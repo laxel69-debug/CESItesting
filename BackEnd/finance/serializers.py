@@ -32,10 +32,11 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 class TransactionCreateSerializer(serializers.ModelSerializer):
     """
-    Write serializer – used when admins create a transaction.
+    Write serializer – used when admins create or update a transaction.
     Accepts parent (user id), auto-fills student_name from profile if blank.
     """
     due_date = serializers.DateField(required=False, allow_null=True)
+    student_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Transaction
@@ -55,8 +56,8 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Selected user is not a Parent/Student account.")
         return value
 
-    def create(self, validated_data):
-        # Auto-fill student_name from the parent's profile if left blank
+    def _auto_fill_student_name(self, validated_data):
+        """Auto-fill student_name from the parent's profile if left blank."""
         if not validated_data.get('student_name'):
             try:
                 profile = validated_data['parent'].profile
@@ -65,6 +66,9 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
                 )
             except UserProfile.DoesNotExist:
                 validated_data['student_name'] = validated_data['parent'].username
+
+    def create(self, validated_data):
+        self._auto_fill_student_name(validated_data)
 
         # Auto-generate school-side reference number (CESI-YYYY-NNNNN)
         if not validated_data.get('reference_number'):
@@ -76,20 +80,34 @@ class TransactionCreateSerializer(serializers.ModelSerializer):
 
         return super().create(validated_data)
 
+    def update(self, instance, validated_data):
+        self._auto_fill_student_name(validated_data)
+        return super().update(instance, validated_data)
+
 
 class ParentDropdownSerializer(serializers.ModelSerializer):
     """
     Lightweight serializer for the parent search/dropdown in admin UI.
     """
     student_name = serializers.SerializerMethodField()
+    parent_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'student_name']
+        fields = ['id', 'username', 'email', 'student_name', 'parent_name']
 
     def get_student_name(self, obj):
         try:
             p = obj.profile
-            return f"{p.student_first_name} {p.student_last_name}"
-        except UserProfile.DoesNotExist:
+            name = f"{p.student_first_name} {p.student_last_name}".strip()
+            return name if name else ""
+        except (UserProfile.DoesNotExist, AttributeError):
+            return ""
+
+    def get_parent_name(self, obj):
+        try:
+            p = obj.profile
+            name = f"{p.parent_first_name} {p.parent_last_name}".strip()
+            return name if name else ""
+        except (UserProfile.DoesNotExist, AttributeError):
             return ""

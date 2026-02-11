@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../ParentWebsiteCSS/Grades.css";
+import { apiFetch } from "../api/apiFetch";
 
 const Grades = () => {
   const [grades, setGrades] = useState([]);
@@ -8,7 +9,7 @@ const Grades = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/grades/my-grades/", { credentials: "include" });
+        const res = await apiFetch("/api/grades/my-grades/");
         if (res.ok) {
           setGrades(await res.json());
         }

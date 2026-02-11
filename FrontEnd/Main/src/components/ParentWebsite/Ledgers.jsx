@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../ParentWebsiteCSS/Ledgers.css";
+import { apiFetch } from "../api/apiFetch";
 
 const API_BASE = "";
 
@@ -29,9 +30,7 @@ const Ledgers = () => {
   useEffect(() => {
     const fetchMyTransactions = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/finance/my-transactions/`, {
-          credentials: "include",
-        });
+        const res = await apiFetch(`${API_BASE}/api/finance/my-transactions/`);
         if (!res.ok) throw new Error("Failed to load transactions");
         const data = await res.json();
         setTransactions(Array.isArray(data) ? data : []);

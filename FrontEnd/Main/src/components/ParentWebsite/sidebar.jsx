@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import "../ParentWebsiteCSS/sidebar.css";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Auth/useAuth"; // ✅ adjust if your path differs
+import { useAuth } from "../Auth/useAuth";
+import { apiFetch } from "../api/apiFetch";
 
 const navLinks = [
   { key: "dashboard", icon: "bi-speedometer2", label: "Dashboard" },
@@ -63,9 +64,8 @@ export default function Sidebar({ page, setPage, isCollapsed, setIsCollapsed }) 
   const handleLogout = async () => {
     // OPTIONAL: keep this if you're using Django session/cookie auth
     try {
-      await fetch(`${API_BASE}/api/accounts/logout/`, {
+      await apiFetch(`${API_BASE}/api/accounts/logout/`, {
         method: "POST",
-        credentials: "include",
       });
     } catch {
       // ignore network errors, still clear client auth
