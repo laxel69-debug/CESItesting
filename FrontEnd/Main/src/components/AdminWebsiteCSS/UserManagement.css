@@ -557,3 +557,81 @@
     font-size: 13px;
   }
 }
+
+/* ========== INLINE EDITING ========== */
+.inline-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 2px solid #818cf8;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #f0f0ff;
+  outline: none;
+  transition: border 0.2s;
+}
+.inline-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.inline-select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 2px solid #818cf8;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #f0f0ff;
+  cursor: pointer;
+}
+
+.badge-subject {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #e0e7ff;
+  color: #4338ca;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.badge-none {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+.btn-save {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-save:hover { background: #059669; }
+
+.btn-cancel-sm {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-cancel-sm:hover { background: #dc2626; }
+
+.form-error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}

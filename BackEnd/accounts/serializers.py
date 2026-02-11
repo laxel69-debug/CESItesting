@@ -1,11 +1,92 @@
 from rest_framework import serializers
-from .models import User, UserProfile, TeacherProfile, Section, Subject
+from .models import User, UserProfile, TeacherProfile, AdminProfile, Section, Subject
+
+
+# ── Read-only serializers ──────────────────────────────
+
+class SubjectTeacherSerializer(serializers.Serializer):
+    """Lightweight teacher info nested inside a subject."""
+    id = serializers.IntegerField(source="user.id")
+    username = serializers.CharField(source="user.username")
+    employee_id = serializers.CharField()
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    teachers = SubjectTeacherSerializer(many=True, read_only=True)
+    assigned_teacher = serializers.IntegerField(
+        write_only=True, required=False, allow_null=True,
+    )
+
+    class Meta:
+        model = Subject
+        fields = ["id", "name", "code", "teachers", "assigned_teacher"]
+
+
+class SectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Section
+        fields = ["id", "name", "grade_level"]
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "role"]
+        fields = ["id", "username", "email", "role", "status", "created_at"]
+
+
+class TeacherProfileReadSerializer(serializers.ModelSerializer):
+    """Nested read-only representation returned inside UserDetailSerializer."""
+    subject = SubjectSerializer(read_only=True)
+    section = SectionSerializer(read_only=True)
+
+    class Meta:
+        model = TeacherProfile
+        fields = ["id", "employee_id", "subject", "section"]
+
+
+class UserProfileReadSerializer(serializers.ModelSerializer):
+    section = SectionSerializer(read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "id",
+            "student_first_name", "student_middle_name", "student_last_name",
+            "grade_level", "section",
+            "parent_first_name", "parent_middle_name", "parent_last_name",
+            "contact_number", "address",
+        ]
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    """Full user + nested profile (teacher or parent)."""
+    teacher_profile = TeacherProfileReadSerializer(read_only=True)
+    profile = UserProfileReadSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "role", "status", "created_at", "teacher_profile", "profile"]
+
+
+# ── Write serializers ──────────────────────────────────
+
+class TeacherAssignmentSerializer(serializers.Serializer):
+    """Update a teacher's subject / section assignment."""
+    subject = serializers.IntegerField(required=False, allow_null=True)
+    section = serializers.IntegerField(required=False, allow_null=True)
+    employee_id = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_subject(self, value):
+        if value is not None:
+            if not Subject.objects.filter(id=value).exists():
+                raise serializers.ValidationError("Subject not found")
+        return value
+
+    def validate_section(self, value):
+        if value is not None:
+            if not Section.objects.filter(id=value).exists():
+                raise serializers.ValidationError("Section not found")
+        return value
 
 
 class LoginSerializer(serializers.Serializer):

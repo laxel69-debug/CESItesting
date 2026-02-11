@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import "../AdminWebsiteCSS/Sidebar.css";
 import { useAuth } from "../Auth/useAuth";
+import { getToken } from "../Auth/auth";
 
 function getInitials(name = "User") {
   const parts = String(name).trim().split(/\s+/);
@@ -46,6 +47,7 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
       { id: "users", label: "Student Management", icon: UsersRound },
       { id: "enrollment", label: "Enrollment Management", icon: UserPlus },
       { id: "classes", label: "Class Management", icon: BookOpen },
+      { id: "subjects", label: "Subjects", icon: BookOpen },
       { id: "grades", label: "Grades & Records", icon: GraduationCap },
       {
         id: "financial",
@@ -124,9 +126,13 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
 
   const handleLogout = async () => {
     try {
-      await fetch("http://127.0.0.1:8000/api/accounts/logout/", {
+      const token = getToken();
+      await fetch("/api/accounts/logout/", {
         method: "POST",
         credentials: "include",
+        headers: {
+          ...(token ? { Authorization: `Token ${token}` } : {}),
+        },
       });
     } catch {;}
 

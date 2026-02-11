@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../TeacherWebsiteCSS/sidebar.css";
+import { apiFetch } from "../api/apiFetch";
 
 import Dashboard from "./Dashboard.jsx";
 import Grade from "./Grade.jsx";
@@ -94,9 +95,8 @@ function Sidebar() {
   const handleLogout = async () => {
     try {
       // OPTIONAL (recommended if using Django session auth)
-      await fetch("/api/accounts/logout/", {
+      await apiFetch("/api/accounts/logout/", {
         method: "POST",
-        credentials: "include",
       });
     } catch (err) {
       console.warn("Backend logout failed (continuing):", err);
