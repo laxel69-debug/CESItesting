@@ -1,0 +1,29 @@
+Start
+
+
+#Create project root
+    mkdir django-backend
+    cd django-backend
+
+2. Create virtual environment
+python -m venv venv
+Activation
+    or activate # if this one is inside of the workspace
+    venv\Scripts\activate      # Windows
+source venv/bin/activate   # macOS/Linux
+
+3. install basics
+
+Install this or reinstall
+pip install django djangorestframework python-dotenv django-cors-headers
+
+
+4. Create Django project
+django-admin startproject config .
+
+5. Create apps folder
+mkdir BACKEND
+cd BACKEND
+django-admin startapp users
+django-admin startapp core
+cd ..

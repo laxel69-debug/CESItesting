@@ -1,0 +1,58 @@
+.floating-msg-btn {
+  position: fixed;
+  bottom: 25px;
+  right: 30px;
+  background: #FDD835;
+  border: none;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+  cursor: pointer;
+  z-index: 99999;
+}
+
+.floating-msg-btn svg {
+  color: #4A8FB0;
+}
+
+/* PANEL */
+.msg-panel {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 280px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  z-index: 99999;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.msg-header {
+  background: #4A8FB0;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-btn {
+  cursor: pointer;
+}
+
+.msg-body {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.msg-item {
+  padding: 6px 8px;
+  border-bottom: 1px solid #eee;
+}

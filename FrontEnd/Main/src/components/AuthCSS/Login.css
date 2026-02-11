@@ -1,0 +1,89 @@
+/* Full page background with image + gradient overlay */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-page {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: 
+    linear-gradient(135deg, rgba(0, 123, 255, 0.6), rgba(255, 204, 0, 0.6)), 
+    url('../../assets/CESI-cover.png') no-repeat center center;
+  background-size: cover;
+}
+
+/* Container for the login form */
+.login-container {
+  background-color: rgba(255, 255, 255, 0.75); /* white with 85% opacity */
+  padding: 2.5rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 350px;
+}
+
+
+/* Title */
+.login-container h1 {
+  margin-bottom: 1.5rem;
+  color: #004aad; /* Dark blue from school colors */
+  font-family: 'Oswald', sans-serif;
+ font-weight: 800;
+}
+
+/* Inputs */
+.login-container input {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* Input focus effect */
+.login-container input:focus {
+  outline: none;
+  border-color: #004aad;
+  box-shadow: 0 0 5px rgba(0, 74, 173, 0.5);
+}
+
+/* Forgot password link */
+.forgot-pass {
+  display: block;
+  margin: 8px 0 40px;
+  font-size: 14px;
+  color: #d93025; /* red */
+  cursor: pointer;
+  text-decoration: underline; 
+}
+
+/* Submit button */
+.login-container button {
+  width: 100%;
+  padding: 12px;
+  background-color: #004aad; /* dark blue */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-container button:hover {
+  background-color: #357ab8;
+}
+
+/* Error message */
+.error-msg {
+  color: #d93025;
+  margin-bottom: 10px;
+  font-size: 14px;
+}

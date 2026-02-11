@@ -1,0 +1,95 @@
+.attendance-wrapper {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+  width: 100%;
+  /* If a gap exists, it will now be the same color as the sidebar */
+  background-color: #24148a; 
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-container {
+  flex-shrink: 0;
+  background-color: #24148a;
+  border: none !important;
+}
+
+.attendance-content {
+  flex: 1;
+  background-color: #FFFFDF; /* Your Soft Yellow */
+  padding: 2.5rem;
+  border-left: none !important; /* Kill the line */
+  margin: 0;
+}
+
+/* TOP STATS CARDS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0px #000;
+}
+
+.bg-primary { background: #007bff; }
+.bg-danger { background: #dc3545; }
+.bg-warning { background: #ffc107; color: #000; }
+
+/* MAIN TABLE */
+.attendance-main-container {
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.container-header {
+  background: #212529;
+  color: white;
+  padding: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.attendance-table { width: 100%; border-collapse: collapse; }
+.attendance-table th { background: #f8f9fa; padding: 1rem; border-bottom: 2px solid #eee; text-align: center;}
+.attendance-table td { padding: 1rem; border-bottom: 1px solid #eee; text-align: center; }
+
+/* HISTORY CARDS */
+.history-section { margin-top: 2rem; }
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.history-card {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.view-archive-btn {
+  width: 100%;
+  padding: 0.6rem;
+  background: white;
+  border: 2px solid #212529;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.view-archive-btn:hover { background: #212529; color: white; }
+

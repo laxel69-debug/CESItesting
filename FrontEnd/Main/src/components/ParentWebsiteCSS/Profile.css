@@ -1,0 +1,219 @@
+:root {
+  --yellow-bg: #FFFFDF;
+  --blue-soft: #B1D9EC;
+  --blue-dark: #0d6efd;
+  --white: #ffffff;
+  --text-main: #2c3e50;
+  --text-muted: #7f8c8d;
+  --success: #27ae60;
+  --border-color: #edf2f7;
+}
+
+/* Base Layout */
+.profile-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--yellow-bg);
+}
+
+.profile-content {
+  flex-grow: 1;
+  padding: 2.5rem;
+  width: 100%; /* Ensures content doesn't overflow */
+   /* Account for sidebar width */
+}
+
+/* Header Flex */
+.profile-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.edit-profile-btn {
+  background-color: var(--white);
+  border: 2px solid var(--blue-dark);
+  color: var(--blue-dark);
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.8rem;
+  font-weight: 700;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  white-space: nowrap; /* Prevents text wrapping on tiny screens */
+}
+
+/* Hero Section */
+.profile-hero-card {
+  background: var(--white);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  margin-bottom: 2.5rem;
+  border: 2px solid #0056b3;
+}
+
+.hero-main-info {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hero-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.hero-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 1.5rem;
+  object-fit: cover;
+  border: 4px solid var(--blue-soft);
+}
+
+.status-badge {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--success);
+  color: white;
+  padding: 0.2rem 1rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.student-name { font-weight: 900; margin: 0; font-size: 2rem; color: var(--text-main); }
+.student-lrn { color: var(--text-muted); margin: 0.2rem 0 1rem; font-size: 0.95rem; }
+
+.tag-pill {
+  display: inline-block; /* Fix for mobile wrapping */
+  background: var(--blue-soft);
+  color: var(--blue-dark);
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem; /* Added spacing for wrapped pills */
+}
+
+/* Information Grid */
+.profile-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem; /* Reduced gap for better mobile fit */
+  
+}
+
+.details-card {
+  background: var(--white);
+  border-radius: 1.2rem;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  border: 2px solid #0056b3;
+}
+
+.details-header {
+  background: var(--blue-soft);
+  padding: 1.2rem 1.5rem;
+  font-weight: 800;
+  color: var(--blue-dark);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #000000;
+  border: 1px solid #000000;
+}
+
+.red-header {
+  background: #ffdada;
+  color: #c0392b;
+  border: 1px solid #000000;
+}
+
+.details-body {
+  padding: 0.5rem 1.5rem;
+  
+}
+
+.info-entry {
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem 0;
+  
+}
+
+.entry-border {
+  border-bottom: 1px solid var(--border-color);
+  
+}
+
+.entry-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.entry-value {
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 1rem;
+  border: 1px solid #ffea8b;
+  /* border: 1px solid #e5e22e; */ /* Optional: removed for cleaner look, re-add if needed */
+}
+
+/* --- RESPONSIVE QUERIES --- */
+
+/* Tablet and Large Phones */
+@media (max-width: 992px) {
+  .profile-details-grid { 
+    grid-template-columns: 1fr; 
+    gap: 1.5rem;
+  }
+  
+  .profile-content {
+    padding: 1.5rem;
+  }
+}
+
+/* Small Phones */
+@media (max-width: 600px) {
+  .profile-wrapper {
+    flex-direction: column; /* Stacks sidebar and content */
+  }
+
+  .profile-header-flex {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .hero-main-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .hero-avatar img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .student-name {
+    font-size: 1.6rem;
+  }
+
+  .edit-profile-btn {
+    width: 100%; /* Makes button easy to tap on mobile */
+  }
+
+  .details-body {
+    padding: 0.5rem 1rem;
+  }
+}

@@ -1,0 +1,293 @@
+/* ============================================
+   ASSIGN TEACHERS - CSS STYLES WITH ADMIN PREFIX
+   ============================================ */
+
+/* Note: Global reset styles (*, html, body, #root) are defined in index.css */
+
+.admin-class-management {
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ========== HEADER SECTION ========== */
+.admin-class-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-class-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+/* ========== STATISTICS GRID ========== */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.admin-stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #5BA3C7;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.admin-stat-card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-stat-number {
+  margin: 10px 0 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* ========== TEACHER ASSIGNMENT TABLE ========== */
+.admin-assign-teachers-view {
+  margin-bottom: 25px;
+}
+
+.admin-teacher-assignment-table {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-bottom: 25px;
+}
+
+.admin-assignments-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-assignments-table thead {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-bottom: 2px solid #d1d5db;
+}
+
+.admin-assignments-table th {
+  padding: 15px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.admin-assignments-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.admin-assignments-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.admin-assignments-table td {
+  padding: 15px;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.admin-badge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-subjects-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-subject-tag-small {
+  background: #e5e7eb;
+  color: #374151;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ========== TEACHER DETAILS ========== */
+.admin-teacher-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.admin-teacher-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border-left: 4px solid #5BA3C7;
+  padding: 20px;
+}
+
+.admin-teacher-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.admin-teacher-card h3 {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.admin-teacher-info {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.admin-teacher-info p {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.admin-teacher-info ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.admin-teacher-info li {
+  margin: 8px 0;
+  padding-left: 15px;
+  position: relative;
+}
+
+.admin-teacher-info li:before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #5BA3C7;
+  font-weight: bold;
+}
+
+/* ========== DEVELOPMENT NOTES ========== */
+.admin-note {
+  background: #ecfdf5;
+  border-left: 4px solid #10b981;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #047857;
+  margin-top: 20px;
+}
+
+.admin-note strong {
+  font-weight: 600;
+}
+
+.admin-note ul {
+  margin: 10px 0 0 0;
+  padding-left: 20px;
+}
+
+.admin-note li {
+  margin: 5px 0;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1200px) {
+  .admin-teacher-details {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-class-management {
+    padding: 10px;
+  }
+
+  .admin-class-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-teacher-details {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-assignments-table th,
+  .admin-assignments-table td {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-class-management {
+    padding: 10px;
+  }
+
+  .admin-class-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-teacher-details {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-assignments-table th,
+  .admin-assignments-table td {
+    font-size: 11px;
+    padding: 8px;
+  }
+
+  .admin-subjects-list {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

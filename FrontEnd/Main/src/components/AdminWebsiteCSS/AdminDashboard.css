@@ -1,0 +1,34 @@
+/* ============================================
+   ADMIN DASHBOARD LAYOUT
+   ============================================ */
+/* MUST match your admin sidebar css variables */
+:root{
+  --as-wide: 260px;
+  --as-narrow: 72px;
+}
+
+.admin-main{
+  margin-left: var(--as-wide);
+  width: calc(100% - var(--as-wide));
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+  transition: margin-left .25s ease, width .25s ease;
+}
+
+.admin-main.collapsed{
+  margin-left: var(--as-narrow);
+  width: calc(100% - var(--as-narrow));
+}
+
+@media (max-width: 768px){
+  .admin-main,
+  .admin-main.collapsed{
+    margin-left: 0 !important;
+    width: 100% !important;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: visible;
+  }
+}

@@ -1,0 +1,54 @@
+# ═══════════════════════════════════════
+#  Python / Django
+# ═══════════════════════════════════════
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Django
+*.log
+local_settings.py
+
+# SQLite database (include db_backup.json instead)
+db.sqlite3
+db.sqlite3-journal
+
+# Migrations — uncomment if you want to track them
+# **/migrations/
+
+# ═══════════════════════════════════════
+#  Node / React / Vite
+# ═══════════════════════════════════════
+node_modules/
+dist/
+build/
+*.local
+
+# Vite
+.vite/
+
+# ═══════════════════════════════════════
+#  IDE / Editor
+# ═══════════════════════════════════════
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ═══════════════════════════════════════
+#  OS
+# ═══════════════════════════════════════
+*.tmp
+*.bak
+*.orig

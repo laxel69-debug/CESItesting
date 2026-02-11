@@ -1,0 +1,297 @@
+/* Notebook.css */
+.notebook-container {
+  max-width: 1200px;
+  width: 100%;
+  background-color: var(--white);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 3px solid var(--primary-blue);
+}
+
+.notebook-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background-color: var(--blue-light);
+  border-bottom: 3px solid var(--primary-blue);
+}
+
+.notebook-header h2 {
+  color: var(--primary-blue);
+  font-size: 2rem;
+}
+
+.close-btn {
+  padding: 10px 20px;
+  background-color: var(--primary-yellow);
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.close-btn:hover {
+  background-color: var(--yellow-dark);
+}
+
+.notebook-content {
+  display: flex;
+  min-height: 700px;
+}
+
+/* Bookmarks */
+.bookmarks-left {
+  width: 250px;
+  padding: 30px 15px;
+  background-color: var(--gray-light);
+  border-right: 2px dashed var(--primary-blue);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.bookmark-btn {
+  padding: 15px;
+  background-color: var(--white);
+  border: 2px solid var(--primary-blue);
+  border-radius: 8px;
+  color: var(--primary-blue);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.bookmark-btn:hover {
+  background-color: var(--blue-light);
+  transform: translateX(5px);
+}
+
+.bookmark-btn.active {
+  background-color: var(--primary-blue);
+  color: white;
+  box-shadow: 0 4px 0 var(--blue-dark);
+}
+
+/* Notebook Pages */
+.notebook-pages {
+  flex: 1;
+  display: flex;
+  padding: 30px;
+  gap: 30px;
+}
+
+.page-left {
+  flex: 2;
+  background: linear-gradient(to bottom, transparent 39px, var(--gray-medium) 1px);
+  background-size: 100% 40px;
+  padding: 40px;
+  border-radius: 5px;
+  position: relative;
+}
+
+.page-content {
+  min-height: 400px;
+}
+
+.page-content h2 {
+  color: var(--primary-blue);
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--primary-yellow);
+}
+
+.page-content h3 {
+  color: var(--blue-dark);
+  margin: 20px 0 10px;
+}
+
+.page-content p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.page-content ul {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.page-content li {
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
+.page-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid var(--gray-medium);
+  color: var(--gray-dark);
+  font-size: 0.9rem;
+}
+
+.page-right {
+  flex: 1;
+  background-color: var(--yellow-light);
+  padding: 30px;
+  border-radius: 10px;
+  border: 2px dashed var(--yellow-dark);
+}
+
+.action-section h3 {
+  color: var(--blue-dark);
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 18px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.admission-btn {
+  background-color: var(--primary-blue);
+  color: white;
+  box-shadow: 0 4px 0 var(--blue-dark);
+}
+
+.enrollment-btn {
+  background-color: var(--primary-yellow);
+  color: var(--gray-dark);
+  box-shadow: 0 4px 0 var(--yellow-dark);
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 0;
+}
+
+.action-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0;
+}
+
+.quick-info {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: var(--white);
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-blue);
+}
+
+.quick-info h4 {
+  color: var(--primary-blue);
+  margin-bottom: 10px;
+}
+
+.quick-info p {
+  color: var(--gray-dark);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .notebook-content {
+    flex-direction: column;
+  }
+  
+  .bookmarks-left {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 20px;
+  }
+  
+  .bookmark-btn {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .notebook-pages {
+    flex-direction: column;
+  }
+  
+  .header {
+    padding: 15px 20px;
+  }
+  
+  .school-name h1 {
+    font-size: 1.4rem;
+  }
+  
+  .cover-title h2 {
+    font-size: 2.5rem;
+  }
+  
+  .book-cover {
+    width: 300px;
+    height: 400px;
+  }
+}
+
+/* Add to Notebook.css */
+.link-btn {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  background-color: var(--white);
+  border: 2px solid var(--primary-blue);
+  border-radius: 5px;
+  color: var(--primary-blue);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.link-btn:hover {
+  background-color: var(--blue-light);
+}
+
+
+
+.quick-links {
+  margin-top: 25px;
+}
+
+.quick-links h4 {
+  color: var(--primary-blue);
+  margin-bottom: 15px;
+}
+
+
+
+.ann-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.ann-modal {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: auto;
+}

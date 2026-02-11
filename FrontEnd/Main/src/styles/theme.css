@@ -1,0 +1,93 @@
+/* Theme variables — preserving existing palette */
+:root {
+  --primary-yellow: #FDD835;
+  --primary-blue: #5BA3C7;
+  --blue-dark: #4A8FB0;
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --muted: #9ca3af;
+  --danger: #ef4444;
+
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+
+  --radius: 10px;
+  --gap: 1rem;
+  --page-padding: 1.25rem;
+  --transition: 200ms;
+
+  /* Type scale */
+  --fs-base: 16px;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.25rem;
+}
+
+/* Base typography and utilities */
+html {
+  font-size: var(--fs-base);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
+}
+
+/* Common components */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: calc(var(--page-padding) + 0.5rem);
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), var(--surface));
+  border-radius: var(--radius);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  padding: 1rem;
+  border: 1px solid rgba(15,23,42,0.03);
+}
+
+button {
+  background: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 14px rgba(74,143,176,0.08);
+  transition: transform var(--transition) ease, box-shadow var(--transition) ease;
+}
+button:hover { transform: translateY(-2px); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--primary-blue);
+  border: 1px solid rgba(74,143,176,0.12);
+}
+
+input, select, textarea {
+  border-radius: 8px;
+  border: 1px solid rgba(15,23,42,0.06);
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 6px 18px rgba(91,163,199,0.12);
+  border-color: var(--blue-dark);
+}
+
+/* Utility spacing */
+.u-flex { display: flex; }
+.u-center { display:flex; align-items:center; justify-content:center; }
+.u-gap { gap: var(--gap); }
+
+/* Small helpers */
+.text-muted { color: var(--text-secondary); }
+.text-danger { color: var(--danger); }
+

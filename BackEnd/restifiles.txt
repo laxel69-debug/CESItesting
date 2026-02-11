@@ -1,0 +1,237 @@
+═══════════════════════════════════════════════════════════════
+  CESI PROJECT — CHANGELOG & FILE SUMMARY
+  Generated: February 8, 2026
+  Author: GitHub Copilot (Claude Opus 4.6)
+═══════════════════════════════════════════════════════════════
+
+
+────────────────────────────────────────
+ 1. AUTHENTICATION & SESSION FIXES
+────────────────────────────────────────
+
+ accounts/views.py — LoginView
+   • Fixed case-sensitive login bug: changed username lookup
+     to use `username__iexact` so "Teacher_Smith" and
+     "teacher_smith" both work.
+
+ CESI/authentication.py — NEW FILE
+   • Created `CsrfExemptSessionAuthentication` class that
+     skips CSRF enforcement on DRF views, solving the 403
+     Forbidden errors when the React frontend calls the API.
+
+ CESI/settings.py
+   • Added 'grades' to INSTALLED_APPS.
+   • CORS configured with credentials for localhost:5173/5174.
+
+ FrontEnd/CESI-sample/vite.config.js
+   • Added proxy rules: /api → http://127.0.0.1:8000 and
+     /announcements → same. This lets the frontend use
+     relative URLs (/api/...) instead of absolute ones,
+     fixing cross-origin cookie issues.
+
+ FrontEnd/CESI-sample/src/Homepage.jsx
+   • Fixed syncSession: changed `login(data)` to
+     `login({ user: data })` so the AuthProvider stores the
+     user object correctly. This fixed the "Unauthorized"
+     error on the parent portal after login.
+
+ 8 frontend files updated to use relative URLs instead of
+ hardcoded http://localhost:8000 (all API calls now go
+ through the Vite proxy).
+
+
+────────────────────────────────────────
+ 2. FINANCE / TRANSACTION SYSTEM
+────────────────────────────────────────
+
+ finance/models.py — NEW APP
+   • `Transaction` model: parent (FK to User), student_name,
+     transaction_type (TUITION/MISC/LAB/BOOK/OTHER),
+     description, amount, balance, status (PAID/PENDING/
+     OVERDUE/PARTIAL), reference_number (auto-generated as
+     CESI-YYYY-NNNNN), payment_method, date, due_date,
+     created_at/updated_at.
+
+ finance/serializers.py
+   • TransactionSerializer with parent_name computed field.
+
+ finance/views.py
+   • 5 endpoints: list all, create, update (PUT), delete,
+     my-transactions (parent's own), parent students list.
+   • Reference numbers auto-generated in serializer create().
+
+ finance/urls.py
+   • Routes: transactions/, transactions/<pk>/update/,
+     transactions/<pk>/delete/, my-transactions/,
+     parents/<id>/students/.
+
+ FrontEnd — AdminWebsite/TransactionHistory.jsx
+   • Full CRUD: Add modal with parent search dropdown,
+     Edit (pre-filled modal → PUT), Delete (confirmation
+     dialog → DELETE).
+   • Expandable student detail row with ChevronDown/Up caret.
+   • Stats cards, search/filter bar, export button.
+
+ FrontEnd — ParentWebsite/Ledgers.jsx
+   • Fetches from /api/finance/my-transactions/, shows
+     transaction history and payment summary for the
+     logged-in parent.
+
+
+────────────────────────────────────────
+ 3. GRADE MANAGEMENT SYSTEM (THE BIG ONE)
+────────────────────────────────────────
+
+ grades/models.py — COMPLETE REWRITE (old Quarter/Grade removed)
+   • `GradeWeight` — OneToOneField to Subject. Stores
+     activity_weight (default 40%), quiz_weight (20%),
+     exam_weight (20%), class_standing_weight (20%).
+     Editable by teachers on-the-fly.
+   • `GradeItem` — An activity, quiz, or exam created by a
+     teacher. FK to teacher (User), subject (Subject).
+     Fields: grade_level (0=Kinder, 1-6), quarter (1-4),
+     category (ACTIVITY/QUIZ/EXAM), title, description,
+     date_given, due_date, total_score (varied, default 100),
+     order.
+   • `StudentScore` — One score per student per GradeItem.
+     unique_together (student, grade_item).
+   • `ClassStanding` — Single score (out of 100) per student
+     per subject per quarter. unique_together (student,
+     subject, quarter).
+
+ grades/serializers.py — COMPLETE REWRITE
+   • GradeWeightSerializer (includes subject_name/code)
+   • GradeItemSerializer (read_only teacher, created_at)
+   • StudentScoreSerializer (computed student_name,
+     grade_item_title, total_score)
+   • ClassStandingSerializer (computed student_name)
+   • StudentListSerializer (lightweight for dropdowns)
+
+ grades/views.py — COMPLETE REWRITE (~370 lines)
+   • get_weights / update_weights — GET/PUT per subject_id,
+     auto-creates defaults if missing.
+   • GradeItemListCreate — GET (filterable by subject,
+     grade_level, quarter, category) + POST (auto-fills
+     teacher from request.user).
+   • GradeItemDetail — retrieve / update (PATCH) / delete.
+   • StudentScoreListCreate — GET filterable.
+   • upsert_score — POST create-or-update a single score.
+   • upsert_class_standing — POST create-or-update.
+   • list_class_standings — GET filterable.
+   • students_by_grade(grade_level) — returns students in
+     that grade level via UserProfile.
+   • _compute_quarter_grade() — internal helper: computes
+     weighted average from category averages using
+     GradeWeight percentages. Handles missing data.
+   • student_quarter_grades() — all 4 quarters + final
+     average + remarks for one student/subject.
+   • my_grades() — parent endpoint: returns all subjects
+     with q1-q4 + final_grade + remarks (report card).
+   • teacher_info() — returns logged-in teacher's assigned
+     subject info.
+
+ grades/urls.py — COMPLETE REWRITE (13 routes)
+   • teacher-info/
+   • weights/<id>/ and weights/<id>/update/
+   • items/ and items/<pk>/
+   • scores/ and scores/upsert/
+   • class-standing/ and class-standing/upsert/
+   • students/<grade_level>/
+   • compute/<student_id>/<subject_id>/
+   • my-grades/
+
+ grades/migrations/0001_initial.py — AUTO-GENERATED
+   • Old migration (Quarter/Grade tables) deleted.
+   • New migration creates GradeWeight, GradeItem,
+     StudentScore, ClassStanding tables.
+
+ CESI/urls.py
+   • Added: path('api/grades/', include('grades.urls'))
+
+
+────────────────────────────────────────
+ 4. TEACHER GRADE ENCODING FRONTEND
+────────────────────────────────────────
+
+ TeacherWebsite/Grade.jsx — COMPLETE REWRITE (~560 lines)
+   • Header with subject name, grade level, quarter display.
+   • Toolbar row: grade level dropdown (Kinder → Grade 6),
+     Q1-Q4 quarter tabs, Weights button.
+   • Weight display bar (colored chips showing current %).
+   • Item Planner: 3-column auto-fill grid for Activities,
+     Quizzes, Exams. Each has ➕ Add button. Item cards show
+     title, total score, dates, edit/delete on hover.
+   • Student Scores Table: sticky student name column,
+     category-coded column headers (A/Q/E badges), CS
+     column, live-computed Quarter Grade, PASSED/FAILED
+     badge. Click any cell to enter a score via modal.
+   • Add Item Modal: title, description, dates, total score.
+   • Edit Item Modal: pre-filled, PATCH request.
+   • Score Entry Modal: big centered number input, shows
+     student name and max score. Enter key to save.
+   • Class Standing Modal: score out of 100.
+   • Weights Config Modal: adjust all 4 weights, must total
+     100%, save via PUT.
+   • All data fetched from /api/grades/ endpoints.
+   • Live grade computation on the frontend matching the
+     backend algorithm.
+
+ TeacherWebsiteCSS/Grade.css — COMPLETE REWRITE
+   • Full responsive design: desktop, tablet (1024px),
+     mobile (640px).
+   • Planner uses CSS Grid with auto-fill columns.
+   • Table has sticky first column + horizontal scroll with
+     visible styled scrollbar.
+   • Modal animations (fade in + slide up).
+   • Color-coded category badges and weight chips.
+
+
+────────────────────────────────────────
+ 5. PARENT REPORT CARD FRONTEND
+────────────────────────────────────────
+
+ ParentWebsite/Grades.jsx — COMPLETE REWRITE
+   • Fetches from /api/grades/my-grades/ on mount.
+   • Report card table: Subject (name + code), Q1-Q4 grades,
+     Final Grade (color-coded pass/fail), Remarks badge.
+   • GWA chip computed from all subjects' final grades.
+   • Print Report button.
+   • Loading and empty states.
+
+ ParentWebsiteCSS/Grades.css — UPDATED
+   • Added styles for: .gwa-chip, .grade-final, .grade-pass,
+     .grade-fail, .subj-name, .subj-code, .grades-loading,
+     .status-pill.failed.
+
+
+────────────────────────────────────────
+ 6. LAYOUT / RESPONSIVENESS FIX
+────────────────────────────────────────
+
+ TeacherWebsiteCSS/sidebar.css — THE CRITICAL FIX
+   • Added `max-width: calc(100vw - var(--sb-expanded))` and
+     `overflow-x: hidden` to `.content`. This was the root
+     cause of everything stretching past the viewport — the
+     content container had no width cap, so tables and grids
+     just expanded infinitely to the right.
+
+
+────────────────────────────────────────
+ 7. DATA SEEDED VIA SHELL
+────────────────────────────────────────
+
+   • Created Subject: Science (SCI101), id=1
+   • Assigned teacher_smith's TeacherProfile → subject=Science
+   • Existing users: ace (ADMIN), parent1 (PARENT_STUDENT),
+     ZeckAkali (ADMIN), Zeck (ADMIN), Vincy Gam
+     (PARENT_STUDENT), parent_jane (PARENT_STUDENT,
+     password: securepass123), teacher_smith (TEACHER).
+
+
+═══════════════════════════════════════════════════════════════
+  Tech Stack: Django 6.0.1 · DRF · Python 3.14.2 · SQLite
+              React · Vite 7.3.1 · Lucide Icons
+  Venv: BackEnd\venv
+  Frontend: FrontEnd\CESI-sample (port 5173)
+  Backend: BackEnd (port 8000)
+═══════════════════════════════════════════════════════════════

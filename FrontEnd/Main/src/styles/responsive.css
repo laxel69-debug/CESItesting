@@ -1,0 +1,105 @@
+/* Global responsive layout and overrides to harmonize components */
+
+.app-container {
+  display: flex;
+  gap: var(--gap);
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: calc(var(--page-padding) + 0.5rem);
+  transition: margin-left var(--transition) ease, padding var(--transition) ease;
+}
+
+/* When sidebar is collapsed (JS toggles `.sidebar-collapsed` on the sidebar element), adjust main spacing */
+.sidebar-collapsed ~ .main-content,
+.main-content.sidebar-offset-collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Header stretch */
+.header { width: 100%; }
+
+/* Floating messages reposition on small screens */
+.floating-msg-btn { right: 24px; bottom: 24px; }
+
+/* Cards and grids */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+.grid-col-6 { grid-column: span 6; }
+.grid-col-4 { grid-column: span 4; }
+.grid-col-3 { grid-column: span 3; }
+
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
+  :root { --sidebar-width: 240px; }
+  .container { padding-left: 1rem; padding-right: 1rem; }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  /* Sidebar becomes overlay menu */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    transform: translateX(-120%);
+    transition: transform var(--transition) ease;
+    z-index: 1200;
+  }
+  .sidebar.sidebar-visible {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .header {
+    padding: 0.75rem 1rem;
+  }
+
+  .floating-msg-btn { right: 16px; bottom: 16px; width:56px; height:56px; }
+
+  .grid { grid-template-columns: repeat(6, 1fr); }
+  .grid-col-6 { grid-column: span 6; }
+  .grid-col-4 { grid-column: span 3; }
+  .grid-col-3 { grid-column: span 2; }
+}
+
+@media (max-width: 480px) {
+  :root { --page-padding: 0.75rem; }
+  .container { padding-left: 0.75rem; padding-right: 0.75rem; }
+
+  .header-title { font-size: clamp(1rem, 3.5vw, 1.1rem); }
+  .header-subtitle { font-size: 0.72rem; }
+
+  .sidebar { width: 100%; max-width: 280px; }
+  .sidebar-collapsed { width: var(--sidebar-collapsed-width); }
+
+  .grid { grid-template-columns: repeat(4, 1fr); }
+  .grid-col-6 { grid-column: span 4; }
+  .grid-col-4 { grid-column: span 2; }
+  .grid-col-3 { grid-column: span 2; }
+
+  .card { padding: 0.8rem; }
+  button { padding: 0.5rem 0.75rem; }
+}
+
+/* Minor visual polish for small components */
+.nav-item { border-radius: 10px; }
+
+/* Ensure images and media scale */
+img, svg { max-width: 100%; height: auto; display: block; }
+

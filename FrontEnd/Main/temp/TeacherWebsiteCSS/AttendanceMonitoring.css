@@ -1,0 +1,299 @@
+:root {
+  --yellow-main: #FDEF3B;
+  --yellow-soft: #FFFFDF;
+  --blue-sidebar: #98BCBE;
+
+  /* extra helpers */
+  --text: #1f2937;
+  --muted: #6b7280;
+
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --shadow: 0 10px 25px rgba(0,0,0,.08);
+
+  --success: #198754;
+  --success-soft: #d1e7dd;
+
+  --danger: #dc3545;
+  --danger-soft: #f8d7da;
+
+  --warn: #ffc107;
+  --warn-soft: #fff3cd;
+
+  --dark: #111827;
+}
+
+* { box-sizing: border-box; }
+
+/* Page wrapper (replaces .p-4 .bg-soft-yellow) */
+.am {
+  min-height: 100vh;
+  padding: 16px;
+  background: var(--yellow-soft);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* HEADER */
+.am__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.am__title {
+  margin: 0;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.am__date {
+  margin: 6px 0 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.am__headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Select (replaces .form-select shadow-sm w-auto fw-bold) */
+.am__select {
+  appearance: none;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  font-weight: 800;
+  outline: none;
+  box-shadow: 0 8px 18px rgba(0,0,0,.06);
+}
+
+.am__select:focus {
+  border-color: rgba(152, 188, 190, .8);
+}
+
+/* Save button (replaces .btn btn-dark rounded-pill shadow-sm) */
+.am__saveBtn {
+  border: 0;
+  background: var(--dark);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.18);
+}
+
+.am__saveBtn:hover { filter: brightness(1.05); }
+.am__saveBtn:active { transform: translateY(1px); }
+
+.am__saveIcon { font-size: 16px; }
+
+/* STATS GRID (replaces .row .col-4 .stat-card) */
+.am__stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .am__stats { grid-template-columns: 1fr; }
+}
+
+.stat {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,.06);
+  text-align: center;
+
+  /* keep your original "border-top highlight" style */
+  border-top: 5px solid transparent;
+}
+
+.stat--present { border-top-color: var(--success); }
+.stat--absent  { border-top-color: var(--danger); }
+.stat--late    { border-top-color: var(--warn); }
+
+.stat__label {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--muted);
+  letter-spacing: .08em;
+}
+
+.stat__value {
+  margin-top: 6px;
+  font-size: 34px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.stat__value--success { color: var(--success); }
+.stat__value--danger  { color: var(--danger); }
+.stat__value--warn    { color: #b45309; }
+
+/* CARD + TABLE WRAPPER (replaces .card shadow-sm rounded-4 table-responsive) */
+.am__card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.am__tableWrap {
+  overflow: auto;
+  /* similar to your old max-height rule */
+  max-height: calc(100vh - 320px);
+}
+
+/* TABLE */
+.am__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 740px;
+}
+
+.am__th {
+  background: var(--dark);
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.am__th--left { text-align: left; }
+
+.am__tr { border-bottom: 1px solid var(--border); }
+
+.am__td {
+  padding: 14px 16px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.am__td--left { text-align: left; }
+
+.am__tr:hover { background: rgba(0,0,0,.02); }
+
+.am__name {
+  font-weight: 900;
+  color: var(--text);
+}
+
+.am__id {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* BADGES (replaces bootstrap badge + bg-*-subtle) */
+.am__badge {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 12px;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.am__badge--present {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.am__badge--absent {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.am__badge--late {
+  background: var(--warn-soft);
+  color: var(--text);
+}
+
+/* TOGGLE GROUP (replaces .btn-group .btn + btn-* ) */
+.am__toggle {
+  display: inline-flex;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 18px rgba(0,0,0,.08);
+}
+
+.am__toggleBtn {
+  border: 0;
+  padding: 10px 14px;
+  font-weight: 950;
+  cursor: pointer;
+  min-width: 45px; /* your old rule */
+  font-size: 0.75rem; /* your old rule */
+}
+
+.am__toggleBtn--idle {
+  background: #f9fafb;
+  color: var(--muted);
+}
+
+.am__toggleBtn--present { background: var(--success); color: #fff; }
+.am__toggleBtn--absent  { background: var(--danger);  color: #fff; }
+.am__toggleBtn--late    { background: var(--warn);    color: var(--text); }
+
+.am__toggleBtn:active { transform: translateY(1px); }
+
+/* small helper if you still use it somewhere */
+.x-small { font-size: 0.7rem; }
+
+/* OPTIONAL: keep your sidebar styles here only if AttendanceMonitoring page still uses sidebar */
+.sidebar {
+  background-color: var(--blue-sidebar);
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 1000;
+  transition: width 0.3s ease;
+  overflow-x: hidden;
+}
+.sidebar.collapsed { width: 80px; }
+
+.avatar-circle {
+  width: 60px;
+  height: 60px;
+  background-color: white;
+  color: var(--blue-sidebar);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.nav-link {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin: 0.2rem 0;
+  white-space: nowrap;
+}
+.active-link {
+  background-color: var(--yellow-main) !important;
+  color: #333 !important;
+  font-weight: bold;
+}

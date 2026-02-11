@@ -1,0 +1,4 @@
+python manage.py migrate announcements 0002
+python manage.py migrate
+
+
