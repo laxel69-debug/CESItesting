@@ -1,0 +1,39 @@
+
+python manage.py showmigrations contenttypes contenttypes 
+[X] 0001_initial 
+[X] 0002_remove_content_type_name
+====================================
+
+Step 1️⃣ Convert the file to UTF-8 (PowerShell-safe)
+Your file db_backup (1).json is NOT UTF-8.
+
+Get-Content "db_backup (1).json" -Encoding Unicode |
+  Set-Content "db_backup_utf8.json" -Encoding UTF8
+
+Step 2️⃣ Remove built-in Django tables (contenttypes, permissions, etc.)
+
+Now run:
+python -c "import json; p='db_backup_utf8.json'; o='db_backup_no_builtin.json'; data=json.load(open(p,encoding='utf-8')); drop={'contenttypes.contenttype','auth.permission','admin.logentry','sessions.session','authtoken.token'}; data=[x for x in data if x.get('model') not in drop]; json.dump(data, open(o,'w',encoding='utf-8'), ensure_ascii=False, indent=2)"
+
+Perfect — now it’s UTF-8 but with a BOM. That’s why you go
+
+Run this (fixed command)
+python -c "import json; p='db_backup_utf8.json'; o='db_backup_no_builtin.json'; data=json.load(open(p,encoding='utf-8-sig')); drop={'contenttypes.contenttype','auth.permission','admin.logentry','sessions.session','authtoken.token'}; data=[x for x in data if x.get('model') not in drop]; json.dump(data, open(o,'w',encoding='utf-8'), ensure_ascii=False, indent=2)"
+python manage.py loaddata .\db_backup_no_builtin.json
+
+
+Check After it loads successfully (important)
+
+After it loads successfully (important)
+
+Reset sequences (helps avoid “UNIQUE constraint failed: id” later):
+python manage.py shell -c "from django.core.management import call_command; call_command('sqlsequencereset','accounts','announcements','enrollment','finance','grades')"
+============================================
+
+
+
+✅ What you should do next (quick sanity checks)
+1) Confirm data actually loaded
+python manage.py shell -c "from django.apps import apps; 
+print('Accounts User:', apps.get_model('accounts','User').objects.count());
+print('Announcements:', apps.get_model('announcements','Announcement').objects.count())"
