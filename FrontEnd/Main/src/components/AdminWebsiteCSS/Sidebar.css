@@ -615,8 +615,10 @@
   }
 
   .as-usercard {
+    margin-top: 20px;
     margin: 0 8px 6px;
     padding: 8px;
+    
     border-radius: 9px;
   }
 
@@ -640,5 +642,5 @@
     gap: 6px;
   }
 }
-}
+
 /* ===== Card example ===== */

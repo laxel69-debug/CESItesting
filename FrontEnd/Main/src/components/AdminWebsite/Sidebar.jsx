@@ -59,6 +59,7 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
           { id: "payment-reminders", label: "Payment Reminders" },
         ],
       },
+      { id: "cms", label: "CMS Module", icon: Globe },
       { id: "reports", label: "Reports", icon: Globe },
     ],
     []
@@ -172,21 +173,7 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
           isMobile ? "as-mobile" : "as-desktop",
         ].join(" ")}
       >
-        {/* header */}
-        <div className="as-head">
-          <div className="as-brand">
-            <div className="as-badge">PA</div>
-            {(!isCollapsed || isMobile) && (
-              <div className="as-brandtext">
-                <div className="as-title">Preschool Admin</div>
-                <div className="as-subtitle">Management System</div>
-              </div>
-            )}
-          </div>
-
-
-        </div>
-
+       
         {/* user card */}
         {user && (!isCollapsed || isMobile) && (
           <div className="as-usercard">
@@ -194,11 +181,10 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
             <div className="as-usermeta">
               <div className="as-userrow">
                 <div className="as-username">{user?.full_name || user?.username || "User"}</div>
-                <div className="as-role">{roleLabel(user?.role)}</div>
+                
               </div>
               <div className="as-usersub">
-                {user?.username && <span>@{user.username}</span>}
-                {user?.email && <span>{user.email}</span>}
+               <div className="as-role">{roleLabel(user?.role)}</div>
               </div>
             </div>
           </div>

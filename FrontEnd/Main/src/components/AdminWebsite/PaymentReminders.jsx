@@ -61,6 +61,14 @@ const PaymentReminders = () => {
           Manage overdue and upcoming payments with quick reminders
         </p>
       </section>
+       {/* FLOATING QUICK ACTION */}
+      <button
+        className="floating-sms-button th-btn-primary justify-center"
+        title="Send Bulk Reminders"
+        onClick={() => alert("Bulk reminders sent via SMS & Email")}
+      >
+        <Bell />
+      </button>
 
       {/* TABLE */}
       <section className="th-section">
@@ -108,14 +116,7 @@ const PaymentReminders = () => {
         </div>
       </section>
 
-      {/* FLOATING QUICK ACTION */}
-      <button
-        className="floating-sms-button"
-        title="Send Bulk Reminders"
-        onClick={() => alert("Bulk reminders sent via SMS & Email")}
-      >
-        <Bell />
-      </button>
+     
     </main>
   );
 };
