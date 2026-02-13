@@ -5,20 +5,27 @@
 __pycache__/
 *.pyo
 *.pyd
+*.egg-info/
+*.egg
 
 # Virtual environments
 venv/
 env/
 .venv/
 .env/
+ENV/
 
 # Django
 *.log
 local_settings.py
+staticfiles/
 
 # SQLite database (include db_backup.json instead)
 db.sqlite3
 db.sqlite3-journal
+
+# Pipenv / pip
+Pipfile.lock
 
 # Migrations — uncomment if you want to track them
 # **/migrations/
@@ -30,25 +37,39 @@ node_modules/
 dist/
 build/
 *.local
-
-# Vite
 .vite/
+*.tsbuildinfo
+
+# Package lock files (optional — uncomment ONE if your team agrees to track it)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
 
 # ═══════════════════════════════════════
 #  IDE / Editor
 # ═══════════════════════════════════════
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
-desktop.ini
 
 # ═══════════════════════════════════════
 #  OS
 # ═══════════════════════════════════════
+.DS_Store
+Thumbs.db
+desktop.ini
 *.tmp
 *.bak
 *.orig
+ehthumbs.db
+
+# ═══════════════════════════════════════
+#  Media uploads (optional — remove if you
+#  want to track uploaded files)
+# ═══════════════════════════════════════
+BackEnd/media/announcements/*
+!BackEnd/media/announcements/.gitkeep

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Plus, X, Edit2, Trash2, Save, ChevronDown, Settings } from "lucide-react";
 import "../TeacherWebsiteCSS/Grade.css";
+import { apiFetch } from "../api/apiFetch";
 
 const API = "";
 
@@ -55,7 +56,7 @@ const Grade = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API}/api/grades/teacher-info/`, { credentials: "include" });
+        const res = await apiFetch(`${API}/api/grades/teacher-info/`);
         if (res.ok) {
           const data = await res.json();
           setTeacherSubject(data);
@@ -70,11 +71,11 @@ const Grade = () => {
     const subj = teacherSubject.subject_id;
 
     const [itemsRes, studentsRes, scoresRes, csRes, wRes] = await Promise.all([
-      fetch(`${API}/api/grades/items/?subject=${subj}&grade_level=${gradeLevel}&quarter=${quarter}`, { credentials: "include" }),
-      fetch(`${API}/api/grades/students/${gradeLevel}/`, { credentials: "include" }),
-      fetch(`${API}/api/grades/scores/?subject=${subj}&grade_level=${gradeLevel}&quarter=${quarter}`, { credentials: "include" }),
-      fetch(`${API}/api/grades/class-standing/?subject=${subj}&quarter=${quarter}`, { credentials: "include" }),
-      fetch(`${API}/api/grades/weights/${subj}/`, { credentials: "include" }),
+      apiFetch(`${API}/api/grades/items/?subject=${subj}&grade_level=${gradeLevel}&quarter=${quarter}`),
+      apiFetch(`${API}/api/grades/students/${gradeLevel}/`),
+      apiFetch(`${API}/api/grades/scores/?subject=${subj}&grade_level=${gradeLevel}&quarter=${quarter}`),
+      apiFetch(`${API}/api/grades/class-standing/?subject=${subj}&quarter=${quarter}`),
+      apiFetch(`${API}/api/grades/weights/${subj}/`),
     ]);
 
     if (itemsRes.ok) setItems(await itemsRes.json());
@@ -156,8 +157,8 @@ const Grade = () => {
       order: catItems.length,
     };
     try {
-      const res = await fetch(`${API}/api/grades/items/`, {
-        method: "POST", credentials: "include",
+      const res = await apiFetch(`${API}/api/grades/items/`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
@@ -173,7 +174,7 @@ const Grade = () => {
   const handleDeleteItem = async (itemId) => {
     if (!window.confirm("Delete this item and all its scores?")) return;
     try {
-      await fetch(`${API}/api/grades/items/${itemId}/`, { method: "DELETE", credentials: "include" });
+      await apiFetch(`${API}/api/grades/items/${itemId}/`, { method: "DELETE" });
       fetchAll();
     } catch (e) { console.error(e); }
   };
@@ -196,8 +197,8 @@ const Grade = () => {
       const body = { ...editForm };
       if (!body.date_given) body.date_given = null;
       if (!body.due_date) body.due_date = null;
-      await fetch(`${API}/api/grades/items/${editItem.id}/`, {
-        method: "PATCH", credentials: "include",
+      await apiFetch(`${API}/api/grades/items/${editItem.id}/`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
@@ -210,8 +211,8 @@ const Grade = () => {
   const handleSaveScore = async () => {
     if (!scoreModal) return;
     try {
-      await fetch(`${API}/api/grades/scores/upsert/`, {
-        method: "POST", credentials: "include",
+      await apiFetch(`${API}/api/grades/scores/upsert/`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           student: scoreModal.student.id,
@@ -229,8 +230,8 @@ const Grade = () => {
   const handleSaveCS = async () => {
     if (!csModal || !teacherSubject) return;
     try {
-      await fetch(`${API}/api/grades/class-standing/upsert/`, {
-        method: "POST", credentials: "include",
+      await apiFetch(`${API}/api/grades/class-standing/upsert/`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           student: csModal.student.id,
@@ -249,8 +250,8 @@ const Grade = () => {
   const handleSaveWeights = async () => {
     if (!teacherSubject) return;
     try {
-      await fetch(`${API}/api/grades/weights/${teacherSubject.subject_id}/update/`, {
-        method: "PUT", credentials: "include",
+      await apiFetch(`${API}/api/grades/weights/${teacherSubject.subject_id}/update/`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(tempWeights),
       });

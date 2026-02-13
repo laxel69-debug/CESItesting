@@ -69,6 +69,7 @@ function AdminDashboard() {
       grades: "Grades & Records",
       cms: "CMS Module",
       reports: "Reports",
+      
       tuition: "Tuition Management",
       notifications: "SMS & Email",
     };

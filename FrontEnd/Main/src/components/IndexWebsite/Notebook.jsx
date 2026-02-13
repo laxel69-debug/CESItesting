@@ -3,14 +3,14 @@ import AnnouncementCard from "./AnnouncementCard";
 import { useNavigate } from "react-router-dom";
 import "../IndexWebsiteCSS/Notebook.css";
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "";  // use Vite proxy
 
 const Notebook = ({ onClose, openEnrollment }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("announcements");
   const [announcements, setAnnouncements] = useState([]);
 
-  // ✅ Fetch announcements (supports list or paginated results)
+  // ✅ Fetch announcements (public endpoint, no auth needed)
   useEffect(() => {
     fetch(`${API_BASE}/api/announcements/`)
       .then((res) => res.json())

@@ -60,8 +60,30 @@ class TransactionListCreate(generics.ListCreateAPIView):
 # ──────────────────────────────────────────────
 class TransactionDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Transaction.objects.select_related('parent').all()
-    serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method in ('PUT', 'PATCH'):
+            return TransactionCreateSerializer
+        return TransactionSerializer
+
+    def update(self, request, *args, **kwargs):
+        # Only admins may update
+        if getattr(request.user, 'role', None) != 'ADMIN':
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        # Return the read-friendly representation
+        out = TransactionSerializer(instance).data
+        return Response(out)
+
+    def destroy(self, request, *args, **kwargs):
+        if getattr(request.user, 'role', None) != 'ADMIN':
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
 
 
 # ──────────────────────────────────────────────
@@ -104,6 +126,8 @@ def parent_list(request):
             | Q(profile__parent_first_name__icontains=search)
             | Q(profile__parent_last_name__icontains=search)
         )
+    # Prefetch profiles to avoid N+1 and handle missing profiles
+    qs = qs.select_related('profile')
     serializer = ParentDropdownSerializer(qs.distinct()[:50], many=True)
     return Response(serializer.data)
 

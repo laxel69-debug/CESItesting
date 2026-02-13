@@ -1,0 +1,13 @@
+# ═══════════════════════════════════════════════════
+#  CESI Backend — Python Dependencies
+#  Install with:  pip install -r requirements.txt
+# ═══════════════════════════════════════════════════
+
+# Django framework
+django>=5.1,<7.0
+
+# Django REST Framework (API endpoints)
+djangorestframework>=3.15,<4.0
+
+# CORS headers (allows frontend on :5173 to talk to backend on :8000)
+django-cors-headers>=4.3,<5.0

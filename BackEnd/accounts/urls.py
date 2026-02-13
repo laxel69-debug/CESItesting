@@ -7,6 +7,12 @@ from .views import (
     admin_create_user,
     me,
     logout_view,
+    SubjectListCreate,
+    SubjectDetail,
+    SectionListCreate,
+    SectionDetail,
+    user_list,
+    update_teacher_assignment,
 )
 
 urlpatterns = [
@@ -17,4 +23,16 @@ urlpatterns = [
     path("admin/create-user/", admin_create_user, name="admin-create-user"),
     path("me/", me, name="me"),
     path("logout/", logout_view, name="logout"),
+
+    # Subject CRUD
+    path("subjects/", SubjectListCreate.as_view(), name="subject-list"),
+    path("subjects/<int:pk>/", SubjectDetail.as_view(), name="subject-detail"),
+
+    # Section CRUD
+    path("sections/", SectionListCreate.as_view(), name="section-list"),
+    path("sections/<int:pk>/", SectionDetail.as_view(), name="section-detail"),
+
+    # User listing + teacher assignment
+    path("users/", user_list, name="user-list"),
+    path("users/<int:user_id>/assign/", update_teacher_assignment, name="update-teacher-assignment"),
 ]

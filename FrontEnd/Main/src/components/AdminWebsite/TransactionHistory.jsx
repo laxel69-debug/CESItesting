@@ -5,8 +5,18 @@ import {
   Plus, X, ChevronDown, ChevronUp, Edit2, Trash2
 } from 'lucide-react';
 import '../AdminWebsiteCSS/TransactionHistory.css';
+import { getToken } from '../Auth/auth';
 
 const API_BASE = '';
+
+/** Build headers with auth token */
+const authHeaders = (extra = {}) => {
+  const token = getToken();
+  return {
+    ...(token ? { Authorization: `Token ${token}` } : {}),
+    ...extra,
+  };
+};
 
 const TRANSACTION_TYPES = [
   { value: 'TUITION', label: 'Tuition Fee' },
@@ -71,6 +81,7 @@ const TransactionHistory = () => {
   const [parentSearch, setParentSearch] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedParent, setSelectedParent] = useState(null);
+  const [parentLoading, setParentLoading] = useState(false);
   const dropdownRef = useRef(null);
   const debounceRef = useRef(null);
 
@@ -82,6 +93,7 @@ const TransactionHistory = () => {
       if (filterStatus !== 'all') params.append('status', filterStatus);
       const res = await fetch(`${API_BASE}/api/finance/transactions/?${params}`, {
         credentials: 'include',
+        headers: authHeaders(),
       });
       if (!res.ok) throw new Error('Failed to load');
       const data = await res.json();
@@ -96,6 +108,7 @@ const TransactionHistory = () => {
     try {
       const res = await fetch(`${API_BASE}/api/finance/transactions/stats/`, {
         credentials: 'include',
+        headers: authHeaders(),
       });
       if (!res.ok) return;
       const data = await res.json();
@@ -112,17 +125,28 @@ const TransactionHistory = () => {
 
   // ── parent search ──
   const searchParents = useCallback(async (query) => {
+    setParentLoading(true);
     try {
       const res = await fetch(
         `${API_BASE}/api/finance/parents/?search=${encodeURIComponent(query)}`,
-        { credentials: 'include' }
+        { credentials: 'include', headers: authHeaders() }
       );
-      if (!res.ok) return;
+      if (!res.ok) {
+        console.error('Parent search failed:', res.status, res.statusText);
+        if (res.status === 401 || res.status === 403) {
+          setParentOptions([]);
+          setShowDropdown(true); // show "not authorized" in empty state
+        }
+        return;
+      }
       const data = await res.json();
-      setParentOptions(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setParentOptions(list);
       setShowDropdown(true);
     } catch (err) {
       console.error('Error searching parents:', err);
+    } finally {
+      setParentLoading(false);
     }
   }, []);
 
@@ -143,9 +167,12 @@ const TransactionHistory = () => {
     setFormData((prev) => ({
       ...prev,
       parent: parent.id,
-      student_name: parent.student_name || '',
+      student_name: parent.student_name || prev.student_name || '',
     }));
-    setParentSearch(`${parent.username} — ${parent.student_name || parent.email}`);
+    const displayName = parent.student_name
+      ? `${parent.username} — ${parent.student_name}`
+      : `${parent.username} — ${parent.email}`;
+    setParentSearch(displayName);
     setShowDropdown(false);
   };
 
@@ -183,7 +210,10 @@ const TransactionHistory = () => {
       due_date: txn.due_date || '',
       status: txn.status || 'PENDING',
     });
-    setParentSearch(txn.parent_username || '');
+    const editDisplay = txn.parent_username
+      ? `${txn.parent_username}${txn.student_name ? ' — ' + txn.student_name : ''}`
+      : '';
+    setParentSearch(editDisplay);
     setSelectedParent({ id: txn.parent, username: txn.parent_username });
     setFormError('');
     setShowModal(true);
@@ -222,7 +252,7 @@ const TransactionHistory = () => {
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(body),
       });
 
@@ -250,6 +280,7 @@ const TransactionHistory = () => {
       const res = await fetch(`${API_BASE}/api/finance/transactions/${deleteTarget.id}/`, {
         method: 'DELETE',
         credentials: 'include',
+        headers: authHeaders(),
       });
       if (!res.ok && res.status !== 204) {
         throw new Error('Failed to delete');
@@ -291,7 +322,7 @@ const TransactionHistory = () => {
       try {
         const res = await fetch(
           `${API_BASE}/api/finance/parents/${txn.parent}/students/`,
-          { credentials: 'include' }
+          { credentials: 'include', headers: authHeaders() }
         );
         if (res.ok) {
           const data = await res.json();
@@ -535,11 +566,15 @@ const TransactionHistory = () => {
                       <li
                         key={p.id}
                         className={`th-dropdown-item ${selectedParent?.id === p.id ? 'active' : ''}`}
+                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => selectParent(p)}
                       >
                         <strong>{p.username}</strong>
                         <span className="th-dropdown-sub">
-                          {p.student_name ? `Student: ${p.student_name}` : p.email}
+                          {p.student_name
+                            ? `Student: ${p.student_name}`
+                            : p.email}
+                          {p.parent_name ? ` · Parent: ${p.parent_name}` : ''}
                         </span>
                       </li>
                     ))}
@@ -547,7 +582,9 @@ const TransactionHistory = () => {
                 )}
                 {showDropdown && parentOptions.length === 0 && (
                   <ul className="th-dropdown-list">
-                    <li className="th-dropdown-item th-dropdown-empty">No accounts found</li>
+                    <li className="th-dropdown-item th-dropdown-empty">
+                      {parentLoading ? 'Searching...' : 'No accounts found'}
+                    </li>
                   </ul>
                 )}
               </div>

@@ -16,7 +16,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/accounts/login/", {
+      const res = await fetch("/api/accounts/login/", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
