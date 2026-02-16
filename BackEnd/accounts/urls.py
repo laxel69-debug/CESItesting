@@ -14,6 +14,7 @@ from .views import (
     user_list,
     update_teacher_assignment,
 )
+from .views import SetPasswordView # Import the new view for password reset
 
 urlpatterns = [
     path("login/", LoginView.as_view(), name="login"),
@@ -35,4 +36,10 @@ urlpatterns = [
     # User listing + teacher assignment
     path("users/", user_list, name="user-list"),
     path("users/<int:user_id>/assign/", update_teacher_assignment, name="update-teacher-assignment"),
+
+    
+    # Set new Password
+    path("set-password/", SetPasswordView.as_view(), name="set-password"),
+    path("set-password/<str:uidb64>/<str:token>/", SetPasswordView.as_view(), name="set-password"),
+
 ]
