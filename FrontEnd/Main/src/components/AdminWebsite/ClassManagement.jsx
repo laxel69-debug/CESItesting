@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Search, Filter, Clock, Users, BookOpen, Calendar } from 'lucide-react';
+import StatCard, { StatsGrid } from './StatCard';
 import '../AdminWebsiteCSS/AdminClassManagement.css';
 
 /**
@@ -317,24 +318,12 @@ const ClassManagement = ({ initialTab = 'classes' }) => {
       </div>
 
       {/* Statistics */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <h3>Total Classes</h3>
-          <p className="admin-stat-number">{stats.totalClasses}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Total Students</h3>
-          <p className="admin-stat-number">{stats.totalStudents}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Grade Levels</h3>
-          <p className="admin-stat-number">{stats.gradeCount}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Avg. Capacity</h3>
-          <p className="admin-stat-number">{stats.avgCapacity}</p>
-        </div>
-      </div>
+      <StatsGrid>
+        <StatCard label="Total Classes" value={stats.totalClasses} icon={<BookOpen size={22} />} color="blue" />
+        <StatCard label="Total Students" value={stats.totalStudents} icon={<Users size={22} />} color="green" />
+        <StatCard label="Grade Levels" value={stats.gradeCount} icon={<Calendar size={22} />} color="yellow" />
+        <StatCard label="Avg. Capacity" value={stats.avgCapacity} icon={<Clock size={22} />} color="purple" />
+      </StatsGrid>
 
       {/* Class Form Modal */}
       {showClassForm && (

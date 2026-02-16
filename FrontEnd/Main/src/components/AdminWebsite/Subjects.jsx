@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, BookOpen, Save, X, UserCheck } from 'lucide-react';
+import { Plus, Edit2, Trash2, BookOpen, Save, X, UserCheck, Users } from 'lucide-react';
 import { apiFetch } from '../api/apiFetch';
+import StatCard, { StatsGrid } from './StatCard';
 import '../AdminWebsiteCSS/UserManagement.css'; /* reuse same table styles */
 
 const Subjects = () => {
@@ -128,9 +129,9 @@ const Subjects = () => {
       </div>
 
       {/* Stats */}
-      <div className="stats-grid">
-        <div className="stat-card"><h3>Total Subjects</h3><p className="stat-number">{subjects.length}</p></div>
-        <div className="stat-card"><h3>Teachers Available</h3><p className="stat-number">{teachers.length}</p></div>
+      <div className="unified-stats-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        <StatCard label="Total Subjects" value={subjects.length} icon={<BookOpen size={24} />} color="blue" />
+        <StatCard label="Teachers Available" value={teachers.length} icon={<Users size={24} />} color="green" />
       </div>
 
       {/* Create modal */}

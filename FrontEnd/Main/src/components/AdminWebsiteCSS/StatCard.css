@@ -1,0 +1,98 @@
+/* ============================================
+   SHARED STAT CARD - UNIFIED STYLE
+   Used across Dashboard, Classes, Grades, Users, AssignTeachers
+   ============================================ */
+
+.unified-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.unified-stat-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #5BA3C7;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.unified-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Color variants */
+.unified-stat-card.blue   { border-left-color: #5BA3C7; }
+.unified-stat-card.green  { border-left-color: #10b981; }
+.unified-stat-card.yellow { border-left-color: #f59e0b; }
+.unified-stat-card.purple { border-left-color: #8b5cf6; }
+.unified-stat-card.red    { border-left-color: #ef4444; }
+.unified-stat-card.teal   { border-left-color: #14b8a6; }
+
+/* Header row: label + icon */
+.unified-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.unified-stat-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.unified-stat-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* Big number */
+.unified-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+/* Optional subtitle / change */
+.unified-stat-subtitle {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.unified-stat-subtitle.positive {
+  color: #10b981;
+}
+
+.unified-stat-subtitle.negative {
+  color: #ef4444;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+  .unified-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .unified-stat-card {
+    padding: 1rem 1.25rem;
+  }
+  .unified-stat-value {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .unified-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
