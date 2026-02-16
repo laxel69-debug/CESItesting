@@ -27,24 +27,109 @@ function isAdmin(user) {
   return isStaff || isSuper || role.includes("admin");
 }
 
-function MediaPreview({ media }) {
+// Image Modal Component
+function ImageModal({ isOpen, images, currentIndex, onClose, onNext, onPrev }) {
+  if (!isOpen) return null;
+
+  const currentImage = images[currentIndex];
+  const isVideo = currentImage?.file_url?.match(/\.(mp4|webm|ogg|mov)$/i) || 
+                  currentImage?.file?.match(/\.(mp4|webm|ogg|mov)$/i);
+
+  const handleDownload = async () => {
+    const url = currentImage.file_url || currentImage.file;
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = url.split('/').pop() || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
+  return (
+    <div className="cms-modal-overlay" onClick={onClose}>
+      <div className="cms-modal-content" onClick={(e) => e.stopPropagation()}>
+        {images.length > 1 && (
+          <>
+            <button className="cms-modal-nav prev" onClick={onPrev}>❮</button>
+            <button className="cms-modal-nav next" onClick={onNext}>❯</button>
+          </>
+        )}
+        
+        <button className="cms-modal-close" onClick={onClose}>✕</button>
+        
+        {isVideo ? (
+          <video 
+            src={currentImage.file_url || currentImage.file} 
+            controls 
+            className="cms-modal-image"
+            autoPlay
+          />
+        ) : (
+          <img 
+            src={currentImage.file_url || currentImage.file} 
+            alt="" 
+            className="cms-modal-image"
+          />
+        )}
+        
+        <div className="cms-modal-counter">
+          {currentIndex + 1} / {images.length}
+        </div>
+        
+        <a 
+          href="#" 
+          className="cms-modal-download"
+          onClick={(e) => {
+            e.preventDefault();
+            handleDownload();
+          }}
+        >
+          ⬇️ Download
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function MediaPreview({ media, onImageClick }) {
   if (!media?.length) return null;
 
   return (
     <div className="cms-media-grid">
-      {media.map((m) => {
+      {media.map((m, index) => {
         const url = m.file_url || m.file;
         const name = String(m.file || "").toLowerCase();
 
         if (!url) return null;
 
         if (name.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-          return <img key={m.id} src={url} alt="" className="cms-post-media" />;
+          return (
+            <img 
+              key={m.id} 
+              src={url} 
+              alt="" 
+              className="cms-post-media"
+              onClick={() => onImageClick(index)}
+            />
+          );
         }
 
         if (name.match(/\.(mp4|webm|ogg|mov)$/)) {
           return (
-            <video key={m.id} controls className="cms-post-media">
+            <video 
+              key={m.id} 
+              controls 
+              className="cms-post-media"
+              onClick={() => onImageClick(index)}
+            >
               <source src={url} />
             </video>
           );
@@ -76,6 +161,11 @@ export default function CMSModule() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Image modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalImages, setModalImages] = useState([]);
+  const [modalCurrentIndex, setModalCurrentIndex] = useState(0);
 
   async function readError(res) {
     const text = await res.text().catch(() => "");
@@ -112,6 +202,24 @@ export default function CMSModule() {
   useEffect(() => {
     return () => imagePreviews.forEach((u) => URL.revokeObjectURL(u));
   }, [imagePreviews]);
+
+  // Handle keyboard navigation for modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!modalOpen) return;
+      
+      if (e.key === 'Escape') {
+        setModalOpen(false);
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevImage();
+      } else if (e.key === 'ArrowRight') {
+        handleNextImage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modalOpen, modalCurrentIndex, modalImages]);
 
   const handleFiles = (e) => {
     const list = Array.from(e.target.files || []);
@@ -178,6 +286,32 @@ export default function CMSModule() {
       setImagePreviews([]);
     } catch (e) {
       setError(e.message || "Failed to publish announcement");
+    }
+  };
+
+  // Image modal functions
+  const openImageModal = (images, index) => {
+    setModalImages(images);
+    setModalCurrentIndex(index);
+    setModalOpen(true);
+  };
+
+  const handleNextImage = () => {
+    setModalCurrentIndex((prev) => 
+      prev === modalImages.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handlePrevImage = () => {
+    setModalCurrentIndex((prev) => 
+      prev === 0 ? modalImages.length - 1 : prev - 1
+    );
+  };
+
+  // Handle image click from thumbnail
+  const handleThumbnailClick = (post) => {
+    if (post.media && post.media.length > 0) {
+      openImageModal(post.media, 0);
     }
   };
 
@@ -251,7 +385,17 @@ export default function CMSModule() {
               {imagePreviews.length > 0 && (
                 <div className="cms-preview-grid">
                   {imagePreviews.map((src, idx) => (
-                    <img key={idx} src={src} className="preview-img" alt="" />
+                    <img 
+                      key={idx} 
+                      src={src} 
+                      className="preview-img" 
+                      alt="" 
+                      onClick={() => {
+                        // For preview images, we don't have full media objects yet
+                        // So just open the preview URL
+                        window.open(src, '_blank');
+                      }}
+                    />
                   ))}
                 </div>
               )}
@@ -274,27 +418,66 @@ export default function CMSModule() {
         ) : posts.length === 0 ? (
           <p>No announcements yet.</p>
         ) : (
-          posts.map((post) => (
-            <div key={post.id} className="cms-post">
-              <div className="cms-post-top">
-                <div className="cms-post-title">{post.title}</div>
-                <div className="cms-post-meta">
-                  <span className="cms-badge">{post.target_role}</span>
-                  <span>
-                    {post.publish_date
-                      ? new Date(post.publish_date).toLocaleString()
-                      : ""}
-                  </span>
+          posts.map((post) => {
+            const firstMedia = post?.media?.[0];
+            const firstUrl = firstMedia?.file_url || firstMedia?.file || "";
+            const firstName = String(firstMedia?.file || "").toLowerCase();
+            const isImage = firstUrl && firstName.match(/\.(jpg|jpeg|png|gif|webp)$/);
+
+            return (
+              <div key={post.id} className="cms-post cms-post--row">
+                {/* LEFT: reserved media box (always there) */}
+                <div 
+                  className={`cms-post-thumb ${isImage ? "" : "no-photo"}`}
+                  onClick={() => post.media?.length > 0 && handleThumbnailClick(post)}
+                  style={{ cursor: post.media?.length > 0 ? 'pointer' : 'default' }}
+                >
+                  {isImage ? <img src={firstUrl} alt="" /> : null}
+                </div>
+
+                {/* RIGHT: text */}
+                <div className="cms-post-right">
+                  <div className="cms-post-top">
+                    <div className="cms-post-title">{post.title}</div>
+
+                    <div className="cms-post-meta">
+                      <span 
+                        className="cms-badge"
+                        data-role={post.target_role}
+                      >
+                        {post.target_role}
+                      </span>
+                      <span>
+                        {post.publish_date ? new Date(post.publish_date).toLocaleString() : ""}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="cms-post-content">{post.content}</p>
+
+                  {/* Optional: if you still want to show the rest of media below */}
+                  {post?.media?.length > 1 && (
+                    <MediaPreview 
+                      media={post.media.slice(1)} 
+                      onImageClick={(index) => openImageModal(post.media, index + 1)}
+                    />
+                  )}
                 </div>
               </div>
-
-              <p className="cms-post-content">{post.content}</p>
-
-              <MediaPreview media={post.media} />
-            </div>
-          ))
+            );
+          })
         )}
       </div>
+
+      {/* Image Modal */}
+      <ImageModal
+        isOpen={modalOpen}
+        images={modalImages}
+        currentIndex={modalCurrentIndex}
+        onClose={() => setModalOpen(false)}
+        onNext={handleNextImage}
+        onPrev={handlePrevImage}
+      />
     </div>
   );
 }

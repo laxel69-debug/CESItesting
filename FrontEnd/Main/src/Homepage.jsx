@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./components/IndexWebsite/Home";
+
+
+import SetPassword from "./components/Auth/SetPassword";
 import Login from "./components/Auth/Login";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 
@@ -45,7 +48,10 @@ export default function Homepage() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
 
-       <Route
+
+      <Route path="/set-password/:uidb64/:token" element={<SetPassword />} />
+      
+      <Route
         path="/admin"
         element={
           <ProtectedRoute role="ADMIN">
