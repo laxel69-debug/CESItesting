@@ -129,10 +129,10 @@ const Subjects = () => {
       </div>
 
       {/* Stats */}
-      <div className="unified-stats-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-        <StatCard label="Total Subjects" value={subjects.length} icon={<BookOpen size={24} />} color="blue" />
-        <StatCard label="Teachers Available" value={teachers.length} icon={<Users size={24} />} color="green" />
-      </div>
+      <StatsGrid>
+        <StatCard label="Total Subjects" value={subjects.length} icon={<BookOpen size={22} />} color="blue" />
+        <StatCard label="Teachers Available" value={teachers.length} icon={<Users size={22} />} color="green" />
+      </StatsGrid>
 
       {/* Create modal */}
       {showForm && (

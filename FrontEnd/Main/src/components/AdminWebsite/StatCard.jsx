@@ -19,7 +19,11 @@ const StatCard = ({
   icon,
   color = 'blue',
 }) => (
-  <div className={`unified-stat-card ${color}`}>
+  <div
+    className={`unified-stat-card ${color}`}
+    role="region"
+    aria-label={`${label}: ${value}${subtitle ? ', ' + subtitle : ''}`}
+  >
     <div className="unified-stat-header">
       <span className="unified-stat-label">{label}</span>
       {icon && <span className="unified-stat-icon">{icon}</span>}
