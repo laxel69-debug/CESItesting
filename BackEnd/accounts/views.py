@@ -1,22 +1,11 @@
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
-from django.core.mail import send_mail
-from django.conf import settings
-from .models import User
-
-
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import generics, status as http_status
-from rest_framework.authtoken.models import Token
 from .serializers import (
     CreateUserSerializer,
     SubjectSerializer,
@@ -25,46 +14,7 @@ from .serializers import (
     TeacherAssignmentSerializer,
 )
 from .models import User, Subject, Section, TeacherProfile
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class SetPasswordView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []  # skip CSRF/session auth
-
-    def post(self, request):
-        uidb64 = request.data.get("uidb64", "")
-        token = request.data.get("token", "")
-        new_password = request.data.get("new_password", "")
-        confirm_password = request.data.get("confirm_password", "")
-
-        if not uidb64 or not token:
-            return Response({"detail": "Missing token."}, status=400)
-
-        if not new_password or len(new_password) < 8:
-            return Response({"detail": "Password must be at least 8 characters."}, status=400)
-
-        if new_password != confirm_password:
-            return Response({"detail": "Passwords do not match."}, status=400)
-
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except Exception:
-            return Response({"detail": "Invalid link."}, status=400)
-
-        if not default_token_generator.check_token(user, token):
-            return Response({"detail": "Invalid or expired link."}, status=400)
-
-        user.set_password(new_password)
-        user.status = "ACTIVE"   # if you use status field
-        user.is_active = True
-        user.save()
-
-        # optional: auto-create token for SPA
-        token_obj, _ = Token.objects.get_or_create(user=user)
-
-        return Response({"success": True, "token": token_obj.key})
+from rest_framework.authtoken.models import Token
 
 # ✅ LOGIN (creates session cookie — CSRF exempt because the frontend is cross-origin)
 @method_decorator(csrf_exempt, name="dispatch")
@@ -315,63 +265,6 @@ def update_teacher_assignment(request, user_id):
     # Return the updated user detail
     teacher_user.refresh_from_db()
     return Response(UserDetailSerializer(teacher_user).data)
-
-# 
-# SET USER PASSWORD
-# 
-
-class SetPasswordView(APIView):
-    permission_classes = [AllowAny]
-    authentication_classes = []  # no auth needed
-
-    def post(self, request, uidb64, token):
-        password = (request.data.get("password") or "").strip()
-        password2 = (request.data.get("password2") or "").strip()
-
-        if not password or not password2:
-            return Response({"detail": "Password and confirmation are required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if password != password2:
-            return Response({"detail": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # basic length rule (adjust as you want)
-        if len(password) < 8:
-            return Response({"detail": "Password must be at least 8 characters."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except Exception:
-            return Response({"detail": "Invalid link."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not default_token_generator.check_token(user, token):
-            return Response({"detail": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.set_password(password)
-        user.is_active = True
-        user.save()
-
-        # optional: auto-create DRF token so they can login right away if you want
-        drf_token, _ = Token.objects.get_or_create(user=user)
-
-        return Response(
-            {"success": True, "message": "Password set successfully.", "token": drf_token.key},
-            status=status.HTTP_200_OK
-        )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #         "id": 5,
 #         "username": "Vincy Gam",
 #         "email": "VincyGam@gmail.com",

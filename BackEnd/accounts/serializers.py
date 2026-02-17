@@ -53,11 +53,6 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
             "id",
             "student_first_name", "student_middle_name", "student_last_name",
             "grade_level", "section",
-            
-             # ✅ add these
-            "lrn",
-            "student_number",
-            "payment_mode",
             "parent_first_name", "parent_middle_name", "parent_last_name",
             "contact_number", "address",
         ]
