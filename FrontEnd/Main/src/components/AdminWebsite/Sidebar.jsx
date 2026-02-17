@@ -165,7 +165,8 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
     } catch {;}
 
     logout();
-    navigate("/", { replace: true });
+    // Force full page reload to ensure clean state
+    window.location.href = "/";
   };
 
   const visible = !isMobile || drawerOpen;

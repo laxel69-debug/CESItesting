@@ -102,7 +102,8 @@ function Sidebar() {
       console.warn("Backend logout failed (continuing):", err);
     } finally {
       logout();                // clear auth context + storage
-      navigate("/", { replace: true });
+      // Force full page reload to ensure clean state
+      window.location.href = "/";
     }
   };
 

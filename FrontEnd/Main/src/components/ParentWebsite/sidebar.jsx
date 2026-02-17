@@ -72,7 +72,8 @@ export default function Sidebar({ page, setPage, isCollapsed, setIsCollapsed }) 
     }
 
     logout(); // clears context + localStorage (based on your useAuth implementation)
-    navigate("/", { replace: true });
+    // Force full page reload to ensure clean state
+    window.location.href = "/";
   };
 
   const UserCard = ({ compact = false }) => (
