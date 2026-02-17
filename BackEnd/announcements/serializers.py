@@ -16,6 +16,7 @@ class AnnouncementMediaSerializer(serializers.ModelSerializer):
         url = obj.file.url
         return request.build_absolute_uri(url) if request else url
 
+
 class AnnouncementSerializer(serializers.ModelSerializer):
     media = AnnouncementMediaSerializer(many=True, read_only=True)
 
@@ -26,4 +27,10 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             "publish_date", "created_by", "is_active",
             "created_at", "media"
         ]
-        read_only_fields = ["id", "created_by", "created_at", "media"]
+        # ✅ lock these down
+        read_only_fields = ["id", "created_by", "created_at", "media", "is_active"]
+
+    def create(self, validated_data):
+        # ✅ force active on create
+        validated_data["is_active"] = True
+        return super().create(validated_data)
