@@ -26,12 +26,27 @@ const DAYS = [
   { value: 'FRI', label: 'Friday' },
 ];
 
-const TIME_SLOTS = [];
-for (let h = 8; h <= 15; h++) {
-  const ampm = h < 12 ? 'AM' : 'PM';
-  const display = h > 12 ? h - 12 : h === 0 ? 12 : h;
-  TIME_SLOTS.push({ hour: h, label: `${display}:00 ${ampm}` });
-}
+const TIME_SLOTS = [
+  { hour: 7.5, label: '7:30 AM' },
+  { hour: 8, label: '8:00 AM' },
+  { hour: 8.5, label: '8:30 AM' },
+  { hour: 9, label: '9:00 AM' },
+  { hour: 9.5, label: '9:30 AM' },
+  { hour: 10, label: '10:00 AM' },
+  { hour: 10.5, label: '10:30 AM' },
+  { hour: 11, label: '11:00 AM' },
+  { hour: 11.5, label: '11:30 AM' },
+  { hour: 12, label: '12:00 PM' },
+  { hour: 12.5, label: '12:30 PM' },
+  { hour: 13, label: '1:00 PM' },
+  { hour: 13.5, label: '1:30 PM' },
+  { hour: 14, label: '2:00 PM' },
+  { hour: 14.5, label: '2:30 PM' },
+  { hour: 15, label: '3:00 PM' },
+  { hour: 15.5, label: '3:30 PM' },
+  { hour: 16, label: '4:00 PM' },
+  { hour: 16.5, label: '4:30 PM' },
+];
 
 const gradeLabel = (lvl) => GRADE_LEVELS.find((g) => g.value === lvl)?.label ?? `Grade ${lvl}`;
 const dayLabel = (code) => DAYS.find((d) => d.value === code)?.label ?? code;
@@ -42,12 +57,20 @@ const COLORS = [
 ];
 const colorFor = (id) => COLORS[id % COLORS.length];
 
-/* helper: does this schedule overlap the given hour? */
-const overlapsHour = (s, dayCode, hour) => {
+/* helper: convert HH:MM:SS time string to decimal hour */
+const timeToDecimal = (t) => {
+  if (!t) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return h + m / 60;
+};
+
+/* helper: does this schedule overlap the given time slot? */
+const overlapsHour = (s, dayCode, slotHour) => {
   if (s.day_of_week !== dayCode) return false;
-  const sh = parseInt(s.start_time, 10);
-  const eh = parseInt(s.end_time, 10);
-  return sh <= hour && eh > hour;
+  const sh = timeToDecimal(s.start_time);
+  const eh = timeToDecimal(s.end_time);
+  // Check if the slot falls within the schedule's time range
+  return sh <= slotHour && eh > slotHour;
 };
 
 /* ═══════════════════════ MAIN COMPONENT ═══════════════════════ */
@@ -254,7 +277,10 @@ function ClassesTab({ sections, teachers, schedules, onRefresh }) {
    SCHEDULES TAB — table + visual timeline + section filter
    ═════════════════════════════════════════════════════════ */
 function SchedulesTab({ sections, subjects, teachers, schedules, onRefresh }) {
-  const [filterSection, setFilterSection] = useState('');
+  // Default to first Kinder section, or first section if no Kinder
+  const kinderSection = sections.find((s) => s.grade_level === 0);
+  const defaultSection = kinderSection || sections[0];
+  const [filterSection, setFilterSection] = useState(defaultSection ? String(defaultSection.id) : '');
   const [view, setView] = useState('timeline');
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -360,10 +386,12 @@ function SchedulesTab({ sections, subjects, teachers, schedules, onRefresh }) {
   };
 
   const handleAutoGenerate = async () => {
-    if (!window.confirm('Auto-generate schedules for empty slots? This fills Mon–Fri 8 AM–3 PM.')) return;
+    const sec = sections.find((s) => String(s.id) === filterSection);
+    const secName = sec ? `${gradeLabel(sec.grade_level)} — ${sec.name}` : 'selected section';
+    if (!window.confirm(`Auto-generate schedules for ${secName}?\n\nThis will fill empty slots based on CESI schedule template (with recess and lunch breaks).`)) return;
     setGenerating(true);
     try {
-      const payload = filterSection ? { section: Number(filterSection) } : {};
+      const payload = { section: Number(filterSection) };
       const r = await apiFetch('/api/classmanagement/schedules/auto-generate/', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const data = await r.json();
@@ -380,7 +408,6 @@ function SchedulesTab({ sections, subjects, teachers, schedules, onRefresh }) {
         <div className="admin-filter-box">
           <Filter size={18} />
           <select value={filterSection} onChange={(e) => setFilterSection(e.target.value)}>
-            <option value="">All Sections</option>
             {sections.map((sec) => <option key={sec.id} value={sec.id}>{gradeLabel(sec.grade_level)} — {sec.name}</option>)}
           </select>
         </div>
