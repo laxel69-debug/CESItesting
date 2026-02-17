@@ -9,7 +9,11 @@ import {
   AlertCircle,
   XCircle,
   Eye,
+  Plus,
+  Users,
+  DollarSign,
 } from "lucide-react";
+import StatCard, { StatsGrid } from "./StatCard";
 import "../AdminWebsiteCSS/EnrollmentManagement.css";
 import { getToken } from "../Auth/auth";
 
@@ -576,24 +580,13 @@ export default function EnrollmentManagement() {
         </div>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Enrollments</h3>
-          <p className="stat-number">{stats.total}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Active Students</h3>
-          <p className="stat-number active">{stats.active}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Pending Enrollment</h3>
-          <p className="stat-number pending">{stats.pending}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Dropped</h3>
-          <p className="stat-number overdue">{stats.dropped}</p>
-        </div>
-      </div>
+      {/* Statistics Cards */}
+      <StatsGrid>
+        <StatCard label="Total Enrollments" value={stats.total} icon={<Users size={22} />} color="blue" />
+        <StatCard label="Active Students" value={stats.active} icon={<CheckCircle size={22} />} color="green" />
+        <StatCard label="Pending Enrollment" value={stats.pending} icon={<Clock size={22} />} color="yellow" />
+        <StatCard label="Fees Collected" value={stats.feePaid} icon={<DollarSign size={22} />} color="purple" />
+      </StatsGrid>
 
       {/* Controls */}
       <div className="enrollment-controls">
