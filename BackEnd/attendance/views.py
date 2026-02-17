@@ -147,15 +147,19 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
         from enrollment.models import Enrollment
         enrollments = Enrollment.objects.filter(
             section_id=section_id,
-            status__in=["ENROLLED", "APPROVED"],
+            status__in=["ACTIVE", "PENDING"],
         ).select_related("student", "student__profile")
 
         students = []
         for enrollment in enrollments:
             student = enrollment.student
-            name = student.username
-            if hasattr(student, "profile") and student.profile:
+            # Try to get name from enrollment, then profile, then username
+            if enrollment.first_name and enrollment.last_name:
+                name = f"{enrollment.first_name} {enrollment.last_name}"
+            elif hasattr(student, "profile") and student.profile:
                 name = f"{student.profile.first_name} {student.profile.last_name}"
+            else:
+                name = student.username
             students.append({
                 "id": student.id,
                 "username": student.username,
