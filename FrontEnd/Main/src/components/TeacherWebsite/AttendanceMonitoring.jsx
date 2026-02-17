@@ -4,11 +4,36 @@ import { getToken } from "../Auth/auth";
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
+// Quarter date ranges (Philippine school year - starts in June)
+const getQuarterDates = (quarter) => {
+  const today = new Date();
+  const month = today.getMonth() + 1; // 1-12
+  // If month >= 6, school year started this year; else it started last year
+  const syStartYear = month >= 6 ? today.getFullYear() : today.getFullYear() - 1;
+  const ranges = {
+    1: { start: `${syStartYear}-06-01`, end: `${syStartYear}-08-31`, label: "Q1 (June-Aug)" },
+    2: { start: `${syStartYear}-09-01`, end: `${syStartYear}-11-30`, label: "Q2 (Sept-Nov)" },
+    3: { start: `${syStartYear}-12-01`, end: `${syStartYear + 1}-02-28`, label: "Q3 (Dec-Feb)" },
+    4: { start: `${syStartYear + 1}-03-01`, end: `${syStartYear + 1}-05-31`, label: "Q4 (Mar-May)" },
+  };
+  return ranges[quarter];
+};
+
+// Get current quarter based on month
+const getCurrentQuarter = () => {
+  const m = new Date().getMonth() + 1; // 1-12
+  if (m >= 6 && m <= 8) return 1;       // June - Aug
+  if (m >= 9 && m <= 11) return 2;      // Sept - Nov
+  if (m === 12 || m <= 2) return 3;     // Dec - Feb
+  return 4;                              // Mar - May
+};
+
 const AttendanceMonitoring = () => {
   // Core state
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedQuarter, setSelectedQuarter] = useState(getCurrentQuarter());
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({}); // { [studentId]: { status, notes } }
   const [loading, setLoading] = useState(false);
@@ -93,12 +118,13 @@ const AttendanceMonitoring = () => {
     fetchAttendance();
   }, [selectedSection, selectedDate, token]);
 
-  // Fetch history for the section
+  // Fetch history for the section (filtered by quarter)
   const fetchHistory = useCallback(async () => {
     if (!selectedSection || !token) return;
     try {
+      const quarterDates = getQuarterDates(selectedQuarter);
       const res = await fetch(
-        `${API_BASE}/attendance/records/history/?section=${selectedSection}`,
+        `${API_BASE}/attendance/records/history/?section=${selectedSection}&start_date=${quarterDates.start}&end_date=${quarterDates.end}`,
         { headers: { Authorization: `Token ${token}` } }
       );
       if (!res.ok) throw new Error("Failed to fetch history");
@@ -107,13 +133,13 @@ const AttendanceMonitoring = () => {
     } catch (err) {
       setError(err.message);
     }
-  }, [selectedSection, token]);
+  }, [selectedSection, selectedQuarter, token]);
 
   useEffect(() => {
     if (activeTab === "history") {
       fetchHistory();
     }
-  }, [activeTab, fetchHistory]);
+  }, [activeTab, fetchHistory, selectedQuarter]);
 
   // Update local attendance status
   const updateStatus = (studentId, newStatus) => {
@@ -428,9 +454,19 @@ const AttendanceMonitoring = () => {
           <header className="am__header">
             <div className="am__headerLeft">
               <h2 className="am__title">Attendance History</h2>
-              <p className="am__date">Click a date to view/edit that day's attendance</p>
+              <p className="am__date">{getQuarterDates(selectedQuarter).label} — Click a date to edit</p>
             </div>
             <div className="am__headerRight">
+              <select
+                className="am__select"
+                value={selectedQuarter}
+                onChange={(e) => setSelectedQuarter(Number(e.target.value))}
+              >
+                <option value={1}>Q1 (June-Aug)</option>
+                <option value={2}>Q2 (Sept-Nov)</option>
+                <option value={3}>Q3 (Dec-Feb)</option>
+                <option value={4}>Q4 (Mar-May)</option>
+              </select>
               <select
                 className="am__select"
                 value={selectedSection || ""}

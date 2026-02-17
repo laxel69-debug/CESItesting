@@ -28,7 +28,9 @@ class AttendanceRecordSerializer(serializers.ModelSerializer):
 
     def get_student_name(self, obj):
         if hasattr(obj.student, "profile") and obj.student.profile:
-            return f"{obj.student.profile.first_name} {obj.student.profile.last_name}"
+            p = obj.student.profile
+            if p.student_first_name and p.student_last_name:
+                return f"{p.student_first_name} {p.student_last_name}"
         return obj.student.username
 
 

@@ -157,7 +157,11 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
             if enrollment.first_name and enrollment.last_name:
                 name = f"{enrollment.first_name} {enrollment.last_name}"
             elif hasattr(student, "profile") and student.profile:
-                name = f"{student.profile.first_name} {student.profile.last_name}"
+                p = student.profile
+                if p.student_first_name and p.student_last_name:
+                    name = f"{p.student_first_name} {p.student_last_name}"
+                else:
+                    name = student.username
             else:
                 name = student.username
             students.append({
@@ -185,6 +189,14 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
             section_id=section_id
         ).order_by("-date")
 
+        # Filter by date range if provided (for quarter filtering)
+        start_date = request.query_params.get("start_date")
+        end_date = request.query_params.get("end_date")
+        if start_date:
+            records = records.filter(date__gte=start_date)
+        if end_date:
+            records = records.filter(date__lte=end_date)
+
         # Group by date
         dates = records.values_list("date", flat=True).distinct()
 
@@ -207,3 +219,60 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
             })
 
         return Response(history)
+
+    @action(detail=False, methods=["get"])
+    def quarter_stats(self, request):
+        """
+        Get attendance statistics for all students in a grade level for a specific quarter.
+        Used by Grade Encoding to show attendance percentage.
+        """
+        grade_level = request.query_params.get("grade_level")
+        quarter = request.query_params.get("quarter")
+
+        if not grade_level or not quarter:
+            return Response(
+                {"error": "grade_level and quarter parameters are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Get quarter date range - school year starts in June
+        from datetime import date as date_class
+        today = date_class.today()
+        # Determine school year: if month >=6, SY starts this year; else SY started last year
+        sy_start_year = today.year if today.month >= 6 else today.year - 1
+        quarter = int(quarter)
+        quarter_ranges = {
+            1: (date_class(sy_start_year, 6, 1), date_class(sy_start_year, 8, 31)),
+            2: (date_class(sy_start_year, 9, 1), date_class(sy_start_year, 11, 30)),
+            3: (date_class(sy_start_year, 12, 1), date_class(sy_start_year + 1, 2, 28)),
+            4: (date_class(sy_start_year + 1, 3, 1), date_class(sy_start_year + 1, 5, 31)),
+        }
+        quarter_start, quarter_end = quarter_ranges.get(quarter, (None, None))
+
+        if not quarter_start:
+            return Response({"error": "Invalid quarter"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Get students enrolled in sections of this grade level
+        from enrollment.models import Enrollment
+        enrollments = Enrollment.objects.filter(
+            section__grade_level=int(grade_level),
+            status__in=["ACTIVE", "PENDING"],
+        ).select_related("student")
+
+        results = []
+        for enrollment in enrollments:
+            student = enrollment.student
+            stats = AttendanceRecord.get_student_attendance_stats(
+                student.id, quarter_start, quarter_end
+            )
+            results.append({
+                "student_id": student.id,
+                "total": stats["total"],
+                "present": stats["present"],
+                "absent": stats["absent"],
+                "late": stats["late"],
+                "excused": stats["excused"],
+                "percentage": stats["percentage"],
+            })
+
+        return Response(results)
