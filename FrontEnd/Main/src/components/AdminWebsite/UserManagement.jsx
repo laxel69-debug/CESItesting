@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Edit2, Search, Filter, Users,
-  BookOpen, GraduationCap, Save, X,
+  BookOpen, GraduationCap, Save, X, UserCheck, UserX,
 } from 'lucide-react';
 import { apiFetch } from '../api/apiFetch';
+import StatCard, { StatsGrid } from './StatCard';
 import '../AdminWebsiteCSS/UserManagement.css';
 
 const UserManagement = () => {
@@ -191,6 +192,7 @@ const matchStatus = filterStatus === "All" || statusCode === filterStatus.toUppe
     total: teachers.length,
     active: teachers.filter((t) => t.status === 'ACTIVE').length,
     assigned: teachers.filter((t) => t.teacher_profile?.subject).length,
+    unassigned: teachers.filter((t) => !t.teacher_profile?.subject).length,
   };
 
   if (loading) {
@@ -231,18 +233,20 @@ const matchStatus = filterStatus === "All" || statusCode === filterStatus.toUppe
 
       {/* Stats */}
       {activeTab === 'students' && (
-        <div className="stats-grid">
-          <div className="stat-card"><h3>Total Students</h3><p className="stat-number">{studentStats.total}</p></div>
-          <div className="stat-card"><h3>Active</h3><p className="stat-number active">{studentStats.active}</p></div>
-          <div className="stat-card"><h3>Inactive</h3><p className="stat-number inactive">{studentStats.inactive}</p></div>
-        </div>
+        <StatsGrid>
+          <StatCard label="Total Students" value={studentStats.total} icon={<Users size={22} />} color="blue" />
+          <StatCard label="Active" value={studentStats.active} icon={<UserCheck size={22} />} color="green" />
+          <StatCard label="Inactive" value={studentStats.inactive} icon={<UserX size={22} />} color="red" />
+          <StatCard label="Total Teachers" value={teacherStats.total} icon={<BookOpen size={22} />} color="purple" />
+        </StatsGrid>
       )}
       {activeTab === 'teachers' && (
-        <div className="stats-grid">
-          <div className="stat-card"><h3>Total Teachers</h3><p className="stat-number">{teacherStats.total}</p></div>
-          <div className="stat-card"><h3>Active</h3><p className="stat-number active">{teacherStats.active}</p></div>
-          <div className="stat-card"><h3>Assigned to Subject</h3><p className="stat-number">{teacherStats.assigned}</p></div>
-        </div>
+        <StatsGrid>
+          <StatCard label="Total Teachers" value={teacherStats.total} icon={<BookOpen size={22} />} color="blue" />
+          <StatCard label="Active" value={teacherStats.active} icon={<UserCheck size={22} />} color="green" />
+          <StatCard label="Assigned to Subject" value={teacherStats.assigned} icon={<GraduationCap size={22} />} color="yellow" />
+          <StatCard label="Unassigned" value={teacherStats.unassigned} icon={<UserX size={22} />} color="red" />
+        </StatsGrid>
       )}
 
       {/* ── Create Teacher Modal ── */}

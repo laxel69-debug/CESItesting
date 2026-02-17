@@ -3,8 +3,8 @@
    ============================================ */
 /* MUST match your admin sidebar css variables */
 :root{
-  --as-wide: 260px;
-  --as-narrow: 72px;
+  --as-wide: 270px;
+  --as-narrow: 76px;
 }
 
 .admin-main{

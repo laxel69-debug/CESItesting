@@ -57,24 +57,23 @@ function AdminDashboard() {
     }
   };
 
-  const getPageTitle = () => {
-    const titles = {
-      dashboard: "Dashboard",
-      enrollment: "Enrollment Management",
-      financial: "Financial Management",
-      users: "User Management",
-      classes: "Classes",
-      subjects: "Subjects",
-      "assign-teachers": "Assign Teachers",
-      grades: "Grades & Records",
-      cms: "CMS Module",
-      reports: "Reports",
-      
-      tuition: "Tuition Management",
-      notifications: "SMS & Email",
-    };
-    return titles[activeMenu] || "Dashboard";
+  const pageMeta = {
+    dashboard: { title: "Dashboard", subtitle: "Welcome back! Here's what's happening today." },
+    enrollment: { title: "Enrollment Management", subtitle: "Manage student enrollments and applications." },
+    "transaction-history": { title: "Transaction History", subtitle: "View and track all financial transactions." },
+    "payment-reminders": { title: "Payment Reminders", subtitle: "Manage and send payment reminders." },
+    "generate-reports": { title: "Reports", subtitle: "Generate and view system reports." },
+    users: { title: "User Management", subtitle: "Manage users, roles, and permissions." },
+    classes: { title: "Class Management", subtitle: "Manage classes and sections." },
+    subjects: { title: "Subjects", subtitle: "Manage subjects and curriculum." },
+    "assign-teachers": { title: "Assign Teachers", subtitle: "Assign teachers to classes and subjects." },
+    grades: { title: "Grades & Records", subtitle: "View and manage student grades and records." },
+    cms: { title: "CMS Module", subtitle: "Manage announcements and content." },
+    reports: { title: "Reports", subtitle: "Generate and view system reports." },
+    tuition_management: { title: "Tuition Management", subtitle: "Manage tuition fees and payment plans." },
   };
+
+  const currentPage = pageMeta[activeMenu] || pageMeta.dashboard;
 
   return (
     <div className="admin-app-container">
@@ -88,8 +87,8 @@ function AdminDashboard() {
       {/* ✅ This is the important change: admin-main drives layout with the sidebar CSS */}
       <main className={`admin-main ${sidebarCollapsed ? "collapsed" : ""}`}>
         <Header
-          title={getPageTitle()}
-          subtitle="Welcome back! Here's what's happening today."
+          title={currentPage.title}
+          subtitle={currentPage.subtitle}
           onToggleCollapse={handleToggleSidebar}
           sidebarCollapsed={sidebarCollapsed}
         />

@@ -1,9 +1,7 @@
 /* Grades & Records Styles */
 .grades-records-main {
   padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   box-sizing: border-box;
 }
 
@@ -22,18 +20,18 @@
   background-color: white;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-left: 4px solid;
   transition: all 0.3s ease;
 }
 
 .gr-stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
 .gr-stat-blue {
-  border-left-color: #2196F3;
+  border-left-color: #5BA3C7;
 }
 
 .gr-stat-green {
@@ -87,10 +85,10 @@
 
 /* Deadline Card */
 .gr-deadline-card {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
+  background: linear-gradient(135deg, #5BA3C7, #4A8FB0);
   border-radius: 0.75rem;
   padding: 2rem;
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 4px 12px rgba(91, 163, 199, 0.3);
   color: white;
 }
 
@@ -118,7 +116,7 @@
 }
 
 .gr-icon-open {
-  color: #FFEB3B;
+  color: #FDEF3B;
 }
 
 .gr-icon-closed {
@@ -185,7 +183,7 @@
   background-color: white;
   padding: 1rem;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
 
@@ -212,9 +210,9 @@
 }
 
 .gr-tab-active {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
+  background: linear-gradient(135deg, #5BA3C7, #4A8FB0);
   color: white;
-  border-color: #2196F3;
+  border-color: #5BA3C7;
 }
 
 /* Section Header */
@@ -248,7 +246,7 @@
 
 /* Buttons */
 .gr-btn-primary {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
+  background: linear-gradient(135deg, #5BA3C7, #4A8FB0);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -259,16 +257,16 @@
   gap: 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
+  box-shadow: 0 2px 4px rgba(91, 163, 199, 0.2);
 }
 
 .gr-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 4px 8px rgba(91, 163, 199, 0.3);
 }
 
 .gr-btn-secondary {
-  background-color: #FFEB3B;
+  background-color: #FDEF3B;
   color: #1e293b;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -282,7 +280,7 @@
 }
 
 .gr-btn-secondary:hover {
-  background-color: #FDD835;
+  background-color: #FDEF3B;
   transform: translateY(-2px);
 }
 
@@ -297,7 +295,7 @@
 
 .gr-date-input:focus {
   outline: none;
-  border-color: #2196F3;
+  border-color: #5BA3C7;
 }
 
 /* Filters */
@@ -331,8 +329,8 @@ transition: all 0.3s ease;
 }
 .gr-search-input:focus {
 outline: none;
-border-color: #2196F3;
-box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+border-color: #5BA3C7;
+box-shadow: 0 0 0 3px rgba(91, 163, 199, 0.1);
 }
 .gr-filter-group {
 display: flex;
@@ -351,13 +349,13 @@ background-color: white;
 }
 .gr-filter-select:focus {
 outline: none;
-border-color: #2196F3;
+border-color: #5BA3C7;
 }
 /* Table */
 .gr-table-container {
   background-color: white;
   border-radius: 0.75rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -369,26 +367,26 @@ border-color: #2196F3;
   max-width: 100%;
 }
 .gr-table thead {
-background-color: #f8fafc;
+background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
 }
 .gr-table th {
   padding: 1rem;
   text-align: left;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #475569;
+  color: #374151;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid #d1d5db;
   white-space: normal;
   word-break: break-word;
 }
 .gr-table tbody tr {
-border-bottom: 1px solid #e2e8f0;
+border-bottom: 1px solid #e5e7eb;
 transition: background-color 0.2s ease;
 }
 .gr-table tbody tr:hover {
-background-color: #f8fafc;
+background-color: #f9fafb;
 }
 .gr-table td {
   padding: 1rem;
@@ -503,8 +501,8 @@ align-items: center;
 justify-content: center;
 }
 .gr-btn-icon:hover {
-background-color: #2196F3;
-border-color: #2196F3;
+background-color: #5BA3C7;
+border-color: #5BA3C7;
 color: white;
 transform: translateY(-2px);
 }
