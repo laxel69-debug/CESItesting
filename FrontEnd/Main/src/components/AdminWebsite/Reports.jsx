@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Download, Filter, Calendar, Clock, CheckCircle } from 'lucide-react';
-import StatCard, { StatsGrid } from './StatCard';
+import { FileText, Download, Filter } from 'lucide-react';
 import '../AdminWebsiteCSS/ClassManagement.css'; // Reusing similar styles
 
 const Reports = () => {
@@ -21,14 +20,6 @@ const Reports = () => {
       <div className="class-header">
         <h1>Reports & Analytics</h1>
       </div>
-
-      {/* Statistics */}
-      <StatsGrid>
-        <StatCard label="Total Reports" value={reports.length} icon={<FileText size={22} />} color="blue" />
-        <StatCard label="This Month" value={5} icon={<Calendar size={22} />} color="green" />
-        <StatCard label="Pending" value={2} icon={<Clock size={22} />} color="yellow" />
-        <StatCard label="Generated Today" value={1} icon={<CheckCircle size={22} />} color="purple" />
-      </StatsGrid>
 
       {/* Filters */}
       <div className="class-controls">
@@ -85,6 +76,26 @@ const Reports = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Statistics */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <h3>Total Reports</h3>
+          <p className="stat-number">{reports.length}</p>
+        </div>
+        <div className="stat-card">
+          <h3>This Month</h3>
+          <p className="stat-number">5</p>
+        </div>
+        <div className="stat-card">
+          <h3>Pending</h3>
+          <p className="stat-number">2</p>
+        </div>
+        <div className="stat-card">
+          <h3>Generated Today</h3>
+          <p className="stat-number">1</p>
         </div>
       </div>
 

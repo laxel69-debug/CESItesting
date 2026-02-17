@@ -1,7 +1,9 @@
 /* Transaction History Styles */
 .transaction-history-main {
   padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  max-width: 1400px;
+  margin: 0 auto;
+  background-color: #f8f9fa;
 }
 
 .th-section {
@@ -19,18 +21,18 @@
   background-color: white;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border-left: 4px solid;
   transition: all 0.3s ease;
 }
 
 .th-stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .th-stat-blue {
-  border-left-color: #5BA3C7;
+  border-left-color: #2196F3;
 }
 
 .th-stat-green {
@@ -97,7 +99,7 @@
 
 /* Button */
 .th-btn-primary {
-  background: linear-gradient(135deg, #5BA3C7, #4A8FB0);
+  background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -108,12 +110,12 @@
   gap: 0.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(91, 163, 199, 0.2);
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.2);
 }
 
 .th-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(91, 163, 199, 0.3);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
 }
 
 /* Filters */
@@ -149,8 +151,8 @@
 
 .th-search-input:focus {
   outline: none;
-  border-color: #5BA3C7;
-  box-shadow: 0 0 0 3px rgba(91, 163, 199, 0.1);
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
 .th-filter-group {
@@ -172,14 +174,14 @@
 
 .th-filter-select:focus {
   outline: none;
-  border-color: #5BA3C7;
+  border-color: #2196F3;
 }
 
 /* Table */
 .th-table-container {
   background-color: white;
   border-radius: 0.75rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -189,7 +191,7 @@
 }
 
 .th-table thead {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  background-color: #f8fafc;
 }
 
 .th-table th {
@@ -197,19 +199,19 @@
   text-align: left;
   font-size: 0.875rem;
   font-weight: 600;
-  color: #374151;
+  color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 2px solid #d1d5db;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .th-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e2e8f0;
   transition: background-color 0.2s ease;
 }
 
 .th-table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: #f8fafc;
 }
 
 .th-table td {
@@ -377,7 +379,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .th-modal-header h3 {
@@ -447,8 +449,8 @@
 
 .th-form-input:focus {
   outline: none;
-  border-color: #5BA3C7;
-  box-shadow: 0 0 0 3px rgba(91, 163, 199, 0.1);
+  border-color: #2196F3;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
 }
 
 textarea.th-form-input {
@@ -582,7 +584,7 @@ textarea.th-form-input {
 
 .th-student-detail-panel {
   padding: 1rem 1.5rem 1.25rem;
-  border-top: 2px solid #e5e7eb;
+  border-top: 2px solid #e2e8f0;
   animation: slideDown 0.2s ease-out;
 }
 
@@ -674,9 +676,9 @@ textarea.th-form-input {
   color: #64748b;
 }
 .th-edit-btn:hover {
-  color: #5BA3C7;
-  background: #f0f9ff;
-  border-color: #bae6fd;
+  color: #3b82f6;
+  background: #eff6ff;
+  border-color: #bfdbfe;
 }
 
 .th-delete-btn {

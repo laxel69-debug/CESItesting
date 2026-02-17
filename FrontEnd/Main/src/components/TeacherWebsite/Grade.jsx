@@ -25,19 +25,10 @@ const CATEGORIES = [
 
 /* ═══════════════════════════════════════════════════ */
 
-// Compute current quarter based on date (school year starts June)
-const getCurrentQuarter = () => {
-  const m = new Date().getMonth() + 1; // 1-12
-  if (m >= 6 && m <= 8) return 1;       // June - Aug
-  if (m >= 9 && m <= 11) return 2;      // Sept - Nov
-  if (m === 12 || m <= 2) return 3;     // Dec - Feb
-  return 4;                              // Mar - May
-};
-
 const Grade = () => {
   // ── core state ──
-  const [gradeLevel, setGradeLevel] = useState(4); // default to Grade 4 for now
-  const [quarter, setQuarter] = useState(getCurrentQuarter());
+  const [gradeLevel, setGradeLevel] = useState(0);
+  const [quarter, setQuarter] = useState(1);
   const [teacherSubject, setTeacherSubject] = useState(null); // {subject_id, subject_name, subject_code}
 
   // ── data ──
@@ -45,9 +36,8 @@ const Grade = () => {
   const [students, setStudents] = useState([]);  // students in selected grade
   const [scores, setScores] = useState([]);      // all scores for this quarter
   const [classStandings, setClassStandings] = useState([]); // class standing scores
-  const [attendanceStats, setAttendanceStats] = useState([]); // attendance stats per student
   const [weights, setWeights] = useState({
-    activity_weight: 40, quiz_weight: 20, exam_weight: 20, class_standing_weight: 10, attendance_weight: 10,
+    activity_weight: 40, quiz_weight: 20, exam_weight: 20, class_standing_weight: 20,
   });
 
   // ── UI state ──
@@ -80,13 +70,12 @@ const Grade = () => {
     if (!teacherSubject) return;
     const subj = teacherSubject.subject_id;
 
-    const [itemsRes, studentsRes, scoresRes, csRes, wRes, attRes] = await Promise.all([
+    const [itemsRes, studentsRes, scoresRes, csRes, wRes] = await Promise.all([
       apiFetch(`${API}/api/grades/items/?subject=${subj}&grade_level=${gradeLevel}&quarter=${quarter}`),
       apiFetch(`${API}/api/grades/students/${gradeLevel}/`),
       apiFetch(`${API}/api/grades/scores/?subject=${subj}&grade_level=${gradeLevel}&quarter=${quarter}`),
       apiFetch(`${API}/api/grades/class-standing/?subject=${subj}&quarter=${quarter}`),
       apiFetch(`${API}/api/grades/weights/${subj}/`),
-      apiFetch(`${API}/api/attendance/records/quarter_stats/?grade_level=${gradeLevel}&quarter=${quarter}`),
     ]);
 
     if (itemsRes.ok) setItems(await itemsRes.json());
@@ -98,7 +87,6 @@ const Grade = () => {
       setWeights(wd);
       setTempWeights(wd);
     }
-    if (attRes.ok) setAttendanceStats(await attRes.json());
   }, [teacherSubject, gradeLevel, quarter]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -114,11 +102,6 @@ const Grade = () => {
   const getCS = (studentId) => {
     const c = classStandings.find((cs) => cs.student === studentId);
     return c ? c.score : null;
-  };
-
-  const getAttendance = (studentId) => {
-    const a = attendanceStats.find((att) => att.student_id === studentId);
-    return a ? a.percentage : null;
   };
 
   // Compute category average for a student (percentage)
@@ -144,14 +127,12 @@ const Grade = () => {
     const quizAvg = categoryAvg(studentId, "QUIZ");
     const examAvg = categoryAvg(studentId, "EXAM");
     const cs = getCS(studentId);
-    const att = getAttendance(studentId);
 
     const parts = [];
     if (actAvg !== null) parts.push({ avg: actAvg, w: weights.activity_weight });
     if (quizAvg !== null) parts.push({ avg: quizAvg, w: weights.quiz_weight });
     if (examAvg !== null) parts.push({ avg: examAvg, w: weights.exam_weight });
     if (cs !== null) parts.push({ avg: Number(cs), w: weights.class_standing_weight });
-    if (att !== null) parts.push({ avg: att, w: weights.attendance_weight || 0 });
 
     if (!parts.length) return null;
     const totalW = parts.reduce((s, p) => s + p.w, 0);
@@ -279,7 +260,7 @@ const Grade = () => {
     } catch (e) { console.error(e); }
   };
 
-  const weightTotal = tempWeights.activity_weight + tempWeights.quiz_weight + tempWeights.exam_weight + tempWeights.class_standing_weight + (tempWeights.attendance_weight || 0);
+  const weightTotal = tempWeights.activity_weight + tempWeights.quiz_weight + tempWeights.exam_weight + tempWeights.class_standing_weight;
 
   // ─── Render ───
   if (!teacherSubject) {
@@ -329,7 +310,6 @@ const Grade = () => {
         <span className="ge__weightChip ge__weightChip--quiz">Quizzes {weights.quiz_weight}%</span>
         <span className="ge__weightChip ge__weightChip--exam">Exams {weights.exam_weight}%</span>
         <span className="ge__weightChip ge__weightChip--cs">Class Standing {weights.class_standing_weight}%</span>
-        <span className="ge__weightChip ge__weightChip--att">Attendance {weights.attendance_weight || 0}%</span>
       </div>
 
       {/* ════ Grade Items Planner (top section) ════ */}
@@ -387,14 +367,13 @@ const Grade = () => {
                   ))
                 )}
                 <th className="ge__th ge__th--score">CS</th>
-                <th className="ge__th ge__th--score">Att</th>
                 <th className="ge__th">Quarter Grade</th>
                 <th className="ge__th">Remarks</th>
               </tr>
             </thead>
             <tbody>
               {students.length === 0 && (
-                <tr><td className="ge__td" colSpan={items.length + 5}>No students enrolled in this grade level.</td></tr>
+                <tr><td className="ge__td" colSpan={items.length + 4}>No students enrolled in this grade level.</td></tr>
               )}
               {students.map((stu) => {
                 const qg = quarterGrade(stu.id);
@@ -415,9 +394,6 @@ const Grade = () => {
                     )}
                     <td className="ge__td ge__td--clickable" onClick={() => { setCsModal({ student: stu }); setCsValue(getCS(stu.id) !== null ? String(getCS(stu.id)) : ""); }}>
                       {getCS(stu.id) !== null ? <span className="ge__scoreVal">{getCS(stu.id)}</span> : <span className="ge__scoreEmpty">—</span>}
-                    </td>
-                    <td className="ge__td" title="Attendance Percentage">
-                      {getAttendance(stu.id) !== null ? <span className="ge__scoreVal">{getAttendance(stu.id).toFixed(0)}%</span> : <span className="ge__scoreEmpty">—</span>}
                     </td>
                     <td className="ge__td">
                       {qg !== null
@@ -559,7 +535,6 @@ const Grade = () => {
                 { key: "quiz_weight", label: "Quizzes", color: "#8b5cf6" },
                 { key: "exam_weight", label: "Exams", color: "#ef4444" },
                 { key: "class_standing_weight", label: "Class Standing", color: "#10b981" },
-                { key: "attendance_weight", label: "Attendance", color: "#f59e0b" },
               ].map(({ key, label, color }) => (
                 <div className="ge__weightRow" key={key}>
                   <span className="ge__weightLabel" style={{ color }}>{label}</span>

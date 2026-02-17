@@ -1,52 +1,214 @@
+/* ============================================
+   ANNOUNCEMENTS LIST
+   ============================================ */
+
 .announcements-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
-.announcement-card {
-  display: flex;
-  gap: 15px;
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
+/* ============================================
+   ANNOUNCEMENT CARD (CMS-LIKE ROW LAYOUT)
+   ============================================ */
+
+.ann-card {
   background: #fff;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  border-radius: 18px;
+  padding: 18px;
+  border: 1px solid #eef2f7;
+  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.announcement-image {
-  width: 120px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
+.ann-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, 0.14);
+  border-color: #e2e8f0;
 }
 
-.announcement-body {
-  flex: 1;
+.ann-card--row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 18px;
+  align-items: start;
 }
 
-.collapsed {
+/* LEFT THUMBNAIL BOX */
+.ann-thumb {
+  width: 240px;
+  height: 155px;
+  border-radius: 14px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-
-  -webkit-box-orient: vertical;
-}
-
-.expand-btn {
-  background: none;
-  border: none;
-  color: var(--primary-blue);
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  box-shadow: 0 8px 16px -10px rgba(0, 0, 0, 0.14);
   cursor: pointer;
-  margin-top: 5px;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.ann-thumb:hover {
+  opacity: 0.95;
+  filter: brightness(1.03);
+}
+
+.ann-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 
-.zoomable {
-  cursor: zoom-in;
+
+/* RIGHT CONTENT */
+.ann-right {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
+
+.ann-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ann-title {
+  font-weight: 800;
+  font-size: 18px;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.ann-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 12px;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.ann-role {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 800;
+  text-transform: capitalize;
+  font-size: 11px;
+}
+
+.ann-desc {
+  margin: 0;
+  color: #334155;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+/* Read more behavior */
+.ann-desc.collapsed {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* lines shown */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ann-desc.expanded {
+  display: block;
+}
+
+.ann-expand-btn {
+  align-self: flex-start;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ann-expand-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   IMAGE ZOOM OVERLAY
+   ============================================ */
 
 .image-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 24px;
+}
+
+.zoomed-image {
+  max-width: 92vw;
+  max-height: 92vh;
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+}
+
+.image-overlay .close-btn {
+  position: absolute;
+  top: 18px;
+  right: 22px;
+  color: white;
+  font-size: 26px;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .ann-card--row {
+    grid-template-columns: 1fr;
+  }
+
+  .ann-thumb {
+    width: 100%;
+    height: 190px;
+  }
+
+  .ann-meta {
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+}
+
+/* Layout without image */
+.ann-card--noimg {
+  display: block;
+}
+
+.ann-card--row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+/* ============================================
+   ANNOUNCEMENT FULL VIEW MODAL
+   ============================================ */
+
+.ann-modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
@@ -54,19 +216,50 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  padding: 30px;
 }
 
-.zoomed-image {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 8px;
+.ann-modal {
+  background: white;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 }
 
-.image-overlay .close-btn {
+.ann-modal-close {
   position: absolute;
-  top: 20px;
-  right: 30px;
-  color: white;
-  font-size: 26px;
+  top: 18px;
+  right: 22px;
+  font-size: 22px;
   cursor: pointer;
+}
+
+.ann-modal-image {
+  width: 100%;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  object-fit: cover;
+}
+
+.ann-modal-title {
+  margin: 0 0 10px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.ann-modal-meta {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 18px;
+}
+
+.ann-modal-content {
+  line-height: 1.8;
+  color: #334155;
+  white-space: pre-wrap;
 }

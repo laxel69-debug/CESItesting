@@ -1,5 +1,215 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../TeacherWebsiteCSS/Dashboard.css";
+import { apiFetch } from "../api/apiFetch";
+
+const API_BASE = "http://127.0.0.1:8000"; // only needed if file/file_url returns /media/...
+
+function toAbsUrl(path) {
+  if (!path) return null;
+  return path.startsWith("http") ? path : `${API_BASE}${path}`;
+}
+
+function getFirstImagePath(a) {
+  const firstImage = a?.media?.find((m) =>
+    /\.(jpg|jpeg|png|gif|webp)$/i.test(m?.file || m?.file_url || "")
+  );
+  return firstImage?.file_url || firstImage?.file || null;
+}
+
+function getFirstMedia(a) {
+  return Array.isArray(a?.media) ? a.media[0] : null;
+}
+
+function TeacherAnnouncementsPanel() {
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
+
+  const [listOpen, setListOpen] = useState(false);
+  const [active, setActive] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      setLoading(true);
+      setErr("");
+      try {
+        const res = await apiFetch("/api/announcements/");
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : data.results || [];
+        if (mounted) setAnnouncements(list);
+      } catch (e) {
+        console.error(e);
+        if (mounted) setErr("Failed to load announcements.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const latest = useMemo(() => announcements.slice(0, 3), [announcements]);
+
+  return (
+    <>
+      <div className="card__body card__body--flush">
+        {loading ? (
+          <div className="list__staticItem">Loading announcements…</div>
+        ) : err ? (
+          <div className="list__staticItem" style={{ color: "crimson" }}>
+            {err}
+          </div>
+        ) : announcements.length === 0 ? (
+          <div className="list__staticItem">No announcements yet.</div>
+        ) : (
+          <div className="tann-list">
+            {latest.map((a) => {
+              const img = toAbsUrl(getFirstImagePath(a));
+              const isImg = img && /\.(jpg|jpeg|png|gif|webp)$/i.test(img);
+
+              return (
+                <div
+                  key={a.id}
+                  className="tann-card tann-card--noimg"
+                  onClick={() => setActive(a)}
+                  style={{ cursor: "pointer" }}
+                >
+                  {/* {isImg && (
+                    <div className="tann-thumb">
+                      <img src={img} alt="" />
+                    </div>
+                  )} */}
+
+                  <div className="tann-right">
+                    <div className="tann-top">
+                      <div className="tann-title">{a.title || "Untitled"}</div>
+
+                      <div className="tann-meta">
+                        <span className="tann-role">
+                          {(a.target_role || "all").replace("_", " ")}
+                        </span>
+                        <span>
+                          {a.publish_date || a.created_at
+                            ? new Date(a.publish_date || a.created_at).toLocaleString()
+                            : ""}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="tann-desc">
+                      {(a.content || "").slice(0, 120)}
+                      {(a.content || "").length > 120 ? "…" : ""}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="card__footer">
+        <button
+          type="button"
+          className="link link--danger"
+          style={{ background: "transparent", border: 0, padding: 0 }}
+          onClick={() => setListOpen(true)}
+          disabled={loading || announcements.length === 0}
+        >
+          See All Updates
+        </button>
+      </div>
+
+      {/* View All Modal */}
+      {listOpen && (
+        <div className="tann-modal-overlay" onClick={() => setListOpen(false)}>
+          <div className="tann-modal" onClick={(e) => e.stopPropagation()}>
+            <span className="tann-modal-close" onClick={() => setListOpen(false)}>
+              ✕
+            </span>
+
+            <h3 className="tann-modal-title">Announcements</h3>
+
+            <div className="tann-modal-list">
+              {announcements.map((a) => {
+                const img = toAbsUrl(getFirstImagePath(a));
+                const isImg = img && /\.(jpg|jpeg|png|gif|webp)$/i.test(img);
+
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    className="tann-modal-item"
+                    onClick={() => {
+                      setListOpen(false);
+                      setActive(a);
+                    }}
+                  >
+                    {/* {isImg && (
+                      <div className="tann-modal-thumb">
+                        <img src={img} alt="" />
+                      </div>
+                    )} */}
+
+                    <div className="tann-modal-right">
+                      <div className="tann-modal-itemTitle">{a.title || "Untitled"}</div>
+                      <div className="tann-modal-itemMeta">
+                        {(a.target_role || "all").replace("_", " ").toUpperCase()} •{" "}
+                        {a.publish_date || a.created_at
+                          ? new Date(a.publish_date || a.created_at).toLocaleString()
+                          : ""}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {active && <TeacherAnnouncementDetailModal a={active} onClose={() => setActive(null)} />}
+    </>
+  );
+}
+
+function TeacherAnnouncementDetailModal({ a, onClose }) {
+  const img = toAbsUrl(getFirstImagePath(a));
+  const firstMedia = getFirstMedia(a);
+  const firstUrl = toAbsUrl(firstMedia?.file_url || firstMedia?.file);
+  const isVideo = firstUrl && /\.(mp4|webm|ogg|mov)$/i.test(firstUrl);
+
+  return (
+    <div className="tann-modal-overlay" onClick={onClose}>
+      <div className="tann-modal" onClick={(e) => e.stopPropagation()}>
+        <span className="tann-modal-close" onClick={onClose}>✕</span>
+
+        {firstUrl && isVideo ? (
+          <video src={firstUrl} controls className="tann-modal-image" />
+        ) : (
+          img && <img src={img} alt="" className="tann-modal-image" />
+        )}
+
+        <h2 className="tann-modal-title">{a.title || "Untitled"}</h2>
+
+        <div className="tann-modal-meta">
+          {(a.target_role || "all").replace("_", " ").toUpperCase()} •{" "}
+          {a.publish_date || a.created_at
+            ? new Date(a.publish_date || a.created_at).toLocaleString()
+            : ""}
+        </div>
+
+        <p className="tann-modal-content">{a.content || ""}</p>
+      </div>
+    </div>
+  );
+}
+
 
 const Dashboard = () => {
   return (
@@ -84,28 +294,7 @@ const Dashboard = () => {
             </h6>
           </div>
 
-          <div className="card__body card__body--flush">
-            <div className="list">
-              <div className="list__staticItem">
-                <div className="announce__title announce__title--danger">Library is now Open</div>
-                <div className="announce__meta">⏰ 8:00 AM - 5:00 PM</div>
-              </div>
-
-              <div className="list__staticItem">
-                <div className="announce__title">Enrollment Period</div>
-                <div className="announce__meta">Second Semester enrollment starts on July 15.</div>
-              </div>
-
-              <div className="list__staticItem">
-                <div className="announce__title">Uniform Policy</div>
-                <div className="announce__meta">Full uniform is required starting Monday.</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="card__footer">
-            <a className="link link--danger" href="#">See All Updates</a>
-          </div>
+          <TeacherAnnouncementsPanel />
         </section>
       </div>
 

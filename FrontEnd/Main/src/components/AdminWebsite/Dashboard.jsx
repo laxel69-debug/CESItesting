@@ -59,7 +59,7 @@ const Dashboard = () => {
           <div className="stat-card stat-card-blue">
             <div className="stat-header">
               <span className="stat-label">Total Students</span>
-              <Users size={32} className="stat-icon" />
+              <Users size={24} className="stat-icon" />
             </div>
             <div className="stat-value">332</div>
             <div className="stat-change">↑ 12% from last month</div>
@@ -68,7 +68,7 @@ const Dashboard = () => {
           <div className="stat-card stat-card-yellow">
             <div className="stat-header">
               <span className="stat-label">Total Revenue</span>
-              <DollarSign size={32} className="stat-icon" />
+              <DollarSign size={24} className="stat-icon" />
             </div>
             <div className="stat-value">₱485,000</div>
             <div className="stat-change">↑ 8% from last month</div>
@@ -77,7 +77,7 @@ const Dashboard = () => {
           <div className="stat-card stat-card-green">
             <div className="stat-header">
               <span className="stat-label">Active Classes</span>
-              <Calendar size={32} className="stat-icon" />
+              <Calendar size={24} className="stat-icon" />
             </div>
             <div className="stat-value">12</div>
             <div className="stat-change">3 classes today</div>
@@ -86,7 +86,7 @@ const Dashboard = () => {
           <div className="stat-card stat-card-purple">
             <div className="stat-header">
               <span className="stat-label">Attendance Rate</span>
-              <TrendingUp size={32} className="stat-icon" />
+              <TrendingUp size={24} className="stat-icon" />
             </div>
             <div className="stat-value">94%</div>
             <div className="stat-change">↑ 2% from yesterday</div>

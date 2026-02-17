@@ -1,7 +1,7 @@
 /* Tuition Management Main Container */
 .tuition-management-main {
   padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-color: #f8f9fa;
   min-height: calc(100vh - 200px);
 }
 
@@ -22,14 +22,13 @@
   background: white;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  border-left: 4px solid #5BA3C7;
 }
 
 .tm-stat-card:hover {
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .tm-stat-header {
@@ -41,7 +40,7 @@
 
 .tm-stat-label {
   font-size: 14px;
-  color: #6b7280;
+  color: #666;
   font-weight: 500;
 }
 
@@ -52,37 +51,25 @@
 .tm-stat-value {
   font-size: 32px;
   font-weight: bold;
-  color: #1f2937;
+  color: #2c3e50;
   margin-bottom: 8px;
 }
 
 .tm-stat-change {
   font-size: 13px;
-  color: #6b7280;
-}
-
-.tm-stat-blue {
-  border-left-color: #5BA3C7;
+  color: #95a5a6;
 }
 
 .tm-stat-blue .tm-stat-icon {
-  color: #5BA3C7;
-}
-
-.tm-stat-green {
-  border-left-color: #10b981;
+  color: #3498db;
 }
 
 .tm-stat-green .tm-stat-icon {
-  color: #10b981;
-}
-
-.tm-stat-purple {
-  border-left-color: #8b5cf6;
+  color: #27ae60;
 }
 
 .tm-stat-purple .tm-stat-icon {
-  color: #8b5cf6;
+  color: #9b59b6;
 }
 
 /* Section Header */
@@ -98,13 +85,13 @@
 .tm-section-title {
   font-size: 22px;
   font-weight: 600;
-  color: #1f2937;
+  color: #2c3e50;
   margin: 0;
 }
 
 .tm-section-subtitle {
   font-size: 14px;
-  color: #6b7280;
+  color: #95a5a6;
   margin: 4px 0 0 0;
 }
 
@@ -131,38 +118,38 @@
 }
 
 .tm-btn-primary {
-  background: linear-gradient(135deg, #5BA3C7 0%, #4A8FB0 100%);
+  background-color: #3498db;
   color: white;
 }
 
 .tm-btn-primary:hover {
-  background: linear-gradient(135deg, #4A8FB0 0%, #3d7a96 100%);
-  box-shadow: 0 4px 12px rgba(91, 163, 199, 0.3);
+  background-color: #2980b9;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 .tm-btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: 1px solid #bdc3c7;
 }
 
 .tm-btn-secondary:hover {
-  background-color: #d1d5db;
+  background-color: #d5dbdb;
 }
 
 .tm-view-toggle {
-  background-color: #10b981;
+  background-color: #27ae60;
   color: white;
   border: none;
 }
 
 .tm-view-toggle:hover {
-  background-color: #059669;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background-color: #229954;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .tm-view-toggle.active {
-  background-color: #10b981;
+  background-color: #27ae60;
 }
 
 /* Filters Container */
@@ -179,14 +166,14 @@
   flex: 1;
   min-width: 250px;
   background: white;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #ddd;
   border-radius: 8px;
   padding: 0 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tm-search-icon {
-  color: #6b7280;
+  color: #95a5a6;
   margin-right: 8px;
 }
 
@@ -199,7 +186,7 @@
 }
 
 .tm-search-input::placeholder {
-  color: #9ca3af;
+  color: #bdc3c7;
 }
 
 .tm-filter-group {
@@ -207,14 +194,14 @@
   align-items: center;
   gap: 8px;
   background: white;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #ddd;
   border-radius: 8px;
   padding: 0 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tm-filter-group svg {
-  color: #6b7280;
+  color: #95a5a6;
 }
 
 .tm-filter-select {
@@ -230,7 +217,7 @@
 .tm-table-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow-x: auto;
 }
 
@@ -240,8 +227,8 @@
 }
 
 .tm-table thead {
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  border-bottom: 2px solid #d1d5db;
+  background-color: #f5f7fa;
+  border-bottom: 2px solid #ecf0f1;
 }
 
 .tm-table th {
@@ -249,24 +236,24 @@
   text-align: left;
   font-weight: 600;
   font-size: 13px;
-  color: #374151;
+  color: #2c3e50;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .tm-table tbody tr {
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #ecf0f1;
   transition: background-color 0.2s ease;
 }
 
 .tm-table tbody tr:hover {
-  background-color: #f9fafb;
+  background-color: #f8f9fa;
 }
 
 .tm-table-cell {
   padding: 14px 12px;
   font-size: 14px;
-  color: #1f2937;
+  color: #2c3e50;
 }
 
 .tm-cell-bold {
@@ -285,33 +272,33 @@
 }
 
 .tm-status-active {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #d4edda;
+  color: #155724;
 }
 
 .tm-status-inactive {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 .tm-status-pending {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: #fff3cd;
+  color: #856404;
 }
 
 .tm-status-paid {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #d4edda;
+  color: #155724;
 }
 
 .tm-status-partial {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: #cfe2ff;
+  color: #084298;
 }
 
 .tm-status-overdue {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 /* Actions Cell */
@@ -335,28 +322,28 @@
 }
 
 .tm-edit-btn {
-  color: #5BA3C7;
-  border: 1px solid #5BA3C7;
+  color: #3498db;
+  border: 1px solid #3498db;
 }
 
 .tm-edit-btn:hover {
-  background-color: #f0f9ff;
+  background-color: #ecf7fb;
 }
 
 .tm-delete-btn {
-  color: #ef4444;
-  border: 1px solid #ef4444;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
 }
 
 .tm-delete-btn:hover {
-  background-color: #fee2e2;
+  background-color: #fde8e6;
 }
 
 /* No Data */
 .tm-no-data {
   text-align: center;
   padding: 48px 12px;
-  color: #9ca3af;
+  color: #95a5a6;
 }
 
 .tm-no-data svg {
@@ -411,20 +398,20 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #ecf0f1;
 }
 
 .tm-modal-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #1f2937;
+  color: #2c3e50;
 }
 
 .tm-modal-close {
   background: none;
   border: none;
   font-size: 28px;
-  color: #9ca3af;
+  color: #95a5a6;
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -436,7 +423,7 @@
 }
 
 .tm-modal-close:hover {
-  color: #1f2937;
+  color: #2c3e50;
 }
 
 /* Modal Body */
@@ -456,7 +443,7 @@
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: #2c3e50;
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -465,7 +452,7 @@
 .tm-form-input {
   width: 100%;
   padding: 10px 12px;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
@@ -475,8 +462,8 @@
 
 .tm-form-input:focus {
   outline: none;
-  border-color: #5BA3C7;
-  box-shadow: 0 0 0 3px rgba(91, 163, 199, 0.1);
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .tm-form-textarea {
@@ -490,8 +477,8 @@
   gap: 12px;
   justify-content: flex-end;
   padding: 20px 24px;
-  border-top: 1px solid #e5e7eb;
-  background-color: #f9fafb;
+  border-top: 1px solid #ecf0f1;
+  background-color: #f8f9fa;
 }
 
 /* Responsive Design */
