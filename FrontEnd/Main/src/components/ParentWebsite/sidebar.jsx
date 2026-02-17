@@ -72,7 +72,7 @@ export default function Sidebar({ page, setPage, isCollapsed, setIsCollapsed }) 
     }
 
     logout(); // clears context + localStorage (based on your useAuth implementation)
-    navigate("/login", { replace: true });
+    navigate("/login", { replace: true, state: {} });
   };
 
   const UserCard = ({ compact = false }) => (

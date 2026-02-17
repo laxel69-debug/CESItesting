@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./useAuth";
 import { clearAuth } from "./auth";
+import { ArrowLeft } from "lucide-react";
 import "../AuthCSS/Login.css";
 
 export default function Login() {
@@ -17,6 +18,10 @@ export default function Login() {
   useEffect(() => {
     clearAuth();
   }, []);
+
+  const handleBack = () => {
+    navigate("/", { replace: true });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -35,18 +40,22 @@ export default function Login() {
         return;
       }
 
+      // Store login info
       login({ user: data.user, token: data.token });
 
-      if (from) {
-        navigate(from, { replace: true });
-        return;
-      }
+      // Small delay to ensure auth context updates before navigation
+      setTimeout(() => {
+        if (from) {
+          navigate(from, { replace: true });
+          return;
+        }
 
-      const normalizedRole = data?.user?.role?.toLowerCase();
-      if (normalizedRole === "admin") navigate("/admin", { replace: true });
-      else if (normalizedRole === "teacher") navigate("/teacher", { replace: true });
-      else if (normalizedRole === "parent_student") navigate("/parent", { replace: true });
-      else navigate("/", { replace: true });
+        const normalizedRole = data?.user?.role?.toLowerCase();
+        if (normalizedRole === "admin") navigate("/admin", { replace: true });
+        else if (normalizedRole === "teacher") navigate("/teacher", { replace: true });
+        else if (normalizedRole === "parent_student") navigate("/parent", { replace: true });
+        else navigate("/", { replace: true });
+      }, 100);
 
     } catch (err) {
       setError("Login failed. Please try again.");
@@ -56,7 +65,12 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-container">
-        <h1>CESI Portal</h1>
+        <div className="login-header">
+          <button type="button" className="back-btn" onClick={handleBack} title="Go Back">
+            <ArrowLeft size={20} />
+          </button>
+          <h1>CESI Portal</h1>
+        </div>
         {error && <div className="error-msg">{error}</div>}
         <form onSubmit={handleLogin}>
           <input
@@ -64,12 +78,14 @@ export default function Login() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Email or Username"
+            required
           />
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
+            required
           />
           <span className="forgot-pass">Forgot your password?</span>
           <button type="submit">Login</button>

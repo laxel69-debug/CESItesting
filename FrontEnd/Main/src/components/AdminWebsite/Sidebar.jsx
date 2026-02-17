@@ -165,7 +165,8 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
     } catch {;}
 
     logout();
-    navigate("/login", { replace: true });
+    // Navigate to fresh login without state
+    navigate("/login", { replace: true, state: {} });
   };
 
   const visible = !isMobile || drawerOpen;

@@ -102,7 +102,7 @@ function Sidebar() {
       console.warn("Backend logout failed (continuing):", err);
     } finally {
       logout();                // clear auth context + storage
-      navigate("/login", { replace: true });
+      navigate("/login", { replace: true, state: {} });
     }
   };
 
