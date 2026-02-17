@@ -91,6 +91,7 @@ class StudentScoreListCreate(generics.ListCreateAPIView):
         qs = StudentScore.objects.select_related("student", "grade_item").all()
         grade_item = self.request.query_params.get("grade_item")
         student = self.request.query_params.get("student")
+
         # Filter by subject + grade_level + quarter (for fetching all scores for a view)
         subject = self.request.query_params.get("subject")
         grade_level = self.request.query_params.get("grade_level")
@@ -203,6 +204,24 @@ def students_by_grade(request, grade_level):
 # ══════════════════════════════════════════════════════
 # COMPUTE QUARTER GRADE  (live computation)
 # ══════════════════════════════════════════════════════
+def _get_quarter_dates(quarter, year=None):
+    """
+    Get approximate start and end dates for a school quarter.
+    Q1: June-August, Q2: September-November, Q3: December-February, Q4: March-May
+    """
+    from datetime import date
+    if year is None:
+        year = date.today().year
+
+    quarter_ranges = {
+        1: (date(year, 6, 1), date(year, 8, 31)),
+        2: (date(year, 9, 1), date(year, 11, 30)),
+        3: (date(year, 12, 1), date(year + 1, 2, 28)),  # Wraps to next year
+        4: (date(year + 1, 3, 1), date(year + 1, 5, 31)),  # Next year
+    }
+    return quarter_ranges.get(quarter, (None, None))
+
+
 def _compute_quarter_grade(student_id, subject_id, quarter):
     """
     Compute the weighted quarter grade for one student.
@@ -216,7 +235,8 @@ def _compute_quarter_grade(student_id, subject_id, quarter):
     aw = w.activity_weight if w else 40
     qw = w.quiz_weight if w else 20
     ew = w.exam_weight if w else 20
-    cw = w.class_standing_weight if w else 20
+    cw = w.class_standing_weight if w else 10
+    atw = w.attendance_weight if w else 10
 
     def _avg(category):
         items = GradeItem.objects.filter(
@@ -250,6 +270,20 @@ def _compute_quarter_grade(student_id, subject_id, quarter):
     except ClassStanding.DoesNotExist:
         cs_score = None
 
+    # Attendance
+    attendance_pct = None
+    try:
+        from attendance.models import AttendanceRecord
+        quarter_start, quarter_end = _get_quarter_dates(quarter)
+        if quarter_start and quarter_end:
+            stats = AttendanceRecord.get_student_attendance_stats(
+                student_id, quarter_start, quarter_end
+            )
+            if stats["total"] > 0:
+                attendance_pct = Decimal(str(stats["percentage"]))
+    except Exception:
+        pass  # Attendance module may not be ready
+
     # Weighted total (only include categories that have data)
     components = []
     if act_avg is not None:
@@ -260,6 +294,8 @@ def _compute_quarter_grade(student_id, subject_id, quarter):
         components.append((exam_avg, ew))
     if cs_score is not None:
         components.append((Decimal(str(cs_score)), cw))
+    if attendance_pct is not None:
+        components.append((attendance_pct, atw))
 
     if not components:
         weighted_total = None
@@ -275,6 +311,7 @@ def _compute_quarter_grade(student_id, subject_id, quarter):
         "quiz_avg": round(float(quiz_avg), 2) if quiz_avg is not None else None,
         "exam_avg": round(float(exam_avg), 2) if exam_avg is not None else None,
         "class_standing": round(float(cs_score), 2) if cs_score is not None else None,
+        "attendance": round(float(attendance_pct), 2) if attendance_pct is not None else None,
         "quarter_grade": round(float(weighted_total), 2) if weighted_total is not None else None,
     }
 

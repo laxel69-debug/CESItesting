@@ -19,13 +19,14 @@ class GradeWeight(models.Model):
     activity_weight = models.IntegerField(default=40, help_text="% for Activities")
     quiz_weight = models.IntegerField(default=20, help_text="% for Quizzes")
     exam_weight = models.IntegerField(default=20, help_text="% for Exams")
-    class_standing_weight = models.IntegerField(default=20, help_text="% for Class Standing")
+    class_standing_weight = models.IntegerField(default=10, help_text="% for Class Standing")
+    attendance_weight = models.IntegerField(default=10, help_text="% for Attendance")
 
     def __str__(self):
-        return f"Weights({self.subject}): A{self.activity_weight} Q{self.quiz_weight} E{self.exam_weight} CS{self.class_standing_weight}"
+        return f"Weights({self.subject}): A{self.activity_weight} Q{self.quiz_weight} E{self.exam_weight} CS{self.class_standing_weight} AT{self.attendance_weight}"
 
     def total(self):
-        return self.activity_weight + self.quiz_weight + self.exam_weight + self.class_standing_weight
+        return self.activity_weight + self.quiz_weight + self.exam_weight + self.class_standing_weight + self.attendance_weight
 
 
 # ═══════════════════════════════════════════════

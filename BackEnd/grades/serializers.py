@@ -13,7 +13,7 @@ class GradeWeightSerializer(serializers.ModelSerializer):
         fields = [
             "id", "subject", "subject_name", "subject_code",
             "activity_weight", "quiz_weight", "exam_weight",
-            "class_standing_weight",
+            "class_standing_weight", "attendance_weight",
         ]
 
 

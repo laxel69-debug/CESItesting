@@ -37,7 +37,7 @@ const Grade = () => {
   const [scores, setScores] = useState([]);      // all scores for this quarter
   const [classStandings, setClassStandings] = useState([]); // class standing scores
   const [weights, setWeights] = useState({
-    activity_weight: 40, quiz_weight: 20, exam_weight: 20, class_standing_weight: 20,
+    activity_weight: 40, quiz_weight: 20, exam_weight: 20, class_standing_weight: 10, attendance_weight: 10,
   });
 
   // ── UI state ──
@@ -260,7 +260,7 @@ const Grade = () => {
     } catch (e) { console.error(e); }
   };
 
-  const weightTotal = tempWeights.activity_weight + tempWeights.quiz_weight + tempWeights.exam_weight + tempWeights.class_standing_weight;
+  const weightTotal = tempWeights.activity_weight + tempWeights.quiz_weight + tempWeights.exam_weight + tempWeights.class_standing_weight + (tempWeights.attendance_weight || 0);
 
   // ─── Render ───
   if (!teacherSubject) {
@@ -535,6 +535,7 @@ const Grade = () => {
                 { key: "quiz_weight", label: "Quizzes", color: "#8b5cf6" },
                 { key: "exam_weight", label: "Exams", color: "#ef4444" },
                 { key: "class_standing_weight", label: "Class Standing", color: "#10b981" },
+                { key: "attendance_weight", label: "Attendance", color: "#f59e0b" },
               ].map(({ key, label, color }) => (
                 <div className="ge__weightRow" key={key}>
                   <span className="ge__weightLabel" style={{ color }}>{label}</span>
