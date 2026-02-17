@@ -253,10 +253,10 @@ const Notebook = ({ onClose, openEnrollment }) => {
                 >
                   <button className="link-btn">🔔 Facebook</button>
                 </a>
-                <a href="../public/oh.pdf" target="_blank" rel="noopener noreferrer">
+                <a href="../../../public/oh.pdf" target="_blank" rel="noopener noreferrer">
                   <button className="link-btn">📅 School Calendar</button>
                 </a>
-                <a href="../public/oh.pdf" target="_blank" rel="noopener noreferrer">
+                <a href="../../../public/oh.pdf" target="_blank" rel="noopener noreferrer">
                   <button className="link-btn">📚 Tuition Fees</button>
                 </a>
               </div>

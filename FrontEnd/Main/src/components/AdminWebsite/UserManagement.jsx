@@ -91,7 +91,8 @@ const UserManagement = () => {
       name.includes(searchTerm.toLowerCase()) ||
       parent.includes(searchTerm.toLowerCase()) ||
       u.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus = filterStatus === 'All' || u.status === filterStatus.toUpperCase();
+      const statusCode = String(u.status || "INACTIVE").toUpperCase();
+const matchStatus = filterStatus === "All" || statusCode === filterStatus.toUpperCase();
     return matchSearch && matchStatus;
   });
 
@@ -101,7 +102,8 @@ const UserManagement = () => {
       u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subjectName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatus = filterStatus === 'All' || u.status === filterStatus.toUpperCase();
+   const statusCode = String(u.status || "INACTIVE").toUpperCase();
+const matchStatus = filterStatus === "All" || statusCode === filterStatus.toUpperCase();
     return matchSearch && matchStatus;
   });
 
@@ -338,24 +340,26 @@ const UserManagement = () => {
               <thead>
                 <tr>
                   <th>Student Name</th>
+                  <th>LRN</th>
                   <th>Grade Level</th>
+                  
                   <th>Section</th>
                   <th>Parent / Guardian</th>
                   <th>Email</th>
                   <th>Contact</th>
-                  <th>Status</th>
+                  
                 </tr>
               </thead>
               <tbody>
                 {filteredStudents.map((u) => (
                   <tr key={u.id}>
                     <td><strong>{studentName(u)}</strong></td>
-                    <td>{u.profile?.grade_level != null ? `Grade ${u.profile.grade_level}` : '—'}</td>
+                    <td>{u.profile?.lrn || "—"}</td>
+                    <td>{u.profile?.grade_level != null ? ` ${u.profile.grade_level}` : '—'}</td>
                     <td>{u.profile?.section ? u.profile.section.name : '—'}</td>
                     <td>{parentName(u)}</td>
                     <td><a href={`mailto:${u.email}`}>{u.email}</a></td>
                     <td>{u.profile?.contact_number || '—'}</td>
-                    <td><span className={`status-badge ${u.status.toLowerCase()}`}>{u.status}</span></td>
                   </tr>
                 ))}
               </tbody>
