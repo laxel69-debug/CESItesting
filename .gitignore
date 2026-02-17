@@ -2,9 +2,13 @@
 #  Python / Django
 # ═══════════════════════════════════════
 *.pyc
-__pycache__/
 *.pyo
 *.pyd
+__pycache__/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
 *.egg-info/
 *.egg
 

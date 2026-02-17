@@ -74,11 +74,11 @@ class UserAdmin(BaseUserAdmin):
     profile_payment_mode.short_description = "Payment Mode"
 
     fieldsets = (
+<<<<<<< HEAD
+        ("Account", {"fields": ("username", "email", "password")}),
+=======
         (None, {"fields": ("username", "email", "password")}),
-        ("Role / Status", {"fields": ("role", "status", "is_active", "is_staff", "is_superuser")}),
-        ("Dates", {"fields": ("created_at", "updated_at", "last_login")}),
-        ("Permissions", {"fields": ("groups", "user_permissions")}),
-    )
+        (None, {"fields": ("username", "email", "password")}),
 
     add_fieldsets = (
         (None, {
@@ -129,7 +129,12 @@ class SubjectAdmin(admin.ModelAdmin):
 # Optional: manage profiles directly too
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
+<<<<<<< HEAD
+    list_display = ("id", "user", "student_first_name", "student_last_name", "grade_level","lrn",           # ✅
+    "payment_mode",  "section")
+=======
     list_display = ("id", "user", "student_first_name", "student_last_name", "grade_level", "lrn", "payment_mode", "section")
+>>>>>>> main
     search_fields = ("user__username", "user__email", "student_first_name", "student_last_name", "parent_last_name")
     list_filter = ("grade_level",)
 
