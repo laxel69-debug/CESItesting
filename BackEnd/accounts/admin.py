@@ -58,9 +58,6 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ("username", "email")
     readonly_fields = ("created_at", "updated_at", "last_login")
     
-<<<<<<< HEAD
-    def enrollment_lrn(self, obj):
-        # reverse name from Enrollment.related_name="parent_enrollment"
     def profile_lrn(self, obj):
         # Only meaningful for parent/student
         if obj.role != "PARENT_STUDENT":
@@ -74,7 +71,10 @@ class UserAdmin(BaseUserAdmin):
             return ""
         prof = getattr(obj, "profile", None)
         return getattr(prof, "payment_mode", "") if prof else ""
-    profile_payment_mode.short_description = "Payment Mode"count", {"fields": ("username", "email", "password")}),
+    profile_payment_mode.short_description = "Payment Mode"
+
+    fieldsets = (
+        (None, {"fields": ("username", "email", "password")}),
         ("Role / Status", {"fields": ("role", "status", "is_active", "is_staff", "is_superuser")}),
         ("Dates", {"fields": ("created_at", "updated_at", "last_login")}),
         ("Permissions", {"fields": ("groups", "user_permissions")}),
@@ -129,12 +129,7 @@ class SubjectAdmin(admin.ModelAdmin):
 # Optional: manage profiles directly too
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-<<<<<<< HEAD
-    list_display = ("id", "user", "student_first_name", "student_last_name", "grade_level", "section")
-=======
-    list_display = ("id", "user", "student_first_name", "student_last_name", "grade_level","lrn",           # ✅
-    "payment_mode",  "section")
->>>>>>> main
+    list_display = ("id", "user", "student_first_name", "student_last_name", "grade_level", "lrn", "payment_mode", "section")
     search_fields = ("user__username", "user__email", "student_first_name", "student_last_name", "parent_last_name")
     list_filter = ("grade_level",)
 
