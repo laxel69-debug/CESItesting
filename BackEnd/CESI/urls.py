@@ -17,6 +17,7 @@ urlpatterns = [
     path('api/', include('enrollment.urls')),  # <-- enrollment endpoints
     path('api/finance/', include('finance.urls')),  # <-- finance endpoints
     path('api/grades/', include('grades.urls')),  # <-- grades endpoints
+    path('api/classmanagement/', include('classmanagement.urls')),  # <-- class management / schedules
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

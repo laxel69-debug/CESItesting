@@ -8,8 +8,6 @@ import PaymentReminders from "./PaymentReminders";
 import Reports from "./Reports";
 import UserManagement from "./UserManagement";
 import ClassManagement from "./ClassManagement";
-import Subjects from "./Subjects";
-import AssignTeachers from "./AssignTeachers";
 import GradesRecords from "./GradesRecords";
 import FloatingMessages from "./FloatingMessages";
 import CMSModule from "./CMSModule";
@@ -39,11 +37,9 @@ function AdminDashboard() {
       case "users":
         return <UserManagement />;
       case "classes":
-        return <ClassManagement />;
       case "subjects":
-        return <Subjects />;
       case "assign-teachers":
-        return <AssignTeachers />;
+        return <ClassManagement />;
       case "grades":
         return <GradesRecords />;
       case "cms":
