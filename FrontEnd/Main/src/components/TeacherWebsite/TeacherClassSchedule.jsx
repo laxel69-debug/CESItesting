@@ -6,7 +6,14 @@ const DAY_MAP = { MON: "Monday", TUE: "Tuesday", WED: "Wednesday", THU: "Thursda
 const DAY_SHORT = { MON: "M", TUE: "T", WED: "W", THU: "TH", FRI: "F" };
 const COLORS = ["#cfe2ff", "#d1e7dd", "#fff3cd", "#f8d7da", "#e2d9f3", "#d4edda", "#fce4ec", "#e0f7fa"];
 const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-const timeSlots = ["08:00 AM","09:00 AM","10:00 AM","11:00 AM","12:00 PM","01:00 PM","02:00 PM","03:00 PM","04:00 PM"];
+
+// Time slots from 7:30 AM to 4:30 PM in half-hour increments
+const timeSlots = [
+  "07:30 AM", "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
+  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM",
+  "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
+  "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM"
+];
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -15,6 +22,16 @@ const fmt12 = (t) => {
   const ampm = hr >= 12 ? "PM" : "AM";
   const d = hr > 12 ? hr - 12 : hr === 0 ? 12 : hr;
   return `${String(d).padStart(2, "0")}:${m} ${ampm}`;
+};
+
+// Convert time string to minutes for comparison
+const timeToMinutes = (t) => {
+  if (!t) return 0;
+  const [time, period] = t.split(" ");
+  let [h, m] = time.split(":").map(Number);
+  if (period === "PM" && h !== 12) h += 12;
+  if (period === "AM" && h === 12) h = 0;
+  return h * 60 + m;
 };
 
 const TeacherClassSchedule = () => {
@@ -37,6 +54,7 @@ const TeacherClassSchedule = () => {
               days: [DAY_SHORT[s.day_of_week] || s.day_of_week],
               time: `${fmt12(s.start_time)} - ${fmt12(s.end_time)}`,
               startTime: fmt12(s.start_time),
+              endTime: fmt12(s.end_time),
               room: s.room || "—",
               color: COLORS[i % COLORS.length],
             }))
@@ -49,9 +67,16 @@ const TeacherClassSchedule = () => {
 
   const uniqueClasses = [...new Set(scheduleData.map((s) => `${s.subject}-${s.section}`))].length;
 
+  // Check if a class overlaps with this time slot
   const getClassForSlot = (day, time) => {
     const dayCode = Object.entries(DAY_MAP).find(([, v]) => v === day)?.[0];
-    return scheduleData.find((cls) => cls.day_of_week === dayCode && cls.startTime === time);
+    const slotMinutes = timeToMinutes(time);
+    return scheduleData.find((cls) => {
+      if (cls.day_of_week !== dayCode) return false;
+      const startMin = timeToMinutes(cls.startTime);
+      const endMin = timeToMinutes(cls.endTime);
+      return slotMinutes >= startMin && slotMinutes < endMin;
+    });
   };
 
   if (loading) return <div className="tcs"><div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>Loading schedule…</div></div>;

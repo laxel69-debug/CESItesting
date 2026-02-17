@@ -14,6 +14,16 @@ const fmt12 = (t) => {
   return `${String(d).padStart(2, "0")}:${m} ${ampm}`;
 };
 
+// Convert time string to minutes for comparison
+const timeToMinutes = (t) => {
+  if (!t) return 0;
+  const [time, period] = t.split(" ");
+  let [h, m] = time.split(":").map(Number);
+  if (period === "PM" && h !== 12) h += 12;
+  if (period === "AM" && h === 12) h = 0;
+  return h * 60 + m;
+};
+
 const Schedule = () => {
   const [view, setView] = useState("calendar");
   const [scheduleData, setScheduleData] = useState([]);
@@ -34,6 +44,8 @@ const Schedule = () => {
               day_of_week: s.day_of_week,
               days: [DAY_MAP[s.day_of_week] || s.day_of_week],
               time: `${fmt12(s.start_time)} - ${fmt12(s.end_time)}`,
+              startTime: fmt12(s.start_time),
+              endTime: fmt12(s.end_time),
               room: s.room || "—",
               color: COLORS[i % COLORS.length],
             }))
@@ -45,7 +57,24 @@ const Schedule = () => {
   }, []);
 
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-  const timeSlots = ["08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"];
+  // Time slots from 7:30 AM to 4:30 PM in half-hour increments
+  const timeSlots = [
+    "07:30 AM", "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
+    "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM",
+    "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
+    "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM"
+  ];
+
+  // Check if a class overlaps with this time slot
+  const getClassForSlot = (day, slotTime) => {
+    const slotMinutes = timeToMinutes(slotTime);
+    return scheduleData.find((item) => {
+      if (!item.days.includes(day)) return false;
+      const startMin = timeToMinutes(item.startTime);
+      const endMin = timeToMinutes(item.endTime);
+      return slotMinutes >= startMin && slotMinutes < endMin;
+    });
+  };
 
   if (loading) return <div className="schedule-content"><div style={{ textAlign: "center", padding: "3rem", color: "#94a3b8" }}>Loading schedule…</div></div>;
 
@@ -92,19 +121,15 @@ const Schedule = () => {
                 <React.Fragment key={time}>
                   <div className="time-cell">{time}</div>
                   {days.map((day) => {
-                    const hour = time.split(":")[0];
-                    const period = time.split(" ")[1];
-                    const sessions = scheduleData.filter(
-                      (item) => item.days.includes(day) && item.time.startsWith(hour) && item.time.includes(period)
-                    );
+                    const cls = getClassForSlot(day, time);
                     return (
-                      <div key={`${day}-${time}`} className="grid-cell">
-                        {sessions.map((item) => (
-                          <div key={item.id} className={`event-card ${item.color}`}>
-                            <div className="event-subject">{item.subject}</div>
-                            <div className="event-info">{item.room} • {item.teacher}</div>
+                      <div key={`${day}-${time}`} className="grid-cell" style={{ backgroundColor: cls ? '#e0f2fe' : 'transparent' }}>
+                        {cls && (
+                          <div className={`event-card ${cls.color}`}>
+                            <div className="event-subject">{cls.subject}</div>
+                            <div className="event-info">{cls.room} • {cls.teacher}</div>
                           </div>
-                        ))}
+                        )}
                       </div>
                     );
                   })}
