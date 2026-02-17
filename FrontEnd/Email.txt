@@ -1,0 +1,63 @@
+[16/Feb/2026 16:46:37] "OPTIONS /api/enrollments/1/mark_active/ HTTP/1.1" 200 0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+Subject: Your Parent Portal Account
+From: noreply@cesi.local
+To: ral531715@gmail.com
+Date: Mon, 16 Feb 2026 08:46:38 +0000
+Message-ID: <177123159800.1484.1338611699291977854@Zeck>
+
+Your enrollment has been approved.
+
+Your Parent Portal account is ready.
+Set your password here:
+http://localhost:5173/set-password/Mw/d43qlq-28cd833bb4edd4efbcbc15e65de94430
+
+If you did not request this, ignore this email.
+
+
+
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+Subject: Your Parent Portal Account
+From: noreply@cesi.local
+To: r21313@gmail.com
+Date: Mon, 16 Feb 2026 09:02:01 +0000
+Message-ID: <177123252161.1484.12884306848913615908@Zeck>
+
+Your enrollment has been approved.
+
+Your Parent Portal account is ready.
+Set your password here:
+http://localhost:5173/set-password/OQ/d43rbd-9b1abfbeac4f9da358323b5ff2cad773
+
+If you did not request this, ignore this email.
+[16/Feb/2026 17:02:01] "OPTIONS /api/enrollments/5/mark_active/ HTTP/1.1" 200 0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+Subject: Your Parent Portal Account
+From: noreply@cesi.local
+To: r21313@gmail.com
+Date: Mon, 16 Feb 2026 09:02:01 +0000
+Message-ID: <177123252161.1484.12884306848913615908@Zeck>
+
+Your enrollment has been approved.
+
+Your Parent Portal account is ready.
+Set your password here:
+http://localhost:5173/set-password/OQ/d43rbd-9b1abfbeac4f9da358323b5ff2cad773
+
+If you did not request this, ignore this email.
+
+
+
+
+
+
+
+#for checking accounts
+from accounts.models import User
+User.objects.filter(email__iexact="r21313@gmail.com").values("id","username","email","role","is_active")

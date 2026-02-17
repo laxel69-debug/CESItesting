@@ -19,7 +19,7 @@ class UserProfileInline(admin.StackedInline):
     fields = (
         "student_first_name", "student_middle_name", "student_last_name",
         "grade_level", "section",
-        "lrn", "student_number", "payment_mode",   # ✅
+        "lrn", "student_number", "payment_mode",
         "parent_first_name", "parent_middle_name", "parent_last_name",
         "contact_number", "address",
     )
@@ -50,8 +50,8 @@ class UserAdmin(BaseUserAdmin):
         "is_active",
         "is_staff",
         "has_profile",
-        "profile_lrn",          # ✅
-        "profile_payment_mode", # ✅
+        "profile_lrn",
+        "profile_payment_mode",
         "created_at"
         )
     list_filter = ("role", "status", "is_active", "is_staff")
@@ -59,7 +59,7 @@ class UserAdmin(BaseUserAdmin):
     readonly_fields = ("created_at", "updated_at", "last_login")
     
     def profile_lrn(self, obj):
-    # Only meaningful for parent/student
+        # Only meaningful for parent/student
         if obj.role != "PARENT_STUDENT":
             return ""
         prof = getattr(obj, "profile", None)
@@ -74,11 +74,11 @@ class UserAdmin(BaseUserAdmin):
     profile_payment_mode.short_description = "Payment Mode"
 
     fieldsets = (
+<<<<<<< HEAD
         ("Account", {"fields": ("username", "email", "password")}),
-        ("Role / Status", {"fields": ("role", "status", "is_active", "is_staff", "is_superuser")}),
-        ("Dates", {"fields": ("created_at", "updated_at", "last_login")}),
-        ("Permissions", {"fields": ("groups", "user_permissions")}),
-    )
+=======
+        (None, {"fields": ("username", "email", "password")}),
+        (None, {"fields": ("username", "email", "password")}),
 
     add_fieldsets = (
         (None, {
@@ -129,8 +129,12 @@ class SubjectAdmin(admin.ModelAdmin):
 # Optional: manage profiles directly too
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
+<<<<<<< HEAD
     list_display = ("id", "user", "student_first_name", "student_last_name", "grade_level","lrn",           # ✅
     "payment_mode",  "section")
+=======
+    list_display = ("id", "user", "student_first_name", "student_last_name", "grade_level", "lrn", "payment_mode", "section")
+>>>>>>> main
     search_fields = ("user__username", "user__email", "student_first_name", "student_last_name", "parent_last_name")
     list_filter = ("grade_level",)
 
