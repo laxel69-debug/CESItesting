@@ -89,6 +89,12 @@ cd /d "%BACKEND%"
 "%VENV_PYTHON%" manage.py migrate --run-syncdb >nul 2>&1
 echo    OK: Migrations applied
 
+REM -- Load backup fixtures --
+echo.
+echo ^>^> Loading database fixtures...
+"%VENV_PYTHON%" manage.py loaddata backup.json >nul 2>&1
+echo    OK: Database fixtures loaded
+
 REM -- Frontend: npm install --
 echo.
 echo ^>^> Setting up Frontend...

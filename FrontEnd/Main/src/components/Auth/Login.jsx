@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./useAuth";
+import { clearAuth } from "./auth";
 import "../AuthCSS/Login.css";
 
 export default function Login() {
@@ -11,6 +12,11 @@ export default function Login() {
   const location = useLocation();
   const { login } = useAuth();
   const from = location.state?.from?.pathname;
+
+  // Clear auth when landing on login page to prevent stale tokens
+  useEffect(() => {
+    clearAuth();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -123,6 +123,11 @@ Write-Step "Applying database migrations..."
 Push-Location "$BackendDir"
 & "$VenvPython" manage.py migrate --run-syncdb 2>&1 | Out-Null
 Write-Ok "Migrations applied"
+
+# Load backup data
+Write-Step "Loading database fixtures..."
+& "$VenvPython" manage.py loaddata backup.json 2>&1 | Out-Null
+Write-Ok "Database fixtures loaded"
 Pop-Location
 
 # =============================================

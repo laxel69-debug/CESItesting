@@ -27,6 +27,9 @@ db.sqlite3-journal
 # Pipenv / pip
 Pipfile.lock
 
+# ✅ EXCEPTION: Track backup.json for database fixtures
+!BackEnd/backup.json
+
 # Migrations — uncomment if you want to track them
 # **/migrations/
 
