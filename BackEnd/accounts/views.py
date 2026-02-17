@@ -330,6 +330,7 @@ def update_teacher_assignment(request, user_id):
     teacher_user.refresh_from_db()
     return Response(UserDetailSerializer(teacher_user).data)
 
+
 # 
 # SET USER PASSWORD
 # 

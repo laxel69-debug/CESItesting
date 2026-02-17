@@ -924,6 +924,141 @@
   margin: 5px 0;
 }
 
+/* ========== SCHEDULE CONTROLS ========== */
+.schedule-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.schedule-view-toggle {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.admin-tab-btn.small {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* ========== SCHEDULE TIMELINE TABLE ========== */
+.schedule-timeline-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.schedule-timeline-table thead {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+}
+
+.schedule-timeline-table th {
+  padding: 14px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.timeline-time-col {
+  width: 90px;
+  text-align: right !important;
+  padding-right: 14px !important;
+}
+
+.timeline-time-cell {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-align: right;
+  padding: 10px 14px 10px 0;
+  border-right: 2px solid #e5e7eb;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.timeline-cell {
+  padding: 4px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+  min-height: 56px;
+  height: 56px;
+}
+
+.timeline-block {
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border-left: 3px solid rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.timeline-block:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.timeline-block--selected {
+  outline: 2px solid #3b82f6;
+  outline-offset: -1px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+/* ========== BULK SELECT BAR ========== */
+.bulk-select-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-bottom: 10px;
+}
+
+.timeline-block-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-block-meta {
+  font-size: 10px;
+  color: #4b5563;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ========== INLINE EDIT INPUTS ========== */
+.inline-input,
+.inline-select {
+  padding: 6px 10px;
+  border: 2px solid #5BA3C7;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #f9fafb;
+  transition: border-color 0.2s;
+}
+
+.inline-input:focus,
+.inline-select:focus {
+  outline: none;
+  border-color: #4A8FB0;
+  box-shadow: 0 0 0 3px rgba(91, 163, 199, 0.15);
+}
+
 /* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 1200px) {
   .admin-teachers-grid {

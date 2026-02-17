@@ -56,7 +56,6 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
           { id: "users", label: "User Management", icon: UsersRound },
           { id: "enrollment", label: "Enrollment", icon: UserPlus },
           { id: "classes", label: "Class Management", icon: BookOpen },
-          { id: "subjects", label: "Subjects", icon: BookOpen },
           { id: "grades", label: "Grades & Records", icon: GraduationCap },
         ],
       },
