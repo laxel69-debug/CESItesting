@@ -57,11 +57,18 @@ class BulkAttendanceSerializer(serializers.Serializer):
 
 class SectionSimpleSerializer(serializers.ModelSerializer):
     """Simple serializer for sections the teacher teaches."""
-    grade_level = serializers.CharField(source="grade_level.name", read_only=True)
+    grade_level = serializers.SerializerMethodField()
 
     class Meta:
         model = Section
         fields = ["id", "name", "grade_level"]
+
+    def get_grade_level(self, obj):
+        """Convert grade_level integer to readable name."""
+        gl = obj.grade_level
+        if gl == 0:
+            return "Kinder"
+        return f"Grade {gl}"
 
 
 class StudentAttendanceStatsSerializer(serializers.Serializer):

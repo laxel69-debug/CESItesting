@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import "../TeacherWebsiteCSS/AttendanceMonitoring.css";
+import { getToken } from "../Auth/auth";
 
 const API_BASE = "http://127.0.0.1:8000/api";
 
@@ -19,7 +20,7 @@ const AttendanceMonitoring = () => {
   const [history, setHistory] = useState([]);
   const [historyDate, setHistoryDate] = useState(null);
 
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   // Fetch sections the teacher teaches
   useEffect(() => {

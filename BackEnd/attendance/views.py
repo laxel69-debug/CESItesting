@@ -31,12 +31,12 @@ class TeacherSectionsView(APIView):
             )
 
         # Get sections from teacher's schedules
-        from classmanagement.models import ClassSchedule
-        schedule_section_ids = ClassSchedule.objects.filter(
+        from classmanagement.models import Schedule
+        schedule_section_ids = Schedule.objects.filter(
             teacher=user
         ).values_list("section_id", flat=True).distinct()
 
-        sections = Section.objects.filter(id__in=schedule_section_ids).select_related("grade_level")
+        sections = Section.objects.filter(id__in=schedule_section_ids)
         serializer = SectionSimpleSerializer(sections, many=True)
         return Response(serializer.data)
 
