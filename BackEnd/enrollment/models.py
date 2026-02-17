@@ -1,76 +1,141 @@
+# enrollment/models.py
+from django.conf import settings
 from django.db import models
-from accounts.models import User, Section
 from django.utils import timezone
+from accounts.models import Section  # keep if your Section is in accounts
 
 
 class Enrollment(models.Model):
     """
-    Enrollment model tracks which students are enrolled in which sections/grades.
-    Supports grades 1-6 for elementary school.
+    Enrollment model tracks which students are enrolled.
+    Includes all student info from the enrollment form.
     """
-    
-    GRADE_CHOICES = (
-        (1, "Grade 1"),
-        (2, "Grade 2"),
-        (3, "Grade 3"),
-        (4, "Grade 4"),
-        (5, "Grade 5"),
-        (6, "Grade 6"),
-    )
-    
-    STATUS_CHOICES = (
+
+    GRADE_LEVEL_CHOICES = [
+        ("prek", "Pre-Kinder"),
+        ("kinder", "Kinder"),
+        ("grade1", "Grade 1"),
+        ("grade2", "Grade 2"),
+        ("grade3", "Grade 3"),
+        ("grade4", "Grade 4"),
+        ("grade5", "Grade 5"),
+        ("grade6", "Grade 6"),
+    ]
+
+    STATUS_CHOICES = [
+        ("PENDING", "Pending"),
         ("ACTIVE", "Active"),
         ("COMPLETED", "Completed"),
         ("DROPPED", "Dropped"),
-        ("PENDING", "Pending"),
+    ]
+
+    PAYMENT_MODE_CHOICES = [
+        ("cash", "Cash"),
+        ("installment", "Installment"),
+    ]
+
+    STUDENT_TYPE_CHOICES = [
+        ("new", "New / Transferee"),
+        ("old", "Old Student"),
+    ]
+
+    EDUCATION_LEVEL_CHOICES = [
+        ("preschool", "Preschool"),
+        ("elementary", "Elementary"),
+    ]
+
+    # ✅ Parent portal account (ALLOW multiple enrollments / kids per parent)
+    parent_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="parent_enrollments",
     )
-    
-    # Link to student user
+
+    # ✅ Student user (you set this to public_user during public create)
     student = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="enrollments",
-        limit_choices_to={"role": "PARENT_STUDENT"}
     )
-    
-    # Link to section
+
+    # ✅ Safer: do not delete enrollment if section is deleted
     section = models.ForeignKey(
         Section,
-        on_delete=models.CASCADE,
-        related_name="enrollments"
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="enrollments",
     )
-    
-    # Grade level (1-6)
-    grade_level = models.IntegerField(choices=GRADE_CHOICES)
-    
-    # Enrollment status
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default="PENDING"
-    )
-    
-    # Enrollment date
-    enrolled_at = models.DateTimeField(default=timezone.now)
-    
-    # Completion/dropout date (optional)
-    completed_at = models.DateTimeField(null=True, blank=True)
-    
-    # Academic year (e.g., "2024-2025")
+
+    # Academic
+    grade_level = models.CharField(max_length=20, choices=GRADE_LEVEL_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="PENDING")
     academic_year = models.CharField(max_length=10, default="2024-2025")
-    
-    # Notes or remarks
+
+    student_type = models.CharField(
+        max_length=10, choices=STUDENT_TYPE_CHOICES, blank=True, null=True
+    )
+    education_level = models.CharField(
+        max_length=20, choices=EDUCATION_LEVEL_CHOICES, blank=True, null=True
+    )
+
+    # Student Info
+    lrn = models.CharField(max_length=20, blank=True, null=True)
+    student_number = models.CharField(max_length=20, blank=True, null=True)
+    last_name = models.CharField(max_length=50, blank=True, null=True)
+    first_name = models.CharField(max_length=50, blank=True, null=True)
+    middle_name = models.CharField(max_length=50, blank=True, null=True)
+    birth_date = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=10, blank=True, null=True)
+
+    # Contact Info
+    email = models.EmailField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    religion = models.CharField(max_length=50, blank=True, null=True)
+    telephone_number = models.CharField(max_length=20, blank=True, null=True)
+    mobile_number = models.CharField(max_length=20, blank=True, null=True)
+    parent_facebook = models.CharField(max_length=100, blank=True, null=True)
+
+    # Payment / Tracking
+    payment_mode = models.CharField(
+        max_length=20, choices=PAYMENT_MODE_CHOICES, blank=True, null=True
+    )
+    enrolled_at = models.DateTimeField(default=timezone.now)
+    completed_at = models.DateTimeField(blank=True, null=True)
     remarks = models.TextField(blank=True, null=True)
-    
-    # Track creation and updates
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        unique_together = ("student", "section", "grade_level", "academic_year")
         ordering = ["-enrolled_at"]
         verbose_name = "Enrollment"
         verbose_name_plural = "Enrollments"
-    
+
     def __str__(self):
-        return f"{self.student.username} - Grade {self.grade_level} ({self.section.name}) - {self.academic_year}"
+        return f"{self.first_name} {self.last_name} - {self.grade_level}"
+
+
+class ParentInfo(models.Model):
+    enrollment = models.OneToOneField(
+        Enrollment,
+        on_delete=models.CASCADE,
+        related_name="parent_info",
+    )
+
+    father_name = models.CharField(max_length=100, blank=True, null=True)
+    father_contact = models.CharField(max_length=20, blank=True, null=True)
+    father_occupation = models.CharField(max_length=100, blank=True, null=True)
+
+    mother_name = models.CharField(max_length=100, blank=True, null=True)
+    mother_contact = models.CharField(max_length=20, blank=True, null=True)
+    mother_occupation = models.CharField(max_length=100, blank=True, null=True)
+
+    guardian_name = models.CharField(max_length=100, blank=True, null=True)
+    guardian_contact = models.CharField(max_length=20, blank=True, null=True)
+    guardian_relationship = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"Parent Info - {self.enrollment}"

@@ -1,26 +1,109 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, Filter, CheckCircle, Clock, AlertCircle, Users, DollarSign } from 'lucide-react';
-import StatCard, { StatsGrid } from './StatCard';
-import '../AdminWebsiteCSS/EnrollmentManagement.css';
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Edit2,
+  Trash2,
+  Search,
+  Filter,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  XCircle,
+  Eye,
+  Plus,
+  Users,
+  DollarSign,
+} from "lucide-react";
+import StatCard, { StatsGrid } from "./StatCard";
+import "../AdminWebsiteCSS/EnrollmentManagement.css";
+import { getToken } from "../Auth/auth";
 
-/**
- * EnrollmentManagement Component
- * Manages student enrollments with add, edit, delete, and filter functionality
- * NOTE: This is a frontend-only component. Connect to backend API when ready.
- */
-const EnrollmentManagement = () => {
-  // Sample enrollment data - REPLACE with API call to backend
-  const [enrollments, setEnrollments] = useState([
-    { id: 1, studentName: 'John Smith', gradeLevel: 'Grade 1', enrollmentDate: '2026-01-10', status: 'Active', fee: 'Paid', parentName: 'Robert Smith', phone: '555-0101' },
-    { id: 2, studentName: 'Sarah Johnson', gradeLevel: 'Kindergarten', enrollmentDate: '2025-12-15', status: 'Active', fee: 'Pending', parentName: 'Mary Johnson', phone: '555-0102' },
-    { id: 3, studentName: 'Michael Davis', gradeLevel: 'Grade 2', enrollmentDate: '2026-01-05', status: 'Active', fee: 'Paid', parentName: 'James Davis', phone: '555-0103' },
-    { id: 4, studentName: 'Emily Wilson', gradeLevel: 'Grade 1', enrollmentDate: '2026-01-12', status: 'Pending', fee: 'Not Paid', parentName: 'Linda Wilson', phone: '555-0104' },
-    { id: 5, studentName: 'David Brown', gradeLevel: 'Grade 3', enrollmentDate: '2025-11-20', status: 'Active', fee: 'Overdue', parentName: 'Thomas Brown', phone: '555-0105' },
-  ]);
+const API_BASE = "http://127.0.0.1:8000";
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('All');
-  const [showForm, setShowForm] = useState(false);
+function authHeaders(json = true) {
+  const token = getToken();
+  return {
+    ...(json ? { "Content-Type": "application/json" } : {}),
+    ...(token ? { Authorization: `Token ${token}` } : {}),
+  };
+}
+
+const gradeLabel = (code) => {
+  const map = {
+    prek: "Pre-Kinder",
+    kinder: "Kindergarten",
+    grade1: "Grade 1",
+    grade2: "Grade 2",
+    grade3: "Grade 3",
+    grade4: "Grade 4",
+    grade5: "Grade 5",
+    grade6: "Grade 6",
+  };
+  return map[code] || code || "";
+};
+
+const statusLabel = (s) => {
+  const m = {
+    ACTIVE: "Active",
+    PENDING: "Pending",
+    DROPPED: "Dropped",
+    COMPLETED: "Completed",
+  };
+  return m[s] || s || "";
+};
+
+const emptyForm = () => ({
+  // student
+  first_name: "",
+  last_name: "",
+  middle_name: "",
+  birth_date: "",
+  gender: "",
+
+  lrn: "",
+  student_number: "",
+
+  // academic
+  education_level: "",
+  grade_level: "",
+  student_type: "",
+  academic_year: "2024-2025",
+  status: "PENDING",
+  payment_mode: "",
+
+  // contact
+  email: "",
+  address: "",
+  religion: "",
+  telephone_number: "",
+  mobile_number: "",
+  parent_facebook: "",
+
+  remarks: "",
+
+  // nested parent
+  parent_info: {
+    father_name: "",
+    father_contact: "",
+    father_occupation: "",
+    mother_name: "",
+    mother_contact: "",
+    mother_occupation: "",
+    guardian_name: "",
+    guardian_contact: "",
+    guardian_relationship: "",
+  },
+});
+
+export default function EnrollmentManagement() {
+  const [enrollments, setEnrollments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+
+  // One modal for view + edit + create
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("view"); // "view" | "edit"
   const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState(emptyForm());
