@@ -110,13 +110,24 @@ class Section(models.Model):
 # =========================
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-
+    GRADE_LEVEL_CHOICES = [
+        ("Pre-Kinder", "Pre-Kinder"),
+        ("Kinder", "Kinder"),
+        ("Grade 1", "Grade 1"),
+        ("Grade 2", "Grade 2"),
+        ("Grade 3", "Grade 3"),
+        ("Grade 4", "Grade 4"),
+        ("Grade 5", "Grade 5"),
+        ("Grade 6", "Grade 6"),
+    ]
     # Student Info
     student_first_name = models.CharField(max_length=50)
     student_middle_name = models.CharField(max_length=50, blank=True, null=True)
     student_last_name = models.CharField(max_length=50)
-    grade_level = models.IntegerField()
-
+    grade_level = models.CharField(max_length=20, choices=GRADE_LEVEL_CHOICES)
+    lrn = models.CharField(max_length=20, blank=True, null=True)
+    student_number = models.CharField(max_length=20, blank=True, null=True)
+    payment_mode = models.CharField(max_length=20, blank=True, null=True)
     section = models.ForeignKey(Section, on_delete=models.SET_NULL, null=True, blank=True, related_name="students")
 
     # Parent Info
