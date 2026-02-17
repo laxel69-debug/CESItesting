@@ -45,6 +45,7 @@ const AssignTeachers = () => {
           icon={<TrendingUp size={22} />}
           color="purple"
         />
+      </StatsGrid>
 
       {/* ASSIGN TEACHERS VIEW */}
       <div className="admin-assign-teachers-view">
