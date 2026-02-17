@@ -76,19 +76,33 @@ class LoginView(APIView):
         username = request.data.get("username", "").strip()
         password = request.data.get("password", "").strip()
 
+        # Check if credentials provided
+        if not username or not password:
+            return Response(
+                {"success": False, "message": "Username and password required"},
+                status=400
+            )
+
         # Case-insensitive username lookup
         try:
             actual_user = User.objects.get(username__iexact=username)
             username = actual_user.username  # use the DB-stored casing
         except User.DoesNotExist:
-            pass  # let authenticate() handle the failure
+            return Response(
+                {"success": False, "message": "Invalid credentials"},
+                status=400
+            )
 
+        # Authenticate user
         user = authenticate(request, username=username, password=password)
         if not user:
-            return Response({"success": False, "message": "Invalid credentials"}, status=400)
+            return Response(
+                {"success": False, "message": "Invalid credentials"},
+                status=400
+            )
 
         login(request, user)  # ✅ important
-         # ✅ Token for SPA
+        # ✅ Token for SPA
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response({
