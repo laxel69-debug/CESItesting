@@ -18,7 +18,11 @@ const AttendanceMonitoring = () => {
   // History view state
   const [activeTab, setActiveTab] = useState("today"); // "today" or "history"
   const [history, setHistory] = useState([]);
-  const [historyDate, setHistoryDate] = useState(null);
+  
+  // Edit modal state
+  const [editModal, setEditModal] = useState(null); // date string or null
+  const [editAttendance, setEditAttendance] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
 
   const token = getToken();
 
@@ -152,12 +156,82 @@ const AttendanceMonitoring = () => {
     }
   };
 
-  // Load history day for editing
-  const loadHistoryDay = (histDate) => {
-    setHistoryDate(histDate);
-    setSelectedDate(histDate);
-    setActiveTab("today");
+  // Open edit modal for a historical date
+  const openEditModal = async (histDate) => {
+    setEditModal(histDate);
+    // Fetch attendance for that date
+    try {
+      const res = await fetch(
+        `${API_BASE}/attendance/records/?section=${selectedSection}&date=${histDate}`,
+        { headers: { Authorization: `Token ${token}` } }
+      );
+      if (!res.ok) throw new Error("Failed to fetch attendance");
+      const data = await res.json();
+      const attMap = {};
+      data.forEach((rec) => {
+        attMap[rec.student] = { status: rec.status, notes: rec.notes || "", id: rec.id };
+      });
+      setEditAttendance(attMap);
+    } catch (err) {
+      setError(err.message);
+    }
   };
+
+  // Update status in edit modal
+  const updateEditStatus = (studentId, newStatus) => {
+    setEditAttendance((prev) => ({
+      ...prev,
+      [studentId]: { ...prev[studentId], status: newStatus, notes: prev[studentId]?.notes || "" },
+    }));
+  };
+
+  // Save edited attendance
+  const saveEditAttendance = async () => {
+    if (!selectedSection || !editModal) return;
+    setEditSaving(true);
+    setError(null);
+    try {
+      const records = students.map((s) => ({
+        student_id: s.id,
+        status: editAttendance[s.id]?.status || "PRESENT",
+        notes: editAttendance[s.id]?.notes || "",
+      }));
+      const res = await fetch(`${API_BASE}/attendance/records/bulk_upsert/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          section: selectedSection,
+          date: editModal,
+          records,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save attendance");
+      const result = await res.json();
+      alert(`Attendance updated! ${result.created} created, ${result.updated} updated.`);
+      setEditModal(null);
+      fetchHistory(); // Refresh history
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  // Edit modal counts
+  const editCounts = useMemo(() => {
+    const c = { P: 0, A: 0, L: 0, E: 0 };
+    students.forEach((s) => {
+      const st = editAttendance[s.id]?.status || "PRESENT";
+      if (st === "PRESENT") c.P++;
+      else if (st === "ABSENT") c.A++;
+      else if (st === "LATE") c.L++;
+      else if (st === "EXCUSED") c.E++;
+    });
+    return c;
+  }, [students, editAttendance]);
 
   // Counts
   const counts = useMemo(() => {
@@ -405,7 +479,7 @@ const AttendanceMonitoring = () => {
                       <td className="am__td">
                         <button
                           className="am__editBtn"
-                          onClick={() => loadHistoryDay(h.date)}
+                          onClick={() => openEditModal(h.date)}
                         >
                           ✏️ Edit
                         </button>
@@ -424,6 +498,105 @@ const AttendanceMonitoring = () => {
             </div>
           </section>
         </>
+      )}
+
+      {/* Edit History Modal */}
+      {editModal && (
+        <div className="am__overlay" onClick={() => setEditModal(null)}>
+          <div className="am__modal" onClick={(e) => e.stopPropagation()}>
+            <div className="am__modalHeader">
+              <h3>Edit Attendance - {editModal}</h3>
+              <button className="am__modalClose" onClick={() => setEditModal(null)}>✕</button>
+            </div>
+
+            <div className="am__modalStats">
+              <span className="am__modalStat am__modalStat--present">P: {editCounts.P}</span>
+              <span className="am__modalStat am__modalStat--absent">A: {editCounts.A}</span>
+              <span className="am__modalStat am__modalStat--late">L: {editCounts.L}</span>
+              <span className="am__modalStat am__modalStat--excused">E: {editCounts.E}</span>
+            </div>
+
+            <div className="am__modalBody">
+              <table className="am__table am__table--modal">
+                <thead>
+                  <tr>
+                    <th className="am__th am__th--left">Student</th>
+                    <th className="am__th">Status</th>
+                    <th className="am__th">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((student) => {
+                    const st = editAttendance[student.id]?.status || "PRESENT";
+                    return (
+                      <tr className="am__tr" key={student.id}>
+                        <td className="am__td am__td--left">
+                          <div className="am__name">{student.name}</div>
+                        </td>
+                        <td className="am__td">
+                          <span
+                            className={[
+                              "am__badge",
+                              st === "PRESENT" && "am__badge--present",
+                              st === "ABSENT" && "am__badge--absent",
+                              st === "LATE" && "am__badge--late",
+                              st === "EXCUSED" && "am__badge--excused",
+                            ].filter(Boolean).join(" ")}
+                          >
+                            {st}
+                          </span>
+                        </td>
+                        <td className="am__td">
+                          <div className="am__toggle">
+                            <button
+                              type="button"
+                              onClick={() => updateEditStatus(student.id, "PRESENT")}
+                              className={`am__toggleBtn ${st === "PRESENT" ? "am__toggleBtn--present" : "am__toggleBtn--idle"}`}
+                            >
+                              P
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateEditStatus(student.id, "ABSENT")}
+                              className={`am__toggleBtn ${st === "ABSENT" ? "am__toggleBtn--absent" : "am__toggleBtn--idle"}`}
+                            >
+                              A
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateEditStatus(student.id, "LATE")}
+                              className={`am__toggleBtn ${st === "LATE" ? "am__toggleBtn--late" : "am__toggleBtn--idle"}`}
+                            >
+                              L
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateEditStatus(student.id, "EXCUSED")}
+                              className={`am__toggleBtn ${st === "EXCUSED" ? "am__toggleBtn--excused" : "am__toggleBtn--idle"}`}
+                            >
+                              E
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="am__modalFooter">
+              <button className="am__cancelBtn" onClick={() => setEditModal(null)}>Cancel</button>
+              <button
+                className="am__saveBtn"
+                onClick={saveEditAttendance}
+                disabled={editSaving}
+              >
+                {editSaving ? "Saving..." : "💾 Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -406,3 +406,128 @@
   color: var(--muted);
   font-weight: 600;
 }
+
+/* ═══════════════════════════════════════════════
+   Edit History Modal
+   ═══════════════════════════════════════════════ */
+
+.am__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.am__modal {
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.am__modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: var(--dark);
+  color: #fff;
+}
+
+.am__modalHeader h3 {
+  margin: 0;
+  font-weight: 800;
+}
+
+.am__modalClose {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.am__modalClose:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.am__modalStats {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #f9fafb;
+  border-bottom: 1px solid var(--border);
+}
+
+.am__modalStat {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.am__modalStat--present {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.am__modalStat--absent {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.am__modalStat--late {
+  background: var(--warn-soft);
+  color: #b45309;
+}
+
+.am__modalStat--excused {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.am__modalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.am__table--modal {
+  min-width: auto;
+}
+
+.am__modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  background: #f9fafb;
+  border-top: 1px solid var(--border);
+}
+
+.am__cancelBtn {
+  padding: 10px 20px;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.am__cancelBtn:hover {
+  background: #d1d5db;
+}
