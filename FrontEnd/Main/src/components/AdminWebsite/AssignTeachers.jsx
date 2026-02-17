@@ -33,8 +33,18 @@ const AssignTeachers = () => {
         <StatCard label="Total Teachers" value={availableTeachers.length} icon={<BookOpen size={22} />} color="blue" />
         <StatCard label="Classes Assigned" value={classes.length} icon={<GraduationCap size={22} />} color="green" />
         <StatCard label="Total Students" value={classes.reduce((sum, c) => sum + c.enrolled, 0)} icon={<Users size={22} />} color="yellow" />
-        <StatCard label="Avg. Students/Teacher" value={Math.round(classes.reduce((sum, c) => sum + c.enrolled, 0) / availableTeachers.length)} icon={<TrendingUp size={22} />} color="purple" />
-      </StatsGrid>
+        <StatCard
+          label="Avg. Students/Teacher"
+          value={
+            availableTeachers.length > 0
+              ? Math.round(
+                  classes.reduce((sum, c) => sum + c.enrolled, 0) / availableTeachers.length
+                )
+              : 0
+          }
+          icon={<TrendingUp size={22} />}
+          color="purple"
+        />
 
       {/* ASSIGN TEACHERS VIEW */}
       <div className="admin-assign-teachers-view">
