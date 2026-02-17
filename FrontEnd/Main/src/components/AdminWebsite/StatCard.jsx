@@ -20,17 +20,19 @@ const StatCard = ({
   color = 'blue',
 }) => {
   // Build accessible label for screen readers
-  const ariaLabel = `${label}: ${value}${subtitle ? ', ' + subtitle : ''}`;
+  // Format value for better screen reader pronunciation
+  const formattedValue = String(value).replace(/,/g, '');
+  const ariaLabel = `${label}: ${formattedValue}${subtitle ? '. ' + subtitle : ''}`;
 
   return (
     <div
       className={`unified-stat-card ${color}`}
-      role="region"
+      role="group"
       aria-label={ariaLabel}
     >
       <div className="unified-stat-header">
         <span className="unified-stat-label">{label}</span>
-        {icon && <span className="unified-stat-icon">{icon}</span>}
+        {icon && <span className="unified-stat-icon" aria-hidden="true">{icon}</span>}
       </div>
       <div className="unified-stat-value">{value}</div>
       {subtitle && (
