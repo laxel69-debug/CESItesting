@@ -57,7 +57,39 @@ REST_FRAMEWORK = {
      "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+         "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "20/hour",          # general anonymous traffic
+        "user": "200/hour",         # authenticated users
+        "enrollment_public": "5/hour",  # STRICT: public enrollment submit
+    },
+    
+    # "DEFAULT_THROTTLE_RATES": {
+    #     "anon": "1/min",
+    #     "user": "1/min",
+    #     "enrollment_public": "10/min",
+    # },
 }
+# Email backend for development - prints emails to console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# FRONTEND_URL = "http://localhost:5173"  # or your real domain later
+
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = "zekaido123@gmail.com"  # Your Gmail address
+# EMAIL_HOST_PASSWORD = "ZeckAkali002"  # Gmail App Password (not normal password)
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "noreply@cesi.local"
+FRONTEND_URL = "http://localhost:5173"
+
+# CORS settings for development - adjust for production as needed
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
