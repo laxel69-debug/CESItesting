@@ -215,7 +215,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
             if not enrollment.student_number:
                 # Try up to 10 times to generate a unique student number
                 max_attempts = 10
-                for attempt in range(max_attempts):
+                for _ in range(max_attempts):
                     candidate = self.generate_student_number()
                     if not Enrollment.objects.filter(student_number=candidate).exists():
                         enrollment.student_number = candidate
