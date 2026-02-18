@@ -153,10 +153,12 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def generate_student_number(self):
+        """Generate unique student number with format YYYY######"""
         year = timezone.now().year
         prefix = str(year)
 
-        # get highest student_number for this year
+        # Get highest student_number for this year
+        # Note: This should be called within a transaction.atomic() block
         last = (
             Enrollment.objects
             .filter(student_number__startswith=prefix)
@@ -206,21 +208,28 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         parent_email = (enrollment.email or "").strip().lower()
 
         with transaction.atomic():
-            # 1) set enrollment ACTIVE
+            # 1) Generate student number if needed
+            student_number_generated = False
             if not enrollment.student_number:
                 while True:
                     candidate = self.generate_student_number()
                     if not Enrollment.objects.filter(student_number=candidate).exists():
                         enrollment.student_number = candidate
+                        student_number_generated = True
                         break
             
-            
+            # 2) Set enrollment ACTIVE
             enrollment.status = "ACTIVE"
             note = "APPROVED BY ADMIN"
             enrollment.remarks = (enrollment.remarks or "").strip()
             if note not in enrollment.remarks:
                 enrollment.remarks = f"{enrollment.remarks} | {note}".strip(" |")
-                enrollment.save(update_fields=["status", "remarks", "updated_at", "student_number"])
+            
+            # Save with appropriate fields
+            update_fields = ["status", "remarks", "updated_at"]
+            if student_number_generated:
+                update_fields.append("student_number")
+            enrollment.save(update_fields=update_fields)
 
             # 2) create/link parent user if needed
             if parent_email and enrollment.parent_user_id is None:
