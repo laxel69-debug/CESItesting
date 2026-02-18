@@ -22,11 +22,13 @@ def validate_file_size(value):
     if value.size > max_mb * 1024 * 1024:
         raise ValidationError(f"File too large. Max size is {max_mb}MB.")
 
+
 class Announcement(models.Model):
     TARGET_CHOICES = [
-        ("all", "Public (All)"),
-        ("teachers", "Teachers"),
-        ("parent_student", "Parent / Student"),
+        ('all', 'All'),
+        ('students', 'Students'),
+        ('teachers', 'Teachers'),
+        ('parents', 'Parents'),
     ]
 
     title = models.CharField(max_length=255)
@@ -35,15 +37,14 @@ class Announcement(models.Model):
     target_role = models.CharField(
         max_length=20,
         choices=TARGET_CHOICES,
-        default="all",
+        default='all'
     )
 
     publish_date = models.DateTimeField()
-
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="announcements",
+        related_name='announcements'
     )
 
     is_active = models.BooleanField(default=True)
@@ -51,6 +52,7 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
+
 
 class AnnouncementMedia(models.Model):
     announcement = models.ForeignKey(

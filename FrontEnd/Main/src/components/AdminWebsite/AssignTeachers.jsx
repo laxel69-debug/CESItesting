@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Users } from 'lucide-react';
+import { Users, BookOpen, GraduationCap, TrendingUp } from 'lucide-react';
+import StatCard, { StatsGrid } from './StatCard';
 import '../AdminWebsiteCSS/AssignTeachers.css';
 
 const AssignTeachers = () => {
@@ -28,24 +29,23 @@ const AssignTeachers = () => {
       </div>
 
       {/* Statistics */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <h3>Total Teachers</h3>
-          <p className="admin-stat-number">{availableTeachers.length}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Classes Assigned</h3>
-          <p className="admin-stat-number">{classes.length}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Total Students</h3>
-          <p className="admin-stat-number">{classes.reduce((sum, c) => sum + c.enrolled, 0)}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Avg. Students/Teacher</h3>
-          <p className="admin-stat-number">{Math.round(classes.reduce((sum, c) => sum + c.enrolled, 0) / availableTeachers.length)}</p>
-        </div>
-      </div>
+      <StatsGrid>
+        <StatCard label="Total Teachers" value={availableTeachers.length} icon={<BookOpen size={22} />} color="blue" />
+        <StatCard label="Classes Assigned" value={classes.length} icon={<GraduationCap size={22} />} color="green" />
+        <StatCard label="Total Students" value={classes.reduce((sum, c) => sum + c.enrolled, 0)} icon={<Users size={22} />} color="yellow" />
+        <StatCard
+          label="Avg. Students/Teacher"
+          value={
+            availableTeachers.length > 0
+              ? Math.round(
+                  classes.reduce((sum, c) => sum + c.enrolled, 0) / availableTeachers.length
+                )
+              : 0
+          }
+          icon={<TrendingUp size={22} />}
+          color="purple"
+        />
+      </StatsGrid>
 
       {/* ASSIGN TEACHERS VIEW */}
       <div className="admin-assign-teachers-view">

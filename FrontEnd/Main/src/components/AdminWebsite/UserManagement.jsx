@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Plus, Edit2, Search, Filter, Users,
-  BookOpen, GraduationCap, Save, X,
+  BookOpen, GraduationCap, Save, X, UserCheck, UserX,
 } from 'lucide-react';
 import { apiFetch } from '../api/apiFetch';
+import StatCard, { StatsGrid } from './StatCard';
 import '../AdminWebsiteCSS/UserManagement.css';
 
 const UserManagement = () => {
@@ -76,36 +77,6 @@ const UserManagement = () => {
     if (!p) return u.username;
     return `${p.student_first_name} ${p.student_last_name}`;
   };
-    const gradeLabelFromProfile = (raw) => {
-    if (raw == null) return "—";
-
-    const v = String(raw).trim();
-
-    // Already pretty labels
-    const pretty = new Set([
-      "Pre-Kinder", "Kinder",
-      "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6",
-    ]);
-    if (pretty.has(v)) return v;
-
-    // Numeric legacy: "1".."6"
-    if (/^\d+$/.test(v)) return `Grade ${v}`;
-
-    // Code-based: prek/kinder/grade1..grade6
-      const map = {
-        prek: "Pre-Kinder",
-        kinder: "Kinder",
-        grade1: "Grade 1",
-        grade2: "Grade 2",
-        grade3: "Grade 3",
-        grade4: "Grade 4",
-        grade5: "Grade 5",
-        grade6: "Grade 6",
-      };
-      const key = v.toLowerCase();
-      return map[key] || v; // fallback: show whatever it is
-    };
-
   const parentName = (u) => {
     const p = u.profile;
     if (!p) return '—';
@@ -221,6 +192,7 @@ const matchStatus = filterStatus === "All" || statusCode === filterStatus.toUppe
     total: teachers.length,
     active: teachers.filter((t) => t.status === 'ACTIVE').length,
     assigned: teachers.filter((t) => t.teacher_profile?.subject).length,
+    unassigned: teachers.filter((t) => !t.teacher_profile?.subject).length,
   };
 
   if (loading) {
@@ -261,18 +233,20 @@ const matchStatus = filterStatus === "All" || statusCode === filterStatus.toUppe
 
       {/* Stats */}
       {activeTab === 'students' && (
-        <div className="stats-grid">
-          <div className="stat-card"><h3>Total Students</h3><p className="stat-number">{studentStats.total}</p></div>
-          <div className="stat-card"><h3>Active</h3><p className="stat-number active">{studentStats.active}</p></div>
-          <div className="stat-card"><h3>Inactive</h3><p className="stat-number inactive">{studentStats.inactive}</p></div>
-        </div>
+        <StatsGrid>
+          <StatCard label="Total Students" value={studentStats.total} icon={<Users size={22} />} color="blue" />
+          <StatCard label="Active" value={studentStats.active} icon={<UserCheck size={22} />} color="green" />
+          <StatCard label="Inactive" value={studentStats.inactive} icon={<UserX size={22} />} color="red" />
+          <StatCard label="Total Teachers" value={teacherStats.total} icon={<BookOpen size={22} />} color="purple" />
+        </StatsGrid>
       )}
       {activeTab === 'teachers' && (
-        <div className="stats-grid">
-          <div className="stat-card"><h3>Total Teachers</h3><p className="stat-number">{teacherStats.total}</p></div>
-          <div className="stat-card"><h3>Active</h3><p className="stat-number active">{teacherStats.active}</p></div>
-          <div className="stat-card"><h3>Assigned to Subject</h3><p className="stat-number">{teacherStats.assigned}</p></div>
-        </div>
+        <StatsGrid>
+          <StatCard label="Total Teachers" value={teacherStats.total} icon={<BookOpen size={22} />} color="blue" />
+          <StatCard label="Active" value={teacherStats.active} icon={<UserCheck size={22} />} color="green" />
+          <StatCard label="Assigned to Subject" value={teacherStats.assigned} icon={<GraduationCap size={22} />} color="yellow" />
+          <StatCard label="Unassigned" value={teacherStats.unassigned} icon={<UserX size={22} />} color="red" />
+        </StatsGrid>
       )}
 
       {/* ── Create Teacher Modal ── */}
@@ -381,7 +355,7 @@ const matchStatus = filterStatus === "All" || statusCode === filterStatus.toUppe
                   <tr key={u.id}>
                     <td><strong>{studentName(u)}</strong></td>
                     <td>{u.profile?.lrn || "—"}</td>
-                    <td>{gradeLabelFromProfile(u.profile?.grade_level)}</td>
+                    <td>{u.profile?.grade_level != null ? ` ${u.profile.grade_level}` : '—'}</td>
                     <td>{u.profile?.section ? u.profile.section.name : '—'}</td>
                     <td>{parentName(u)}</td>
                     <td><a href={`mailto:${u.email}`}>{u.email}</a></td>

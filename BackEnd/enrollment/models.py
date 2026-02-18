@@ -10,7 +10,7 @@ class Enrollment(models.Model):
     Enrollment model tracks which students are enrolled.
     Includes all student info from the enrollment form.
     """
-    
+
     GRADE_LEVEL_CHOICES = [
         ("prek", "Pre-Kinder"),
         ("kinder", "Kinder"),
@@ -83,7 +83,7 @@ class Enrollment(models.Model):
 
     # Student Info
     lrn = models.CharField(max_length=20, blank=True, null=True)
-    student_number = models.CharField(max_length=20,blank=True,null=True,unique=True)
+    student_number = models.CharField(max_length=20, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
     first_name = models.CharField(max_length=50, blank=True, null=True)
     middle_name = models.CharField(max_length=50, blank=True, null=True)
@@ -139,20 +139,3 @@ class ParentInfo(models.Model):
 
     def __str__(self):
         return f"Parent Info - {self.enrollment}"
-    
-    
-    
-# from django.db.models import Count
-# from enrollment.models import Enrollment
-
-# dups = (Enrollment.objects.exclude(student_number__isnull=True).exclude(student_number__exact="").values("student_number").annotate(c=Count("id")).filter(c__gt=1))
-
-# for row in dups:
-#     sn = row["student_number"]
-#     qs = Enrollment.objects.filter(student_number=sn).order_by("id")
-#     first = qs.first()               # keep this one
-#     for e in qs.exclude(id=first.id):  # clear others
-#         e.student_number = None
-#         e.save(update_fields=["student_number"])
-
-# print("done fixing duplicates:", dups.count())

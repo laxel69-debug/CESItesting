@@ -62,15 +62,18 @@ export default function Sidebar({ page, setPage, isCollapsed, setIsCollapsed }) 
 
   // ✅ LOGOUT (same pattern as your admin sidebar)
   const handleLogout = async () => {
-  try {
-    await apiFetch(`/api/accounts/logout/`, { method: "POST" });
-  } catch (e) {
-    console.warn(e);
-  } finally {
-    logout();
-    navigate("/", { replace: true });
-    window.location.reload();
-  }
+    // OPTIONAL: keep this if you're using Django session/cookie auth
+    try {
+      await apiFetch(`${API_BASE}/api/accounts/logout/`, {
+        method: "POST",
+      });
+    } catch {
+      // ignore network errors, still clear client auth
+    }
+
+    logout(); // clears context + localStorage (based on your useAuth implementation)
+    // Force full page reload to ensure clean state
+    window.location.href = "/";
   };
 
   const UserCard = ({ compact = false }) => (

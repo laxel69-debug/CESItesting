@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'enrollment',
     'finance',
     'grades',
+    'classmanagement',
+    'attendance',
 ]
 
 
@@ -63,9 +65,9 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "20/hour",          # general anonymous traffic
-        "user": "200/hour",         # authenticated users
-        "enrollment_public": "5/hour",  # STRICT: public enrollment submit
+        "anon": "100/hour",          # general anonymous traffic (increased for dev)
+        "user": "500/hour",         # authenticated users
+        "enrollment_public": "10/hour",  # STRICT: public enrollment submit
     },
     
     # "DEFAULT_THROTTLE_RATES": {

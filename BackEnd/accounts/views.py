@@ -6,12 +6,10 @@ from django.conf import settings
 from .models import User
 
 
-from django.contrib.auth import authenticate, login, logout, logout as django_logout
+from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -78,19 +76,33 @@ class LoginView(APIView):
         username = request.data.get("username", "").strip()
         password = request.data.get("password", "").strip()
 
+        # Check if credentials provided
+        if not username or not password:
+            return Response(
+                {"success": False, "message": "Username and password required"},
+                status=400
+            )
+
         # Case-insensitive username lookup
         try:
             actual_user = User.objects.get(username__iexact=username)
             username = actual_user.username  # use the DB-stored casing
         except User.DoesNotExist:
-            pass  # let authenticate() handle the failure
+            return Response(
+                {"success": False, "message": "Invalid credentials"},
+                status=400
+            )
 
+        # Authenticate user
         user = authenticate(request, username=username, password=password)
         if not user:
-            return Response({"success": False, "message": "Invalid credentials"}, status=400)
+            return Response(
+                {"success": False, "message": "Invalid credentials"},
+                status=400
+            )
 
         login(request, user)  # ✅ important
-         # ✅ Token for SPA
+        # ✅ Token for SPA
         token, _ = Token.objects.get_or_create(user=user)
 
         return Response({
@@ -110,32 +122,14 @@ class LoginView(APIView):
 def me(request):
     u = request.user
     return Response({"id": u.id, "username": u.username, "role": u.role})
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def me_detail(request):
-    """
-    Returns full details of the currently logged-in user:
-    - user fields
-    - nested profile (UserProfile) for PARENT_STUDENT
-    - nested teacher_profile for TEACHER
-    """
-    return Response(UserDetailSerializer(request.user).data)
+
 
 # ✅ LOGOUT (CSRF exempt — cross-origin call)
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])  # ✅ MUST be authenticated
+@permission_classes([AllowAny])
 def logout_view(request):
-    # ✅ delete token (TokenAuthentication)
-    Token.objects.filter(user=request.user).delete()
-
-    # ✅ logout session (SessionAuthentication)
-    django_logout(request)
-
-    # ✅ ensure session cookie is invalidated
-    if hasattr(request, "session"):
-        request.session.flush()
-
-    return Response({"detail": "Logged out."}, status=status.HTTP_200_OK)
+    logout(request)
+    return Response({"success": True})
 
 
 # ✅ ROLE-PROTECTED TEST ENDPOINTS (keep these because urls.py expects them)
@@ -335,6 +329,7 @@ def update_teacher_assignment(request, user_id):
     # Return the updated user detail
     teacher_user.refresh_from_db()
     return Response(UserDetailSerializer(teacher_user).data)
+
 
 # 
 # SET USER PASSWORD

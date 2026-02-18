@@ -1,5 +1,4 @@
 from django.urls import path
-from . import views
 from .views import (
     LoginView,
     admin_data,
@@ -24,8 +23,6 @@ urlpatterns = [
     path("parent-data/", parent_data, name="parent-data"),
     path("admin/create-user/", admin_create_user, name="admin-create-user"),
     path("me/", me, name="me"),
-    path("me/detail/", views.me_detail), 
-    
     path("logout/", logout_view, name="logout"),
 
     # Subject CRUD
@@ -40,9 +37,7 @@ urlpatterns = [
     path("users/", user_list, name="user-list"),
     path("users/<int:user_id>/assign/", update_teacher_assignment, name="update-teacher-assignment"),
 
-    
     # Set new Password
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
     path("set-password/<str:uidb64>/<str:token>/", SetPasswordView.as_view(), name="set-password"),
-
 ]

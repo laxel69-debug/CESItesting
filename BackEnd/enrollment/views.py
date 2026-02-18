@@ -15,8 +15,6 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.throttling import ScopedRateThrottle
 from django.utils import timezone
 # ============================
-from django.db.models import Max
-
 from .models import Enrollment
 from .serializers import (
     EnrollmentSerializer,
@@ -152,25 +150,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(enrollment)
         return Response(serializer.data)
     
-    def generate_student_number(self):
-        year = timezone.now().year
-        prefix = str(year)
-
-        # get highest student_number for this year
-        last = (
-            Enrollment.objects
-            .filter(student_number__startswith=prefix)
-            .aggregate(max_sn=Max("student_number"))
-            .get("max_sn")
-        )
-
-        if last:
-            last_seq = int(last[len(prefix):])
-            next_seq = last_seq + 1
-        else:
-            next_seq = 1
-
-        return f"{prefix}{next_seq:06d}"
+    
     
    
     @action(detail=True, methods=["post"])
@@ -207,20 +187,11 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
 
         with transaction.atomic():
             # 1) set enrollment ACTIVE
-            if not enrollment.student_number:
-                while True:
-                    candidate = self.generate_student_number()
-                    if not Enrollment.objects.filter(student_number=candidate).exists():
-                        enrollment.student_number = candidate
-                        break
-            
-            
             enrollment.status = "ACTIVE"
             note = "APPROVED BY ADMIN"
             enrollment.remarks = (enrollment.remarks or "").strip()
-            if note not in enrollment.remarks:
-                enrollment.remarks = f"{enrollment.remarks} | {note}".strip(" |")
-                enrollment.save(update_fields=["status", "remarks", "updated_at", "student_number"])
+            enrollment.remarks = f"{enrollment.remarks} | {note}".strip(" |")
+            enrollment.save(update_fields=["status", "remarks", "updated_at"])
 
             # 2) create/link parent user if needed
             if parent_email and enrollment.parent_user_id is None:

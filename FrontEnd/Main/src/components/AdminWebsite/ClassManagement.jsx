@@ -1,575 +1,585 @@
-import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, Filter, Clock, Users, BookOpen, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Plus, Edit2, Trash2, Search, Filter, Clock, Users, BookOpen,
+  Calendar, Save, X, UserCheck, Zap, ChevronDown, CheckSquare,
+} from 'lucide-react';
+import StatCard, { StatsGrid } from './StatCard';
+import { apiFetch } from '../api/apiFetch';
 import '../AdminWebsiteCSS/AdminClassManagement.css';
 
-/**
- * ClassManagement Component
- * Manages classes with teacher assignments and subject scheduling
- * NOTE: Frontend-only. Connect to backend API for data persistence.
- */
-const ClassManagement = ({ initialTab = 'classes' }) => {
-  // Sample classes data
-  const [classes, setClasses] = useState([
-    { id: 1, name: 'Grade 1-A', gradeLevel: 'Grade 1', teacher: 'Mrs. Jennifer Johnson', capacity: 30, enrolled: 28, subjects: ['Math', 'Language Arts', 'Science'], schedule: 'Mon-Fri, 8:00 AM - 3:00 PM' },
-    { id: 2, name: 'Grade 1-B', gradeLevel: 'Grade 1', teacher: 'Mr. David Santos', capacity: 30, enrolled: 26, subjects: ['Math', 'Language Arts', 'Social Studies'], schedule: 'Mon-Fri, 8:00 AM - 3:00 PM' },
-    { id: 3, name: 'Grade 2-A', gradeLevel: 'Grade 2', teacher: 'Ms. Maria Garcia', capacity: 32, enrolled: 30, subjects: ['Math', 'Science', 'Physical Education'], schedule: 'Mon-Fri, 8:30 AM - 3:30 PM' },
-    { id: 4, name: 'Kindergarten-A', gradeLevel: 'Kindergarten', teacher: 'Mrs. Susan Williams', capacity: 25, enrolled: 24, subjects: ['Art', 'Music', 'Science Basics'], schedule: 'Mon-Fri, 9:00 AM - 12:00 PM' },
-  ]);
+/* ───────────────────────── helpers ───────────────────────── */
+const GRADE_LEVELS = [
+  { value: 0, label: 'Kinder' },
+  { value: 1, label: 'Grade 1' },
+  { value: 2, label: 'Grade 2' },
+  { value: 3, label: 'Grade 3' },
+  { value: 4, label: 'Grade 4' },
+  { value: 5, label: 'Grade 5' },
+  { value: 6, label: 'Grade 6' },
+];
 
-  // Available teachers
-  const [availableTeachers] = useState([
-    'Mrs. Jennifer Johnson',
-    'Mr. David Santos',
-    'Ms. Maria Garcia',
-    'Mr. Robert Brown',
-    'Mrs. Susan Williams',
-  ]);
+const DAYS = [
+  { value: 'MON', label: 'Monday' },
+  { value: 'TUE', label: 'Tuesday' },
+  { value: 'WED', label: 'Wednesday' },
+  { value: 'THU', label: 'Thursday' },
+  { value: 'FRI', label: 'Friday' },
+];
 
-  // Available subjects
-  const [availableSubjects, setAvailableSubjects] = useState([
-    'Math', 'Language Arts', 'Science', 'Social Studies', 
-    'Physical Education', 'Art', 'Music', 'Science Basics',
-    'Computer Science', 'Environmental Studies'
-  ]);
+const TIME_SLOTS = [
+  { hour: 7.5, label: '7:30 AM' },
+  { hour: 8, label: '8:00 AM' },
+  { hour: 8.5, label: '8:30 AM' },
+  { hour: 9, label: '9:00 AM' },
+  { hour: 9.5, label: '9:30 AM' },
+  { hour: 10, label: '10:00 AM' },
+  { hour: 10.5, label: '10:30 AM' },
+  { hour: 11, label: '11:00 AM' },
+  { hour: 11.5, label: '11:30 AM' },
+  { hour: 12, label: '12:00 PM' },
+  { hour: 12.5, label: '12:30 PM' },
+  { hour: 13, label: '1:00 PM' },
+  { hour: 13.5, label: '1:30 PM' },
+  { hour: 14, label: '2:00 PM' },
+  { hour: 14.5, label: '2:30 PM' },
+  { hour: 15, label: '3:00 PM' },
+  { hour: 15.5, label: '3:30 PM' },
+  { hour: 16, label: '4:00 PM' },
+  { hour: 16.5, label: '4:30 PM' },
+];
 
-  // Teachers state (editable) - now with assignments
-  const [teachers, setTeachers] = useState([
-    { id: 1, name: 'Mrs. Jennifer Johnson', qualifications: 'B.A. Education', experience: '8 years' },
-    { id: 2, name: 'Mr. David Santos', qualifications: 'B.S. Mathematics', experience: '5 years' },
-    { id: 3, name: 'Ms. Maria Garcia', qualifications: 'B.S. Science', experience: '6 years' },
-    { id: 4, name: 'Mr. Robert Brown', qualifications: 'B.Ed. Physical Education', experience: '10 years' },
-    { id: 5, name: 'Mrs. Susan Williams', qualifications: 'B.A. Early Childhood', experience: '7 years' },
-  ]);
+const gradeLabel = (lvl) => GRADE_LEVELS.find((g) => g.value === lvl)?.label ?? `Grade ${lvl}`;
+const dayLabel = (code) => DAYS.find((d) => d.value === code)?.label ?? code;
 
-  // Teacher assignments: { teacherId: { classId: [subjects] } }
-  const [teacherAssignments, setTeacherAssignments] = useState({
-    1: { 1: ['Math', 'Language Arts'] },
-    2: { 2: ['Math', 'Language Arts', 'Social Studies'] },
-    3: { 3: ['Math', 'Science'] },
-    5: { 4: ['Art', 'Music'] },
-  });
+const COLORS = [
+  '#cfe2ff', '#d1e7dd', '#fff3cd', '#f8d7da',
+  '#e2d9f3', '#d4edda', '#fce4ec', '#e0f7fa',
+];
+const colorFor = (id) => COLORS[id % COLORS.length];
 
-  const [activeTab, setActiveTab] = useState(initialTab || 'classes');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterGrade, setFilterGrade] = useState('All');
-  const [showClassForm, setShowClassForm] = useState(false);
-  const [showSubjectForm, setShowSubjectForm] = useState(false);
-  const [showTeacherForm, setShowTeacherForm] = useState(false);
-  const [showAssignmentForm, setShowAssignmentForm] = useState(false);
-  const [editingClassId, setEditingClassId] = useState(null);
-  const [editingSubjectId, setEditingSubjectId] = useState(null);
-  const [editingTeacherId, setEditingTeacherId] = useState(null);
-  const [selectedTeacherForAssignment, setSelectedTeacherForAssignment] = useState(null);
-  const [assignmentFormData, setAssignmentFormData] = useState({
-    classId: '',
-    teacherId: '',
-    subjects: []
-  });
-  const [classFormData, setClassFormData] = useState({
-    name: '',
-    gradeLevel: '',
-    teacher: '',
-    capacity: '',
-    enrolled: '',
-    subjects: [],
-    schedule: ''
-  });
-  const [newSubject, setNewSubject] = useState('');
-  const [newTeacher, setNewTeacher] = useState('');
+/* helper: convert HH:MM:SS time string to decimal hour */
+const timeToDecimal = (t) => {
+  if (!t) return 0;
+  const [h, m] = t.split(':').map(Number);
+  return h + m / 60;
+};
 
-  // Filter classes
-  const filteredClasses = classes.filter(cls => {
-    const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         cls.teacher.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGrade = filterGrade === 'All' || cls.gradeLevel === filterGrade;
-    return matchesSearch && matchesGrade;
-  });
+/* helper: does this schedule overlap the given time slot? */
+const overlapsHour = (s, dayCode, slotHour) => {
+  if (s.day_of_week !== dayCode) return false;
+  const sh = timeToDecimal(s.start_time);
+  const eh = timeToDecimal(s.end_time);
+  // Check if the slot falls within the schedule's time range
+  return sh <= slotHour && eh > slotHour;
+};
 
-  // Get unique grade levels
-  const gradelevels = ['All', ...new Set(classes.map(c => c.gradeLevel))];
+/* ═══════════════════════ MAIN COMPONENT ═══════════════════════ */
+const ClassManagement = () => {
+  const [activeTab, setActiveTab] = useState('classes');
+  const [loading, setLoading] = useState(true);
 
-  // Handle form input
-  const handleClassInputChange = (e) => {
-    const { name, value } = e.target;
-    setClassFormData({ ...classFormData, [name]: value });
-  };
+  /* data from API */
+  const [sections, setSections] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [schedules, setSchedules] = useState([]);
 
-  // Handle subject selection
-  const handleSubjectToggle = (subject) => {
-    setClassFormData(prev => ({
-      ...prev,
-      subjects: prev.subjects.includes(subject)
-        ? prev.subjects.filter(s => s !== subject)
-        : [...prev.subjects, subject]
-    }));
-  };
+  /* fetchers */
+  const fetchSections = useCallback(async () => {
+    try { const r = await apiFetch('/api/accounts/sections/'); if (r.ok) setSections(await r.json()); } catch (e) { console.error(e); }
+  }, []);
+  const fetchSubjects = useCallback(async () => {
+    try { const r = await apiFetch('/api/accounts/subjects/'); if (r.ok) setSubjects(await r.json()); } catch (e) { console.error(e); }
+  }, []);
+  const fetchTeachers = useCallback(async () => {
+    try { const r = await apiFetch('/api/accounts/users/?role=TEACHER'); if (r.ok) setTeachers(await r.json()); } catch (e) { console.error(e); }
+  }, []);
+  const fetchSchedules = useCallback(async () => {
+    try { const r = await apiFetch('/api/classmanagement/schedules/'); if (r.ok) setSchedules(await r.json()); } catch (e) { console.error(e); }
+  }, []);
 
-  // Save class
-  const handleSaveClass = () => {
-    if (!classFormData.name || !classFormData.gradeLevel || !classFormData.teacher) {
-      alert('Please fill in all required fields');
-      return;
-    }
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await Promise.all([fetchSections(), fetchSubjects(), fetchTeachers(), fetchSchedules()]);
+      setLoading(false);
+    })();
+  }, [fetchSections, fetchSubjects, fetchTeachers, fetchSchedules]);
 
-    if (editingClassId) {
-      // UPDATE class
-      setClasses(classes.map(c => 
-        c.id === editingClassId ? { ...classFormData, id: editingClassId } : c
-      ));
-      setEditingClassId(null);
-    } else {
-      // ADD new class
-      const newClass = {
-        id: Math.max(...classes.map(c => c.id), 0) + 1,
-        ...classFormData
-      };
-      setClasses([...classes, newClass]);
-    }
+  /* stats */
+  const totalStudents = sections.reduce((s, sec) => s + (sec.student_count || 0), 0);
 
-    resetClassForm();
-  };
+  /* single refresh-all helper so deletes in one tab update counts everywhere */
+  const refreshAll = useCallback(() =>
+    Promise.all([fetchSections(), fetchSubjects(), fetchTeachers(), fetchSchedules()]),
+    [fetchSections, fetchSubjects, fetchTeachers, fetchSchedules]);
 
-  // Edit class
-  const handleEditClass = (classItem) => {
-    setClassFormData(classItem);
-    setEditingClassId(classItem.id);
-    setShowClassForm(true);
-  };
-
-  // Delete class
-  const handleDeleteClass = (id) => {
-    if (window.confirm('Are you sure you want to delete this class?')) {
-      setClasses(classes.filter(c => c.id !== id));
-    }
-  };
-
-  // Reset form
-  const resetClassForm = () => {
-    setClassFormData({
-      name: '',
-      gradeLevel: '',
-      teacher: '',
-      capacity: '',
-      enrolled: '',
-      subjects: [],
-      schedule: ''
-    });
-    setShowClassForm(false);
-  };
-
-  // Subject management
-  const handleAddSubject = () => {
-    if (newSubject.trim() && !availableSubjects.includes(newSubject.trim())) {
-      setAvailableSubjects([...availableSubjects, newSubject.trim()]);
-      setNewSubject('');
-    }
-  };
-
-  const handleDeleteSubject = (subject) => {
-    if (window.confirm(`Delete subject "${subject}"?`)) {
-      setAvailableSubjects(availableSubjects.filter(s => s !== subject));
-      setClasses(classes.map(c => ({
-        ...c,
-        subjects: c.subjects.filter(s => s !== subject)
-      })));
-    }
-  };
-
-  // Teacher management
-  const handleAddTeacher = () => {
-    if (newTeacher.trim() && !teachers.some(t => t.name === newTeacher.trim())) {
-      setTeachers([...teachers, { id: Math.max(...teachers.map(t => t.id), 0) + 1, name: newTeacher.trim() }]);
-      setNewTeacher('');
-    }
-  };
-
-  const handleDeleteTeacher = (teacherId, teacherName) => {
-    if (window.confirm(`Delete teacher "${teacherName}"?`)) {
-      setTeachers(teachers.filter(t => t.id !== teacherId));
-      // Remove from assignments
-      setTeacherAssignments(prev => {
-        const updated = { ...prev };
-        delete updated[teacherId];
-        return updated;
-      });
-      // Remove from classes
-      setClasses(classes.map(c => ({
-        ...c,
-        teacher: c.teacher === teacherName ? '' : c.teacher
-      })));
-    }
-  };
-
-  // Assignment management
-  const handleOpenAssignmentForm = (teacherId) => {
-    setSelectedTeacherForAssignment(teacherId);
-    setAssignmentFormData({
-      classId: '',
-      teacherId: teacherId,
-      subjects: []
-    });
-    setShowAssignmentForm(true);
-  };
-
-  const handleAssignmentSubjectToggle = (subject) => {
-    setAssignmentFormData(prev => ({
-      ...prev,
-      subjects: prev.subjects.includes(subject)
-        ? prev.subjects.filter(s => s !== subject)
-        : [...prev.subjects, subject]
-    }));
-  };
-
-  const handleSaveAssignment = () => {
-    const { classId, teacherId, subjects } = assignmentFormData;
-    if (!classId || subjects.length === 0) {
-      alert('Please select a class and at least one subject');
-      return;
-    }
-
-    setTeacherAssignments(prev => ({
-      ...prev,
-      [teacherId]: {
-        ...prev[teacherId],
-        [classId]: subjects
-      }
-    }));
-
-    resetAssignmentForm();
-  };
-
-  const handleRemoveAssignment = (teacherId, classId) => {
-    setTeacherAssignments(prev => {
-      const updated = { ...prev };
-      if (updated[teacherId]) {
-        const newClasses = { ...updated[teacherId] };
-        delete newClasses[classId];
-        if (Object.keys(newClasses).length === 0) {
-          delete updated[teacherId];
-        } else {
-          updated[teacherId] = newClasses;
-        }
-      }
-      return updated;
-    });
-  };
-
-  const resetAssignmentForm = () => {
-    setShowAssignmentForm(false);
-    setSelectedTeacherForAssignment(null);
-    setAssignmentFormData({
-      classId: '',
-      teacherId: '',
-      subjects: []
-    });
-  };
-
-  // Statistics
-  const stats = {
-    totalClasses: classes.length,
-    totalStudents: classes.reduce((sum, c) => sum + c.enrolled, 0),
-    avgCapacity: Math.round(classes.reduce((sum, c) => sum + c.capacity, 0) / classes.length),
-    gradeCount: new Set(classes.map(c => c.gradeLevel)).size
-  };
+  if (loading) return (
+    <div className="admin-class-management">
+      <div style={{ textAlign: 'center', padding: '3rem', color: '#94a3b8' }}>Loading…</div>
+    </div>
+  );
 
   return (
     <div className="admin-class-management">
-      {/* Header */}
-      <div className="admin-class-header">
-        <h1>Class Management</h1>
-        {activeTab === 'classes' && (
-          <button className="admin-btn-primary" onClick={() => setShowClassForm(true)}>
-            <Plus size={18} /> Add New Class
-          </button>
-        )}
-      </div>
+      <div className="admin-class-header"><h1>Class Management</h1></div>
 
       {/* Tabs */}
       <div className="admin-tabs-container">
-        <button 
-          className={`admin-tab-btn ${activeTab === 'classes' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('classes'); setSearchTerm(''); setFilterGrade('All'); }}
-        >
-          <BookOpen size={18} />
-          Classes ({stats.totalClasses})
+        <button className={`admin-tab-btn ${activeTab === 'classes' ? 'active' : ''}`} onClick={() => setActiveTab('classes')}>
+          <BookOpen size={18} /> Classes ({sections.length})
         </button>
-        <button 
-          className={`admin-tab-btn ${activeTab === 'schedule' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('schedule'); setSearchTerm(''); }}
-        >
-          <Calendar size={18} />
-          Schedules
+        <button className={`admin-tab-btn ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => setActiveTab('schedule')}>
+          <Calendar size={18} /> Schedules ({schedules.length})
         </button>
-        <button 
-          className={`admin-tab-btn ${activeTab === 'subjects' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('subjects'); setSearchTerm(''); }}
-        >
-          <BookOpen size={18} />
-          Subjects
-        </button>
-        <button 
-          className={`admin-tab-btn ${activeTab === 'assign-teachers' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('assign-teachers'); setSearchTerm(''); }}
-        >
-          <Users size={18} />
-          Assign Teachers
+        <button className={`admin-tab-btn ${activeTab === 'subjects' ? 'active' : ''}`} onClick={() => setActiveTab('subjects')}>
+          <BookOpen size={18} /> Subjects ({subjects.length})
         </button>
       </div>
 
-      {/* Statistics */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <h3>Total Classes</h3>
-          <p className="admin-stat-number">{stats.totalClasses}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Total Students</h3>
-          <p className="admin-stat-number">{stats.totalStudents}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Grade Levels</h3>
-          <p className="admin-stat-number">{stats.gradeCount}</p>
-        </div>
-        <div className="admin-stat-card">
-          <h3>Avg. Capacity</h3>
-          <p className="admin-stat-number">{stats.avgCapacity}</p>
-        </div>
+      <StatsGrid>
+        <StatCard label="Sections" value={sections.length} icon={<BookOpen size={22} />} color="blue" />
+        <StatCard label="Total Students" value={totalStudents} icon={<Users size={22} />} color="green" />
+        <StatCard label="Subjects" value={subjects.length} icon={<BookOpen size={22} />} color="yellow" />
+        <StatCard label="Schedule Entries" value={schedules.length} icon={<Clock size={22} />} color="purple" />
+      </StatsGrid>
+
+      {activeTab === 'classes' && (
+        <ClassesTab sections={sections} teachers={teachers} schedules={schedules}
+          onRefresh={refreshAll} />
+      )}
+      {activeTab === 'schedule' && (
+        <SchedulesTab sections={sections} subjects={subjects} teachers={teachers} schedules={schedules} onRefresh={refreshAll} />
+      )}
+      {activeTab === 'subjects' && (
+        <SubjectsTab subjects={subjects} teachers={teachers} onRefresh={refreshAll} />
+      )}
+    </div>
+  );
+};
+
+/* ═════════════════════════════════════════════════════════
+   CLASSES TAB — sections list + homeroom teacher
+   ═════════════════════════════════════════════════════════ */
+function ClassesTab({ sections, teachers, schedules, onRefresh }) {
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ name: '', grade_level: '', adviser: '' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const teacherProfiles = teachers.filter((t) => t.teacher_profile).map((t) => ({
+    userId: t.id, profileId: t.teacher_profile.id, username: t.username,
+  }));
+
+  const openNew = () => { setEditId(null); setForm({ name: '', grade_level: '', adviser: '' }); setError(''); setShowForm(true); };
+  const openEdit = (sec) => {
+    setEditId(sec.id);
+    setForm({ name: sec.name, grade_level: String(sec.grade_level), adviser: sec.adviser ? String(sec.adviser) : '' });
+    setError(''); setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name || form.grade_level === '') { setError('Name and grade level are required.'); return; }
+    setSaving(true); setError('');
+    try {
+      const payload = { name: form.name, grade_level: Number(form.grade_level), adviser: form.adviser ? Number(form.adviser) : null };
+      const url = editId ? `/api/accounts/sections/${editId}/` : '/api/accounts/sections/';
+      const r = await apiFetch(url, { method: editId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || JSON.stringify(e)); }
+      setShowForm(false); await onRefresh();
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this section? This will also remove related schedules.')) return;
+    try {
+      const r = await apiFetch(`/api/accounts/sections/${id}/`, { method: 'DELETE' });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.detail || `Delete failed (${r.status})`);
+      }
+      await onRefresh();
+    } catch (e) { alert('Delete failed: ' + e.message); }
+  };
+
+  return (
+    <>
+      <div className="admin-section-header" style={{ marginBottom: 16 }}>
+        <h2>Sections &amp; Homeroom Teachers</h2>
+        <button className="admin-btn-primary" onClick={openNew}><Plus size={18} /> Add Section</button>
       </div>
 
-      {/* Class Form Modal */}
-      {showClassForm && (
+      {showForm && (
         <div className="admin-modal-overlay">
           <div className="admin-modal-content">
-            <h2>{editingClassId ? 'Edit Class' : 'Add New Class'}</h2>
-            
+            <h2>{editId ? 'Edit Section' : 'Add Section'}</h2>
+            {error && <div style={{ color: '#ef4444', marginBottom: 8 }}>{error}</div>}
             <div className="admin-form-group">
-              <label>Class Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={classFormData.name}
-                onChange={handleClassInputChange}
-                placeholder="e.g., Grade 1-A"
-              />
+              <label>Section Name *</label>
+              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Gentleness" />
             </div>
+            <div className="admin-form-group">
+              <label>Grade Level *</label>
+              <select value={form.grade_level} onChange={(e) => setForm({ ...form, grade_level: e.target.value })}>
+                <option value="">Select…</option>
+                {GRADE_LEVELS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
+              </select>
+            </div>
+            <div className="admin-form-group">
+              <label>Homeroom Teacher (Adviser)</label>
+              <select value={form.adviser} onChange={(e) => setForm({ ...form, adviser: e.target.value })}>
+                <option value="">— None —</option>
+                {teacherProfiles.map((t) => <option key={t.profileId} value={t.profileId}>{t.username}</option>)}
+              </select>
+            </div>
+            <div className="admin-form-actions">
+              <button className="admin-btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+              <button className="admin-btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : editId ? 'Update' : 'Create'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
+      <div className="admin-classes-grid">
+        {sections.length === 0 && (
+          <div className="admin-no-results"><BookOpen size={48} /><p>No sections yet. Add one to get started.</p></div>
+        )}
+        {sections.map((sec) => {
+          const sectionSchedules = schedules.filter((s) => s.section === sec.id);
+          const subjectIds = [...new Set(sectionSchedules.map((s) => s.subject))];
+          return (
+            <div key={sec.id} className="admin-class-card">
+              <div className="admin-class-card-header">
+                <div>
+                  <h3>{gradeLabel(sec.grade_level)} — {sec.name}</h3>
+                  <p className="admin-class-grade">{gradeLabel(sec.grade_level)}</p>
+                </div>
+                <div className="admin-card-actions">
+                  <button className="admin-btn-edit" onClick={() => openEdit(sec)} title="Edit"><Edit2 size={16} /></button>
+                  <button className="admin-btn-delete" onClick={() => handleDelete(sec.id)} title="Delete"><Trash2 size={16} /></button>
+                </div>
+              </div>
+              <div className="admin-class-card-body">
+                <div className="admin-info-row"><span className="label">Homeroom:</span><span className="value">{sec.adviser_name || <em style={{ color: '#94a3b8' }}>Unassigned</em>}</span></div>
+                <div className="admin-info-row"><span className="label">Students:</span><span className="value"><Users size={14} /> {sec.student_count ?? 0}</span></div>
+                <div className="admin-info-row"><span className="label">Subjects:</span><span className="value">{subjectIds.length} scheduled</span></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+/* ═════════════════════════════════════════════════════════
+   SCHEDULES TAB — table + visual timeline + section filter
+   ═════════════════════════════════════════════════════════ */
+function SchedulesTab({ sections, subjects, teachers, schedules, onRefresh }) {
+  // Default to first Kinder section, or first section if no Kinder
+  const kinderSection = sections.find((s) => s.grade_level === 0);
+  const defaultSection = kinderSection || sections[0];
+  const [filterSection, setFilterSection] = useState(defaultSection ? String(defaultSection.id) : '');
+  const [view, setView] = useState('timeline');
+  const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState({ teacher: '', subject: '', section: '', day_of_week: '', start_time: '', end_time: '', room: '' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [selected, setSelected] = useState(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
+  const [bulkForm, setBulkForm] = useState({ teacher: '', subject: '', section: '', day_of_week: '', start_time: '', end_time: '', room: '' });
+  const [bulkSaving, setBulkSaving] = useState(false);
+
+  const filtered = filterSection ? schedules.filter((s) => String(s.section) === filterSection) : schedules;
+
+  /* selection helpers */
+  const toggleSelect = (id) => setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggleAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set());
+    else setSelected(new Set(filtered.map((s) => s.id)));
+  };
+  const allSelected = filtered.length > 0 && selected.size === filtered.length;
+
+  const handleBulkDelete = async () => {
+    const ids = [...selected].filter((id) => filtered.some((s) => s.id === id));
+    if (ids.length === 0) return;
+    if (!window.confirm(`Delete ${ids.length} selected schedule entries?`)) return;
+    setBulkDeleting(true);
+    try {
+      const r = await apiFetch('/api/classmanagement/schedules/bulk-delete/', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.detail || 'Failed');
+      setSelected(new Set());
+      await onRefresh();
+    } catch (e) { alert(e.message); }
+    finally { setBulkDeleting(false); }
+  };
+
+  const openBulkEdit = () => {
+    setBulkForm({ teacher: '', subject: '', section: '', day_of_week: '', start_time: '', end_time: '', room: '' });
+    setShowBulkEdit(true);
+  };
+  const handleBulkEdit = async () => {
+    const ids = [...selected].filter((id) => filtered.some((s) => s.id === id));
+    if (ids.length === 0) return;
+    const updates = {};
+    Object.entries(bulkForm).forEach(([k, v]) => { if (v) updates[k] = k === 'start_time' || k === 'end_time' ? v + ':00' : v; });
+    if (Object.keys(updates).length === 0) { alert('Fill in at least one field to update.'); return; }
+    setBulkSaving(true);
+    try {
+      const r = await apiFetch('/api/classmanagement/schedules/bulk-update/', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids, updates }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.detail || 'Failed');
+      alert(`Updated ${data.updated_count} schedule entries.`);
+      setShowBulkEdit(false);
+      setSelected(new Set());
+      await onRefresh();
+    } catch (e) { alert(e.message); }
+    finally { setBulkSaving(false); }
+  };
+
+  const openNew = () => {
+    setEditId(null);
+    setForm({ teacher: '', subject: '', section: filterSection || '', day_of_week: '', start_time: '', end_time: '', room: '' });
+    setError(''); setShowForm(true);
+  };
+  const openEdit = (sch) => {
+    setEditId(sch.id);
+    setForm({ teacher: String(sch.teacher), subject: String(sch.subject), section: String(sch.section),
+      day_of_week: sch.day_of_week, start_time: sch.start_time?.slice(0, 5) || '', end_time: sch.end_time?.slice(0, 5) || '', room: sch.room || '' });
+    setError(''); setShowForm(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.teacher || !form.subject || !form.section || !form.day_of_week || !form.start_time || !form.end_time) {
+      setError('All fields except Room are required.'); return;
+    }
+    setSaving(true); setError('');
+    try {
+      const payload = { teacher: Number(form.teacher), subject: Number(form.subject), section: Number(form.section),
+        day_of_week: form.day_of_week, start_time: form.start_time + ':00', end_time: form.end_time + ':00', room: form.room };
+      const url = editId ? `/api/classmanagement/schedules/${editId}/` : '/api/classmanagement/schedules/';
+      const r = await apiFetch(url, { method: editId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || JSON.stringify(e)); }
+      setShowForm(false); await onRefresh();
+    } catch (e) { setError(e.message); } finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this schedule entry?')) return;
+    try {
+      const r = await apiFetch(`/api/classmanagement/schedules/${id}/`, { method: 'DELETE' });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.detail || `Delete failed (${r.status})`);
+      }
+      await onRefresh();
+    } catch (e) { alert('Delete failed: ' + e.message); }
+  };
+
+  const handleAutoGenerate = async () => {
+    const sec = sections.find((s) => String(s.id) === filterSection);
+    const secName = sec ? `${gradeLabel(sec.grade_level)} — ${sec.name}` : 'selected section';
+    if (!window.confirm(`Auto-generate schedules for ${secName}?\n\nThis will fill empty slots based on CESI schedule template (with recess and lunch breaks).`)) return;
+    setGenerating(true);
+    try {
+      const payload = { section: Number(filterSection) };
+      const r = await apiFetch('/api/classmanagement/schedules/auto-generate/', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.detail || 'Failed');
+      alert(`Created ${data.created_count} schedule entries.`);
+      await onRefresh();
+    } catch (e) { alert(e.message); } finally { setGenerating(false); }
+  };
+
+  return (
+    <>
+      {/* Controls */}
+      <div className="admin-class-controls schedule-controls">
+        <div className="admin-filter-box">
+          <Filter size={18} />
+          <select value={filterSection} onChange={(e) => setFilterSection(e.target.value)}>
+            {sections.map((sec) => <option key={sec.id} value={sec.id}>{gradeLabel(sec.grade_level)} — {sec.name}</option>)}
+          </select>
+        </div>
+        <div className="schedule-view-toggle">
+          <button className={`admin-tab-btn small ${view === 'timeline' ? 'active' : ''}`} onClick={() => setView('timeline')}>Timeline</button>
+          <button className={`admin-tab-btn small ${view === 'table' ? 'active' : ''}`} onClick={() => setView('table')}>Table</button>
+        </div>
+        <button className="admin-btn-primary" onClick={openNew}><Plus size={18} /> Add Entry</button>
+        <button className="admin-btn-primary" onClick={handleAutoGenerate} disabled={generating} style={{ background: '#8b5cf6' }}>
+          <Zap size={18} /> {generating ? 'Generating…' : 'Auto-fill'}
+        </button>
+        {selected.size > 0 && (
+          <>
+            <button className="admin-btn-primary" onClick={openBulkEdit} style={{ background: '#f59e0b' }}>
+              <Edit2 size={18} /> Edit Selected ({selected.size})
+            </button>
+            <button className="admin-btn-delete" onClick={handleBulkDelete} disabled={bulkDeleting} style={{ padding: '10px 20px' }}>
+              <Trash2 size={18} /> {bulkDeleting ? 'Deleting…' : `Delete Selected (${selected.size})`}
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Form Modal */}
+      {showForm && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content" style={{ maxWidth: 620 }}>
+            <h2>{editId ? 'Edit Schedule Entry' : 'New Schedule Entry'}</h2>
+            {error && <div style={{ color: '#ef4444', marginBottom: 8 }}>{error}</div>}
             <div className="admin-form-row">
               <div className="admin-form-group">
-                <label>Grade Level *</label>
-                <select name="gradeLevel" value={classFormData.gradeLevel} onChange={handleClassInputChange}>
-                  <option value="">Select Grade Level</option>
-                  <option value="Kindergarten">Kindergarten</option>
-                  <option value="Grade 1">Grade 1</option>
-                  <option value="Grade 2">Grade 2</option>
-                  <option value="Grade 3">Grade 3</option>
-                  <option value="Grade 4">Grade 4</option>
-                  <option value="Grade 5">Grade 5</option>
-                  <option value="Grade 6">Grade 6</option>
+                <label>Section *</label>
+                <select value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })}>
+                  <option value="">Select…</option>
+                  {sections.map((s) => <option key={s.id} value={s.id}>{gradeLabel(s.grade_level)} — {s.name}</option>)}
                 </select>
               </div>
-
+              <div className="admin-form-group">
+                <label>Subject *</label>
+                <select value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}>
+                  <option value="">Select…</option>
+                  {subjects.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="admin-form-row">
               <div className="admin-form-group">
                 <label>Teacher *</label>
-                <select name="teacher" value={classFormData.teacher} onChange={handleClassInputChange}>
-                  <option value="">Select Teacher</option>
-                  {teachers.map(teacher => (
-                    <option key={teacher.id} value={teacher.name}>{teacher.name}</option>
-                  ))}
+                <select value={form.teacher} onChange={(e) => setForm({ ...form, teacher: e.target.value })}>
+                  <option value="">Select…</option>
+                  {teachers.map((t) => <option key={t.id} value={t.id}>{t.username}</option>)}
+                </select>
+              </div>
+              <div className="admin-form-group">
+                <label>Day *</label>
+                <select value={form.day_of_week} onChange={(e) => setForm({ ...form, day_of_week: e.target.value })}>
+                  <option value="">Select…</option>
+                  {DAYS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
                 </select>
               </div>
             </div>
+            <div className="admin-form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+              <div className="admin-form-group">
+                <label>Start Time *</label>
+                <input type="time" value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })} />
+              </div>
+              <div className="admin-form-group">
+                <label>End Time *</label>
+                <input type="time" value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} />
+              </div>
+              <div className="admin-form-group">
+                <label>Room</label>
+                <input type="text" value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} placeholder="e.g. Room 201" />
+              </div>
+            </div>
+            <div className="admin-form-actions">
+              <button className="admin-btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+              <button className="admin-btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : editId ? 'Update' : 'Create'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
+      {/* Bulk Edit Modal */}
+      {showBulkEdit && (
+        <div className="admin-modal-overlay">
+          <div className="admin-modal-content" style={{ maxWidth: 620 }}>
+            <h2>Bulk Edit — {selected.size} Entries</h2>
+            <p style={{ color: '#6b7280', fontSize: 13, marginBottom: 12 }}>Only fields you fill in will be changed. Leave blank to keep current values.</p>
             <div className="admin-form-row">
               <div className="admin-form-group">
-                <label>Capacity</label>
-                <input
-                  type="number"
-                  name="capacity"
-                  value={classFormData.capacity}
-                  onChange={handleClassInputChange}
-                  placeholder="e.g., 30"
-                />
+                <label>Section</label>
+                <select value={bulkForm.section} onChange={(e) => setBulkForm({ ...bulkForm, section: e.target.value })}>
+                  <option value="">— Keep current —</option>
+                  {sections.map((s) => <option key={s.id} value={s.id}>{gradeLabel(s.grade_level)} — {s.name}</option>)}
+                </select>
               </div>
-
               <div className="admin-form-group">
-                <label>Currently Enrolled</label>
-                <input
-                  type="number"
-                  name="enrolled"
-                  value={classFormData.enrolled}
-                  onChange={handleClassInputChange}
-                  placeholder="e.g., 28"
-                />
+                <label>Subject</label>
+                <select value={bulkForm.subject} onChange={(e) => setBulkForm({ ...bulkForm, subject: e.target.value })}>
+                  <option value="">— Keep current —</option>
+                  {subjects.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.code})</option>)}
+                </select>
               </div>
             </div>
-
-            <div className="admin-form-group">
-              <label>Schedule</label>
-              <input
-                type="text"
-                name="schedule"
-                value={classFormData.schedule}
-                onChange={handleClassInputChange}
-                placeholder="e.g., Mon-Fri, 8:00 AM - 3:00 PM"
-              />
-            </div>
-
-            <div className="admin-form-group">
-              <label>Subjects</label>
-              <div className="admin-subjects-grid">
-                {availableSubjects.map(subject => (
-                  <label key={subject} className="admin-subject-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={classFormData.subjects.includes(subject)}
-                      onChange={() => handleSubjectToggle(subject)}
-                    />
-                    {subject}
-                  </label>
-                ))}
+            <div className="admin-form-row">
+              <div className="admin-form-group">
+                <label>Teacher</label>
+                <select value={bulkForm.teacher} onChange={(e) => setBulkForm({ ...bulkForm, teacher: e.target.value })}>
+                  <option value="">— Keep current —</option>
+                  {teachers.map((t) => <option key={t.id} value={t.id}>{t.username}</option>)}
+                </select>
+              </div>
+              <div className="admin-form-group">
+                <label>Day</label>
+                <select value={bulkForm.day_of_week} onChange={(e) => setBulkForm({ ...bulkForm, day_of_week: e.target.value })}>
+                  <option value="">— Keep current —</option>
+                  {DAYS.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                </select>
               </div>
             </div>
-
+            <div className="admin-form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+              <div className="admin-form-group">
+                <label>Start Time</label>
+                <input type="time" value={bulkForm.start_time} onChange={(e) => setBulkForm({ ...bulkForm, start_time: e.target.value })} />
+              </div>
+              <div className="admin-form-group">
+                <label>End Time</label>
+                <input type="time" value={bulkForm.end_time} onChange={(e) => setBulkForm({ ...bulkForm, end_time: e.target.value })} />
+              </div>
+              <div className="admin-form-group">
+                <label>Room</label>
+                <input type="text" value={bulkForm.room} onChange={(e) => setBulkForm({ ...bulkForm, room: e.target.value })} placeholder="e.g. Room 201" />
+              </div>
+            </div>
             <div className="admin-form-actions">
-              <button className="admin-btn-secondary" onClick={resetClassForm}>Cancel</button>
-              <button className="admin-btn-primary" onClick={handleSaveClass}>
-                {editingClassId ? 'Update Class' : 'Save Class'}
+              <button className="admin-btn-secondary" onClick={() => setShowBulkEdit(false)}>Cancel</button>
+              <button className="admin-btn-primary" onClick={handleBulkEdit} disabled={bulkSaving} style={{ background: '#f59e0b' }}>
+                {bulkSaving ? 'Updating…' : `Update ${selected.size} Entries`}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Search & Filter */}
-      <div className="admin-class-controls">
-        <div className="admin-search-box">
-          <Search size={18} />
-          <input
-            type="text"
-            placeholder="Search by class name or teacher..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        {activeTab === 'classes' && (
-          <div className="admin-filter-box">
-            <Filter size={18} />
-            <select value={filterGrade} onChange={(e) => setFilterGrade(e.target.value)}>
-              {gradelevels.map(grade => (
-                <option key={grade} value={grade}>{grade}</option>
-              ))}
-            </select>
-          </div>
-        )}
-      </div>
-
-      {/* CLASSES VIEW */}
-      {activeTab === 'classes' && (
-        <div className="admin-classes-container">
-          {filteredClasses.length > 0 ? (
-            <div className="admin-classes-grid">
-              {filteredClasses.map(cls => (
-                <div key={cls.id} className="admin-class-card">
-                  <div className="admin-class-card-header">
-                    <div>
-                      <h3>{cls.name}</h3>
-                      <p className="admin-class-grade">{cls.gradeLevel}</p>
-                    </div>
-                    <div className="admin-card-actions">
-                      <button 
-                        className="admin-btn-edit" 
-                        onClick={() => handleEditClass(cls)}
-                        title="Edit"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button 
-                        className="admin-btn-delete" 
-                        onClick={() => handleDeleteClass(cls.id)}
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="admin-class-card-body">
-                    <div className="admin-info-row">
-                      <span className="label">Teacher:</span>
-                      <span className="value">{cls.teacher}</span>
-                    </div>
-
-                    <div className="admin-info-row">
-                      <span className="label">Enrollment:</span>
-                      <span className="value admin-enrollment-bar">
-                        {cls.enrolled}/{cls.capacity}
-                        <div className="admin-progress-bar">
-                          <div className="admin-progress-fill" style={{ width: `${(cls.enrolled/cls.capacity)*100}%` }}></div>
-                        </div>
-                      </span>
-                    </div>
-
-                    <div className="admin-info-row">
-                      <span className="label">Schedule:</span>
-                      <span className="value"><Clock size={14} /> {cls.schedule}</span>
-                    </div>
-
-                    <div className="admin-subjects-section">
-                      <p className="admin-subjects-label">Subjects:</p>
-                      <div className="admin-subjects-list">
-                        {cls.subjects.map((subject, idx) => (
-                          <span key={idx} className="admin-subject-tag">{subject}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="admin-no-results">
-              <BookOpen size={48} />
-              <p>No classes found. Try adjusting your search or filters.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* SCHEDULE VIEW */}
-      {activeTab === 'schedule' && (
+      {/* TABLE VIEW */}
+      {view === 'table' && (
         <div className="admin-schedule-container">
           <table className="admin-schedule-table">
-            <thead>
-              <tr>
-                <th>Class</th>
-                <th>Grade</th>
-                <th>Teacher</th>
-                <th>Schedule</th>
-                <th>Students</th>
-                <th>Subjects</th>
-              </tr>
-            </thead>
+            <thead><tr>
+              <th style={{ width: 40, textAlign: 'center' }}>
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} title="Select all" />
+              </th>
+              <th>Section</th><th>Subject</th><th>Teacher</th><th>Day</th><th>Time</th><th>Room</th><th>Actions</th>
+            </tr></thead>
             <tbody>
-              {filteredClasses.map(cls => (
-                <tr key={cls.id}>
-                  <td><strong>{cls.name}</strong></td>
-                  <td>{cls.gradeLevel}</td>
-                  <td>{cls.teacher}</td>
-                  <td><Calendar size={14} /> {cls.schedule}</td>
-                  <td>
-                    <span className="admin-enrollment-badge">
-                      <Users size={14} /> {cls.enrolled}/{cls.capacity}
-                    </span>
+              {filtered.length === 0 && <tr><td colSpan="8" style={{ textAlign: 'center', color: '#94a3b8', padding: 24 }}>No schedule entries.</td></tr>}
+              {filtered.map((s) => (
+                <tr key={s.id} style={selected.has(s.id) ? { background: '#eff6ff' } : undefined}>
+                  <td style={{ textAlign: 'center' }}>
+                    <input type="checkbox" checked={selected.has(s.id)} onChange={() => toggleSelect(s.id)} />
                   </td>
+                  <td><strong>{s.section_name}</strong></td>
+                  <td>{s.subject_name}</td>
+                  <td>{s.teacher_name}</td>
+                  <td>{dayLabel(s.day_of_week)}</td>
+                  <td><Clock size={14} /> {s.start_time?.slice(0, 5)} – {s.end_time?.slice(0, 5)}</td>
+                  <td>{s.room || '—'}</td>
                   <td>
-                    <div className="admin-subjects-list">
-                      {cls.subjects.slice(0, 2).map((s, i) => (
-                        <span key={i} className="admin-subject-tag-small">{s}</span>
-                      ))}
-                      {cls.subjects.length > 2 && (
-                        <span className="admin-subject-tag-small">+{cls.subjects.length - 2}</span>
-                      )}
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button className="admin-btn-edit" onClick={() => openEdit(s)} title="Edit"><Edit2 size={16} /></button>
+                      <button className="admin-btn-delete" onClick={() => handleDelete(s.id)} title="Delete"><Trash2 size={16} /></button>
                     </div>
                   </td>
                 </tr>
@@ -579,247 +589,191 @@ const ClassManagement = ({ initialTab = 'classes' }) => {
         </div>
       )}
 
-      {/* SUBJECTS VIEW */}
-      {activeTab === 'subjects' && (
-        <div className="admin-subjects-view">
-          <div className="admin-section-header">
-            <h2>Subject Management</h2>
-            <button className="admin-btn-primary" onClick={() => setShowSubjectForm(!showSubjectForm)}>
-              <Plus size={18} /> Add Subject
-            </button>
-          </div>
-
-          {showSubjectForm && (
-            <div className="admin-form-card">
-              <div className="admin-form-group">
-                <label>New Subject</label>
-                <div className="admin-input-group">
-                  <input
-                    type="text"
-                    value={newSubject}
-                    onChange={(e) => setNewSubject(e.target.value)}
-                    placeholder="Enter subject name..."
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddSubject()}
-                  />
-                  <button className="admin-btn-primary" onClick={handleAddSubject}>Add</button>
-                  <button className="admin-btn-secondary" onClick={() => { setShowSubjectForm(false); setNewSubject(''); }}>Cancel</button>
-                </div>
-              </div>
+      {/* TIMELINE VIEW */}
+      {view === 'timeline' && (
+        <>
+          {filtered.length > 0 && (
+            <div className="bulk-select-bar">
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: '#4b5563' }}>
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+                {allSelected ? 'Deselect all' : `Select all ${filtered.length} entries`}
+              </label>
+              {selected.size > 0 && <span style={{ fontSize: 13, color: '#3b82f6', fontWeight: 600 }}>{selected.size} selected</span>}
             </div>
           )}
-
-          <div className="admin-subjects-grid-view">
-            {availableSubjects.map((subject, idx) => {
-              const classesWithSubject = classes.filter(c => c.subjects.includes(subject));
-              return (
-                <div key={idx} className="admin-subject-card">
-                  <div className="admin-subject-card-header">
-                    <h3>{subject}</h3>
-                    <button 
-                      className="admin-btn-delete" 
-                      onClick={() => handleDeleteSubject(subject)}
-                      title="Delete subject"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                  <div className="admin-subject-info">
-                    <p><strong>Classes: {classesWithSubject.length}</strong></p>
-                    {classesWithSubject.length > 0 && (
-                      <div className="admin-classes-list">
-                        {classesWithSubject.map(cls => (
-                          <span key={cls.id} className="admin-class-tag">{cls.name}</span>
+          <div className="admin-schedule-container" style={{ overflowX: 'auto' }}>
+          <table className="schedule-timeline-table">
+            <thead><tr><th className="timeline-time-col">Time</th>{DAYS.map((d) => <th key={d.value}>{d.label}</th>)}</tr></thead>
+            <tbody>
+              {TIME_SLOTS.map((slot) => (
+                <tr key={slot.hour}>
+                  <td className="timeline-time-cell">{slot.label}</td>
+                  {DAYS.map((d) => {
+                    const entries = filtered.filter((s) => overlapsHour(s, d.value, slot.hour));
+                    return (
+                      <td key={d.value} className="timeline-cell">
+                        {entries.map((entry) => (
+                          <div key={entry.id} className={`timeline-block ${selected.has(entry.id) ? 'timeline-block--selected' : ''}`}
+                            style={{ backgroundColor: colorFor(entry.subject) }}
+                            title={`${entry.subject_name} — ${entry.teacher_name}\n${entry.start_time?.slice(0, 5)}–${entry.end_time?.slice(0, 5)}${entry.room ? ' • ' + entry.room : ''}\nClick to select · Double-click to edit`}
+                            onClick={() => toggleSelect(entry.id)}
+                            onDoubleClick={() => openEdit(entry)}>
+                            <input type="checkbox" checked={selected.has(entry.id)} readOnly
+                              style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, cursor: 'pointer' }} />
+                            <div className="timeline-block-title">{entry.subject_name}</div>
+                            <div className="timeline-block-meta">{entry.teacher_name}</div>
+                            {entry.room && <div className="timeline-block-meta">{entry.room}</div>}
+                          </div>
                         ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+        </>
       )}
+    </>
+  );
+}
 
-      {/* ASSIGN TEACHERS FORM MODAL */}
-      {showAssignmentForm && (
-        <div className="admin-modal-overlay">
-          <div className="admin-modal-content">
-            <h2>Assign Teacher to Class</h2>
-            
+/* ═════════════════════════════════════════════════════════
+   SUBJECTS TAB — full CRUD + teacher assignment
+   ═════════════════════════════════════════════════════════ */
+function SubjectsTab({ subjects, teachers, onRefresh }) {
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ name: '', code: '', assigned_teacher: '' });
+  const [formError, setFormError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', code: '', assigned_teacher: '' });
+
+  const handleCreate = async () => {
+    setFormError('');
+    if (!form.name || !form.code) { setFormError('Name and code are required.'); return; }
+    setSaving(true);
+    try {
+      const payload = { name: form.name, code: form.code };
+      if (form.assigned_teacher) payload.assigned_teacher = Number(form.assigned_teacher);
+      const r = await apiFetch('/api/accounts/subjects/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || JSON.stringify(e)); }
+      setShowForm(false); setForm({ name: '', code: '', assigned_teacher: '' }); await onRefresh();
+    } catch (e) { setFormError(e.message); } finally { setSaving(false); }
+  };
+
+  const startEdit = (subj) => {
+    const cur = subj.teachers?.length > 0 ? String(subj.teachers[0].id) : '';
+    setEditingId(subj.id); setEditForm({ name: subj.name, code: subj.code, assigned_teacher: cur });
+  };
+
+  const saveEdit = async (id) => {
+    try {
+      const payload = { name: editForm.name, code: editForm.code, assigned_teacher: editForm.assigned_teacher ? Number(editForm.assigned_teacher) : null };
+      const r = await apiFetch(`/api/accounts/subjects/${id}/`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      if (!r.ok) throw new Error('Failed to update');
+      setEditingId(null); await onRefresh();
+    } catch (e) { alert(e.message); }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this subject? Related schedules and grades will also be removed.')) return;
+    try {
+      const r = await apiFetch(`/api/accounts/subjects/${id}/`, { method: 'DELETE' });
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}));
+        throw new Error(err.detail || `Delete failed (${r.status})`);
+      }
+      await onRefresh();
+    } catch (e) { alert('Delete failed: ' + e.message); }
+  };
+
+  const getAvailableTeachers = (curSubjId = null) => {
+    const assigned = new Set();
+    subjects.forEach((s) => { if (s.id === curSubjId) return; (s.teachers || []).forEach((t) => assigned.add(t.id)); });
+    return teachers.filter((t) => !assigned.has(t.id));
+  };
+
+  return (
+    <>
+      <div className="admin-section-header" style={{ marginBottom: 16 }}>
+        <h2>Subject Management</h2>
+        <button className="admin-btn-primary" onClick={() => setShowForm(true)}><Plus size={18} /> Add Subject</button>
+      </div>
+
+      {showForm && (
+        <div className="admin-modal-overlay" onClick={() => setShowForm(false)}>
+          <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Add Subject</h2>
+            {formError && <div style={{ color: '#ef4444', marginBottom: 8 }}>{formError}</div>}
             <div className="admin-form-group">
-              <label>Select Class *</label>
-              <select 
-                value={assignmentFormData.classId} 
-                onChange={(e) => setAssignmentFormData({ ...assignmentFormData, classId: e.target.value })}
-              >
-                <option value="">Select a class...</option>
-                {classes.map(cls => (
-                  <option key={cls.id} value={cls.id}>{cls.name} - {cls.gradeLevel}</option>
-                ))}
+              <label>Subject Name *</label>
+              <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Mathematics" />
+            </div>
+            <div className="admin-form-group">
+              <label>Subject Code *</label>
+              <input type="text" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} placeholder="e.g. MATH" />
+            </div>
+            <div className="admin-form-group">
+              <label>Assign Teacher</label>
+              <select value={form.assigned_teacher} onChange={(e) => setForm({ ...form, assigned_teacher: e.target.value })}>
+                <option value="">— No teacher —</option>
+                {getAvailableTeachers().map((t) => <option key={t.id} value={t.id}>{t.username}</option>)}
               </select>
             </div>
-
-            {assignmentFormData.classId && (
-              <div className="admin-form-group">
-                <label>Select Subjects to Teach *</label>
-                <div className="admin-subjects-grid">
-                  {classes.find(c => c.id == assignmentFormData.classId)?.subjects.map(subject => (
-                    <label key={subject} className="admin-subject-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={assignmentFormData.subjects.includes(subject)}
-                        onChange={() => handleAssignmentSubjectToggle(subject)}
-                      />
-                      {subject}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <div className="admin-form-actions">
-              <button className="admin-btn-secondary" onClick={resetAssignmentForm}>Cancel</button>
-              <button className="admin-btn-primary" onClick={handleSaveAssignment}>Save Assignment</button>
+              <button className="admin-btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
+              <button className="admin-btn-primary" onClick={handleCreate} disabled={saving}>{saving ? 'Saving…' : 'Save Subject'}</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ASSIGN TEACHERS VIEW */}
-      {activeTab === 'assign-teachers' && (
-        <div className="admin-assign-teachers-view">
-          <div className="admin-section-header">
-            <h2>Teacher Assignments & Management</h2>
-            <button className="admin-btn-primary" onClick={() => setShowTeacherForm(!showTeacherForm)}>
-              <Plus size={18} /> Add Teacher
-            </button>
-          </div>
-
-          {showTeacherForm && (
-            <div className="admin-form-card">
-              <div className="admin-form-group">
-                <label>New Teacher Name</label>
-                <div className="admin-input-group">
-                  <input
-                    type="text"
-                    value={newTeacher}
-                    onChange={(e) => setNewTeacher(e.target.value)}
-                    placeholder="Enter teacher name..."
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddTeacher()}
-                  />
-                  <button className="admin-btn-primary" onClick={handleAddTeacher}>Add</button>
-                  <button className="admin-btn-secondary" onClick={() => { setShowTeacherForm(false); setNewTeacher(''); }}>Cancel</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Teacher Cards with Assignments */}
-          <div className="admin-teachers-grid">
-            {teachers.map((teacher) => {
-              const assignments = teacherAssignments[teacher.id] || {};
-              const assignedClasses = Object.keys(assignments).map(classId => 
-                classes.find(c => c.id == classId)
-              ).filter(Boolean);
-              const totalStudents = assignedClasses.reduce((sum, cls) => sum + cls.enrolled, 0);
-
-              return (
-                <div key={teacher.id} className="admin-teacher-card-large">
-                  <div className="admin-teacher-card-header-large">
-                    <div>
-                      <h3>{teacher.name}</h3>
-                      <p className="admin-teacher-credentials">{teacher.qualifications}</p>
-                    </div>
-                    <button 
-                      className="admin-btn-delete" 
-                      onClick={() => handleDeleteTeacher(teacher.id, teacher.name)}
-                      title="Delete teacher"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-
-                  <div className="admin-teacher-card-body-large">
-                    <div className="admin-teacher-stats">
-                      <div className="admin-teacher-stat">
-                        <span className="admin-stat-label">Experience</span>
-                        <span className="admin-stat-value">{teacher.experience}</span>
+      <div className="admin-schedule-container">
+        {subjects.length > 0 ? (
+          <table className="admin-schedule-table">
+            <thead><tr><th>ID</th><th>Subject Name</th><th>Code</th><th>Assigned Teacher</th><th>Actions</th></tr></thead>
+            <tbody>
+              {subjects.map((s) => {
+                const isEditing = editingId === s.id;
+                const assigned = s.teachers?.length > 0 ? s.teachers[0] : null;
+                return (
+                  <tr key={s.id}>
+                    <td>{s.id}</td>
+                    <td>{isEditing ? <input className="inline-input" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} style={{ width: '100%' }} /> : <strong>{s.name}</strong>}</td>
+                    <td>{isEditing ? <input className="inline-input" value={editForm.code} onChange={(e) => setEditForm({ ...editForm, code: e.target.value })} style={{ width: 80 }} /> : s.code}</td>
+                    <td>
+                      {isEditing ? (
+                        <select className="inline-select" value={editForm.assigned_teacher} onChange={(e) => setEditForm({ ...editForm, assigned_teacher: e.target.value })} style={{ width: '100%' }}>
+                          <option value="">— None —</option>
+                          {getAvailableTeachers(s.id).map((t) => <option key={t.id} value={t.id}>{t.username}</option>)}
+                          {assigned && !getAvailableTeachers(s.id).find((t) => t.id === assigned.id) && <option value={assigned.id}>{assigned.username}</option>}
+                        </select>
+                      ) : assigned ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><UserCheck size={14} />{assigned.username}</span> : <span style={{ color: '#94a3b8' }}>Unassigned</span>}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {isEditing ? (
+                          <><button className="admin-btn-edit" onClick={() => saveEdit(s.id)} title="Save"><Save size={16} /></button>
+                          <button className="admin-btn-delete" onClick={() => setEditingId(null)} title="Cancel"><X size={16} /></button></>
+                        ) : (
+                          <><button className="admin-btn-edit" onClick={() => startEdit(s)} title="Edit"><Edit2 size={16} /></button>
+                          <button className="admin-btn-delete" onClick={() => handleDelete(s.id)} title="Delete"><Trash2 size={16} /></button></>
+                        )}
                       </div>
-                      <div className="admin-teacher-stat">
-                        <span className="admin-stat-label">Classes Assigned</span>
-                        <span className="admin-stat-value">{assignedClasses.length}</span>
-                      </div>
-                      <div className="admin-teacher-stat">
-                        <span className="admin-stat-label">Total Students</span>
-                        <span className="admin-stat-value">{totalStudents}</span>
-                      </div>
-                    </div>
-
-                    {/* Assignments List */}
-                    <div className="admin-assignments-section">
-                      <h4>Class Assignments</h4>
-                      {assignedClasses.length > 0 ? (
-                        <div className="admin-assignments-list">
-                          {assignedClasses.map(cls => (
-                            <div key={cls.id} className="admin-assignment-item">
-                              <div className="admin-assignment-info">
-                                <strong>{cls.name}</strong>
-                                <span className="admin-assignment-grade">{cls.gradeLevel}</span>
-                              </div>
-                              <div className="admin-assignment-subjects">
-                                {assignments[cls.id]?.map(subject => (
-                                  <span key={subject} className="admin-assignment-subject-tag">{subject}</span>
-                                ))}
-                              </div>
-                              <button
-                                className="admin-btn-delete-small"
-                                onClick={() => handleRemoveAssignment(teacher.id, cls.id)}
-                                title="Remove assignment"
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="admin-no-assignments">No classes assigned yet</p>
-                      )}
-                    </div>
-
-                    {/* Add Assignment Button */}
-                    <button 
-                      className="admin-btn-primary-outline"
-                      onClick={() => handleOpenAssignmentForm(teacher.id)}
-                    >
-                      <Plus size={16} /> Add Class Assignment
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {teachers.length === 0 && (
-            <div className="admin-no-results">
-              <Users size={48} />
-              <p>No teachers added yet. Create a teacher to get started.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Developer Notes */}
-      <div className="admin-note">
-        📌 <strong>Development Notes:</strong> 
-        <ul>
-          <li>Connect to backend API for class CRUD operations (POST, PUT, DELETE)</li>
-          <li>Sync teacher assignments with User Management (Teachers)</li>
-          <li>Implement real schedule/timetable system</li>
-          <li>Add room management and capacity alerts</li>
-        </ul>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <div className="admin-no-results"><BookOpen size={48} /><p>No subjects yet. Add one above.</p></div>
+        )}
       </div>
-    </div>
+    </>
   );
-};
+}
 
 export default ClassManagement;

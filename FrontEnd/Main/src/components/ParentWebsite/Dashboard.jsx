@@ -1,60 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React from "react";
 import "../ParentWebsiteCSS/Dashboard.css";
-import { apiFetch } from "../api/apiFetch";
-
-const API_BASE = "http://127.0.0.1:8000"; // only used if media path is /media/...
-
-function toAbsUrl(path) {
-  if (!path) return null;
-  return path.startsWith("http") ? path : `${API_BASE}${path}`;
-}
-
-function getFirstImagePath(a) {
-  const firstImage = a?.media?.find((m) =>
-    /\.(jpg|jpeg|png|gif|webp)$/i.test(m?.file || m?.file_url || "")
-  );
-  return firstImage?.file_url || firstImage?.file || null;
-}
 
 const Dashboard = () => {
-  // announcements
-  const [announcements, setAnnouncements] = useState([]);
-  const [annLoading, setAnnLoading] = useState(true);
-  const [annError, setAnnError] = useState("");
-
-  // modals
-  const [listOpen, setListOpen] = useState(false);
-  const [activeAnnouncement, setActiveAnnouncement] = useState(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      setAnnLoading(true);
-      setAnnError("");
-      try {
-        // ✅ uses your apiFetch wrapper (adds auth when token exists)
-        const res = await apiFetch("/api/announcements/");
-        const data = await res.json();
-
-        const list = Array.isArray(data) ? data : data.results || [];
-        if (mounted) setAnnouncements(list);
-      } catch (e) {
-        console.error(e);
-        if (mounted) setAnnError("Failed to load announcements.");
-      } finally {
-        if (mounted) setAnnLoading(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // show latest 2 inside card
-  const latestTwo = useMemo(() => announcements.slice(0, 2), [announcements]);
-
   return (
     <div className="dashboard-content">
       <header className="content-header">
@@ -62,7 +9,7 @@ const Dashboard = () => {
       </header>
 
       <div className="dashboard-grid">
-        {/* Notifications Section (keep yours for now) */}
+        {/* Notifications Section */}
         <section className="dashboard-card">
           <div className="card-header-blue">
             <h6 className="header-title">
@@ -88,13 +35,14 @@ const Dashboard = () => {
           </div>
 
           <div className="card-footer-center">
+            {/* we are not routing; just a placeholder */}
             <button type="button" className="view-all-link btn btn-link p-0">
               View All
             </button>
           </div>
         </section>
 
-        {/* ✅ Announcements Section (dynamic) */}
+        {/* Announcements Section */}
         <section className="dashboard-card">
           <div className="card-header-red">
             <h6 className="header-title">
@@ -103,48 +51,28 @@ const Dashboard = () => {
           </div>
 
           <div className="card-body-padding">
-            {annLoading ? (
-              <p className="text-muted mb-0">Loading announcements…</p>
-            ) : annError ? (
-              <p className="text-danger mb-0">{annError}</p>
-            ) : announcements.length === 0 ? (
-              <p className="text-muted mb-0">No announcements yet.</p>
-            ) : (
-              <>
-                {latestTwo.map((a, idx) => (
-                  <React.Fragment key={a.id}>
-                    <AnnouncementItem
-                      title={a.title || "Untitled"}
-                      detail={
-                        a.publish_date || a.created_at
-                          ? new Date(a.publish_date || a.created_at).toLocaleString()
-                          : ""
-                      }
-                      icon="bi-clock"
-                      type="danger"
-                      onClick={() => setActiveAnnouncement(a)}
-                    />
-                    {idx === 0 && <hr className="divider" />}
-                  </React.Fragment>
-                ))}
-              </>
-            )}
+            <AnnouncementItem
+              title="Library is now Open"
+              detail="8:00 AM - 5:00 PM"
+              icon="bi-clock"
+              type="danger"
+            />
+            <hr className="divider" />
+            <AnnouncementItem
+              title="Enrollment Period"
+              detail="Second Semester starts July 15."
+            />
           </div>
 
           <div className="card-footer-center">
-            <button
-              type="button"
-              className="view-all-link btn btn-link p-0"
-              onClick={() => setListOpen(true)}
-              disabled={annLoading || announcements.length === 0}
-            >
+            <button type="button" className="view-all-link btn btn-link p-0">
               View All
             </button>
           </div>
         </section>
       </div>
 
-      {/* Info Sections (keep yours) */}
+      {/* Info Section */}
       <InfoSection
         title="ABOUT CESI"
         header="What is CESI Portal?"
@@ -153,55 +81,13 @@ const Dashboard = () => {
         text="The CESI Portal is your all-in-one academic command center. Everything you need to manage your student life is organized into a single, user-friendly digital hub."
       />
 
+      {/* Info Section */}
       <InfoSection
         title="BACK TO SCHOOL"
         header="Back to School 2025-2026"
         img="/bsch.jpg"
         text="A Fresh Start Starts Now: Ready to learn, grow, and succeed together."
       />
-
-      {/* ✅ List Modal */}
-      {listOpen && (
-        <div className="ann-modal-overlay" onClick={() => setListOpen(false)}>
-          <div className="ann-modal" onClick={(e) => e.stopPropagation()}>
-            <span className="ann-modal-close" onClick={() => setListOpen(false)}>
-              ✕
-            </span>
-
-            <h3 className="ann-modal-title">Announcements</h3>
-
-            <div className="ann-list">
-              {announcements.map((a) => (
-                <button
-                  key={a.id}
-                  type="button"
-                  className="ann-list-item"
-                  onClick={() => {
-                    setListOpen(false);
-                    setActiveAnnouncement(a);
-                  }}
-                >
-                  <div className="ann-list-title">{a.title || "Untitled"}</div>
-                  <div className="ann-list-meta">
-                    {(a.target_role || "all").toUpperCase()} •{" "}
-                    {a.publish_date || a.created_at
-                      ? new Date(a.publish_date || a.created_at).toLocaleString()
-                      : ""}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ✅ Detail Modal */}
-      {activeAnnouncement && (
-        <AnnouncementDetailModal
-          a={activeAnnouncement}
-          onClose={() => setActiveAnnouncement(null)}
-        />
-      )}
     </div>
   );
 };
@@ -225,12 +111,8 @@ const NotificationItem = ({ icon, title, meta, time, status }) => (
   </div>
 );
 
-const AnnouncementItem = ({ title, detail, icon, type, onClick }) => (
-  <div
-    className="announcement-block"
-    onClick={onClick}
-    style={onClick ? { cursor: "pointer" } : undefined}
-  >
+const AnnouncementItem = ({ title, detail, icon, type }) => (
+  <div className="announcement-block">
     <h6 className={`announcement-title ${type ? `text-${type}` : ""}`}>
       {title}
     </h6>
@@ -273,32 +155,5 @@ const InfoSection = ({ title, header, img, text, tags }) => (
     </div>
   </section>
 );
-
-function AnnouncementDetailModal({ a, onClose }) {
-  const img = toAbsUrl(getFirstImagePath(a));
-
-  return (
-    <div className="ann-modal-overlay" onClick={onClose}>
-      <div className="ann-modal" onClick={(e) => e.stopPropagation()}>
-        <span className="ann-modal-close" onClick={onClose}>
-          ✕
-        </span>
-
-        {img && <img src={img} alt="" className="ann-modal-image" />}
-
-        <h2 className="ann-modal-title">{a.title || "Untitled"}</h2>
-
-        <div className="ann-modal-meta">
-          {(a.target_role || "all").toUpperCase()} •{" "}
-          {a.publish_date || a.created_at
-            ? new Date(a.publish_date || a.created_at).toLocaleString()
-            : ""}
-        </div>
-
-        <p className="ann-modal-content">{a.content || a.description || ""}</p>
-      </div>
-    </div>
-  );
-}
 
 export default Dashboard;
