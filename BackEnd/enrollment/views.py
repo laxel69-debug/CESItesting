@@ -32,6 +32,9 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     Admin can read/update/approve/decline/delete.
     """
     queryset = Enrollment.objects.select_related("student", "section", "parent_info").all()
+    
+    # Maximum number of attempts to generate a unique student number
+    MAX_STUDENT_NUMBER_GENERATION_ATTEMPTS = 10
 
     def get_permissions(self):
         # Public can only submit enrollment
@@ -224,9 +227,9 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             # 1) Generate student number if needed
             if not enrollment.student_number:
-                # Try up to 10 times to generate a unique student number
+                # Try up to MAX_STUDENT_NUMBER_GENERATION_ATTEMPTS times to generate a unique student number
                 # Handle race conditions via IntegrityError from unique constraint
-                max_attempts = 10
+                max_attempts = self.MAX_STUDENT_NUMBER_GENERATION_ATTEMPTS
                 for _ in range(max_attempts):
                     candidate = self.generate_student_number()
                     enrollment.student_number = candidate
@@ -246,7 +249,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     return Response(
                         {
                             "detail": (
-                                "Unable to generate unique student number after 10 attempts. "
+                                f"Unable to generate unique student number after {max_attempts} attempts. "
                                 "This may indicate an issue with the student number generation logic "
                                 "or database constraints. Please contact system administrator."
                             )
