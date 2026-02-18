@@ -176,6 +176,18 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
 
         return f"{prefix}{next_seq:06d}"
     
+    def _update_enrollment_status_and_remarks(self, enrollment):
+        """Helper method to update enrollment status and add approval remark."""
+        enrollment.status = "ACTIVE"
+        note = "APPROVED BY ADMIN"
+        
+        # Add remark if not already present
+        current_remarks = (enrollment.remarks or "").strip()
+        if note not in current_remarks:
+            if current_remarks:
+                enrollment.remarks = f"{current_remarks} | {note}"
+            else:
+                enrollment.remarks = note
    
     @action(detail=True, methods=["post"])
     def mark_active(self, request, pk=None):
@@ -219,17 +231,8 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     candidate = self.generate_student_number()
                     enrollment.student_number = candidate
                     
-                    # 2) Set enrollment ACTIVE
-                    enrollment.status = "ACTIVE"
-                    note = "APPROVED BY ADMIN"
-                    
-                    # Add remark if not already present
-                    current_remarks = (enrollment.remarks or "").strip()
-                    if note not in current_remarks:
-                        if current_remarks:
-                            enrollment.remarks = f"{current_remarks} | {note}"
-                        else:
-                            enrollment.remarks = note
+                    # Update status and remarks
+                    self._update_enrollment_status_and_remarks(enrollment)
                     
                     # Try to save - if student_number is duplicate, IntegrityError will be raised
                     try:
@@ -252,20 +255,10 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     )
             else:
                 # Student number already exists, just update status and remarks
-                enrollment.status = "ACTIVE"
-                note = "APPROVED BY ADMIN"
-                
-                # Add remark if not already present
-                current_remarks = (enrollment.remarks or "").strip()
-                if note not in current_remarks:
-                    if current_remarks:
-                        enrollment.remarks = f"{current_remarks} | {note}"
-                    else:
-                        enrollment.remarks = note
-                
+                self._update_enrollment_status_and_remarks(enrollment)
                 enrollment.save(update_fields=["status", "remarks", "updated_at"])
 
-            # 3) Create/link parent user and profile if needed
+            # 2) Create/link parent user and profile if needed
             if parent_email and enrollment.parent_user_id is None:
                 parent_user = User.objects.filter(email__iexact=parent_email).first()
 
