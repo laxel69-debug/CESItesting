@@ -24,29 +24,6 @@ const pages = [
   { key: "performance", label: "Performance", icon: "📈", component: <SPerformance /> },
 ];
 
-/* ============================= */
-/* Helpers */
-/* ============================= */
-
-function getInitials(name = "User") {
-  const parts = String(name).trim().split(/\s+/);
-  const first = parts[0]?.[0] || "U";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
-}
-
-function roleLabel(role) {
-  if (!role) return "Faculty Member";
-  const r = String(role).toLowerCase();
-  if (r.includes("admin")) return "Administrator";
-  if (r.includes("teacher")) return "Faculty Member";
-  return role;
-}
-
-/* ============================= */
-/* Sidebar Content */
-/* ============================= */
-
 function NavContent({
   pages,
   activePage,
@@ -54,26 +31,16 @@ function NavContent({
   onPick,
   isCollapsed,
   onLogout,
-  user,
 }) {
-  const displayName =
-    user?.full_name ||
-    user?.name ||
-    user?.username ||
-    user?.email ||
-    "User";
-
   return (
     <>
       <div className="sb__profile">
-        <div className="sb__avatar">
-          {getInitials(displayName)}
-        </div>
+        <div className="sb__avatar">U</div>
 
         {!isCollapsed && (
           <div className="sb__profileText">
-            <div className="sb__name">{displayName}</div>
-            <div className="sb__role">{roleLabel(user?.role)}</div>
+            <div className="sb__name">Username</div>
+            <div className="sb__role">Faculty Member</div>
           </div>
         )}
       </div>
@@ -115,29 +82,28 @@ function NavContent({
   );
 }
 
-/* ============================= */
-/* Main Sidebar */
-/* ============================= */
-
 function Sidebar() {
   const [activePage, setActivePage] = React.useState("dashboard");
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
 
   const navigate = useNavigate();
-  const { user, logout } = useAuth();   // ✅ FIXED: include user
+  const { logout } = useAuth(); // ✅ correct usage
 
   const active = pages.find((p) => p.key === activePage) ?? pages[0];
 
   const handleLogout = async () => {
     try {
-      await apiFetch("/api/accounts/logout/", { method: "POST" });
+      // OPTIONAL (recommended if using Django session auth)
+      await apiFetch("/api/accounts/logout/", {
+        method: "POST",
+      });
     } catch (err) {
       console.warn("Backend logout failed (continuing):", err);
     } finally {
-      logout();
-      navigate("/", { replace: true });
-      window.location.reload();
+      logout();                // clear auth context + storage
+      // Force full page reload to ensure clean state
+      window.location.href = "/";
     }
   };
 
@@ -157,7 +123,7 @@ function Sidebar() {
 
   return (
     <div className="layout">
-      {/* Mobile Topbar */}
+      {/* Mobile topbar */}
       <header className="topbar">
         <button className="topbar__menuBtn" onClick={() => setMobileOpen(true)}>
           ☰
@@ -166,7 +132,7 @@ function Sidebar() {
         <div className="topbar__spacer" />
       </header>
 
-      {/* Mobile Drawer */}
+      {/* Mobile drawer */}
       {mobileOpen && (
         <>
           <div className="drawerBackdrop" onClick={() => setMobileOpen(false)} />
@@ -185,25 +151,32 @@ function Sidebar() {
               isCollapsed={false}
               onPick={() => setMobileOpen(false)}
               onLogout={handleLogout}
-              user={user}   // ✅ FIXED
             />
           </aside>
         </>
       )}
 
-      {/* Desktop Sidebar */}
+      {/* Desktop sidebar */}
       <aside className={`sb ${isCollapsed ? "sb--collapsed" : ""}`}>
+        <div className="sb__collapseRow">
+          {/* <button
+            className="sb__collapseBtn"
+            onClick={() => setIsCollapsed((v) => !v)}
+          >
+             {isCollapsed ? "➤" : "◀"} 
+          </button> */}
+        </div>
+
         <NavContent
           pages={pages}
           activePage={activePage}
           setActivePage={setActivePage}
           isCollapsed={isCollapsed}
           onLogout={handleLogout}
-          user={user}   // ✅ FIXED
         />
       </aside>
 
-      {/* Main Content */}
+      {/* Main content */}
       <main className="content">{active.component}</main>
     </div>
   );

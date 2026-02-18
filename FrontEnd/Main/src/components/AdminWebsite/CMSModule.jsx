@@ -145,88 +145,9 @@ function MediaPreview({ media, onImageClick }) {
   );
 }
 
-
-function PostDetailModal({ isOpen, post, onClose, onMediaClick }) {
-  if (!isOpen || !post) return null;
-
-  const dateStr =
-    post.publish_date || post.created_at
-      ? new Date(post.publish_date || post.created_at).toLocaleString()
-      : "";
-
-  return (
-    <div className="cms-postmodal-overlay" onClick={onClose}>
-      <div className="cms-postmodal" onClick={(e) => e.stopPropagation()}>
-        <button className="cms-postmodal-close" onClick={onClose}>✕</button>
-
-        <div className="cms-postmodal-head">
-          <div className="cms-postmodal-title">{post.title || "Untitled"}</div>
-
-          <div className="cms-postmodal-meta">
-            <span className="cms-badge" data-role={post.target_role}>
-              {post.target_role || "all"}
-            </span>
-            <span>{dateStr}</span>
-          </div>
-        </div>
-
-        <div className="cms-postmodal-body">
-          <p className="cms-postmodal-content">{post.content || ""}</p>
-
-          {post?.media?.length > 0 && (
-            <div className="cms-postmodal-media">
-              <h4>Media</h4>
-              <div className="cms-media-grid">
-                {post.media.map((m, index) => {
-                  const url = m.file_url || m.file;
-                  const name = String(m.file || "").toLowerCase();
-                  if (!url) return null;
-
-                  if (name.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-                    return (
-                      <img
-                        key={m.id}
-                        src={url}
-                        alt=""
-                        className="cms-post-media"
-                        onClick={() => onMediaClick(index)}
-                      />
-                    );
-                  }
-
-                  if (name.match(/\.(mp4|webm|ogg|mov)$/)) {
-                    return (
-                      <video
-                        key={m.id}
-                        className="cms-post-media"
-                        controls
-                        onClick={() => onMediaClick(index)}
-                      >
-                        <source src={url} />
-                      </video>
-                    );
-                  }
-
-                  return (
-                    <a key={m.id} href={url} target="_blank" rel="noreferrer">
-                      Open file
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 export default function CMSModule() {
   const { user } = useAuth();
   const canPost = useMemo(() => isAdmin(user), [user]);
-
-
-
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -241,49 +162,6 @@ export default function CMSModule() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [audienceTab, setAudienceTab] = useState("all"); 
-    // all | public | teachers | parent_student
-
-  const filteredPosts = useMemo(() => {
-    const norm = (v) => String(v || "").toLowerCase();
-
-    if (audienceTab === "all") return posts;
-
-    if (audienceTab === "public") {
-      return posts.filter((p) => norm(p.target_role) === "all");
-    }
-
-    if (audienceTab === "teachers") {
-      return posts.filter((p) => {
-        const t = norm(p.target_role);
-        return t === "teachers" ; // teachers also see public
-      });
-    }
-
-    if (audienceTab === "parent_student") {
-      return posts.filter((p) => {
-        const t = norm(p.target_role);
-        return t === "parent_student" ; // parent/student also see public
-      });
-    }
-
-    return posts;
-  }, [posts, audienceTab]);
-
-  
-  const [postOpen, setPostOpen] = useState(false);
-  const [activePost, setActivePost] = useState(null);
-
-    
-  const openPost = (post) => {
-    setActivePost(post);
-    setPostOpen(true);
-  };
-
-  const closePost = () => {
-    setPostOpen(false);
-    setActivePost(null);
-  };
   // Image modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImages, setModalImages] = useState([]);
@@ -471,8 +349,9 @@ export default function CMSModule() {
                 onChange={(e) => setTargetRole(e.target.value)}
               >
                 <option value="all">All</option>
-                 <option value="parent_student">Parent / Student</option>
+                <option value="students">Students</option>
                 <option value="teachers">Teachers</option>
+                <option value="parents">Parents</option>
               </select>
             </div>
 
@@ -533,71 +412,28 @@ export default function CMSModule() {
 
       <div className="cms-posts">
         <h3>Posted Announcements</h3>
-         <div className="cms-tabs">
-            <button
-              className={`cms-tab ${audienceTab === "all" ? "active" : ""}`}
-              onClick={() => setAudienceTab("all")}
-              type="button"
-            >
-              All
-            </button>
-
-            <button
-              className={`cms-tab ${audienceTab === "public" ? "active" : ""}`}
-              onClick={() => setAudienceTab("public")}
-              type="button"
-            >
-              Public
-            </button>
-
-            <button
-              className={`cms-tab ${audienceTab === "teachers" ? "active" : ""}`}
-              onClick={() => setAudienceTab("teachers")}
-              type="button"
-            >
-              Teachers
-            </button>
-
-            <button
-              className={`cms-tab ${audienceTab === "parent_student" ? "active" : ""}`}
-              onClick={() => setAudienceTab("parent_student")}
-              type="button"
-            >
-              Parent / Student
-            </button>
-          </div>
 
         {loading ? (
           <p>Loading…</p>
-        ) : filteredPosts.length === 0 ? (
+        ) : posts.length === 0 ? (
           <p>No announcements yet.</p>
         ) : (
-          filteredPosts.map((post) => {
+          posts.map((post) => {
             const firstMedia = post?.media?.[0];
             const firstUrl = firstMedia?.file_url || firstMedia?.file || "";
             const firstName = String(firstMedia?.file || "").toLowerCase();
             const isImage = firstUrl && firstName.match(/\.(jpg|jpeg|png|gif|webp)$/);
 
             return (
-              <div
-                  key={post.id}
-                  className={`cms-post ${isImage ? "cms-post--row" : "cms-post--noimg"}`}
-                  onClick={() => openPost(post)}
-                  style={{ cursor: "pointer" }}
-                >
+              <div key={post.id} className="cms-post cms-post--row">
                 {/* LEFT: reserved media box (always there) */}
-                {isImage && (
-                      <div
-                        className="cms-post-thumb"
-                        onClick={(e) => {
-                          e.stopPropagation(); // prevent opening full post modal
-                          post.media?.length > 0 && handleThumbnailClick(post);
-                        }}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <img src={firstUrl} alt="" />
-                      </div>
-                    )}
+                <div 
+                  className={`cms-post-thumb ${isImage ? "" : "no-photo"}`}
+                  onClick={() => post.media?.length > 0 && handleThumbnailClick(post)}
+                  style={{ cursor: post.media?.length > 0 ? 'pointer' : 'default' }}
+                >
+                  {isImage ? <img src={firstUrl} alt="" /> : null}
+                </div>
 
                 {/* RIGHT: text */}
                 <div className="cms-post-right">
@@ -632,16 +468,7 @@ export default function CMSModule() {
           })
         )}
       </div>
-            {/* view */}
-        <PostDetailModal
-          isOpen={postOpen}
-          post={activePost}
-          onClose={closePost}
-          onMediaClick={(index) => {
-            if (!activePost?.media?.length) return;
-            openImageModal(activePost.media, index);
-          }}
-        />
+
       {/* Image Modal */}
       <ImageModal
         isOpen={modalOpen}

@@ -4,6 +4,7 @@ import {
   AlertCircle, CheckCircle, Search, Filter, Edit, Eye, 
   Users, XCircle, Clock, TrendingUp
 } from 'lucide-react';
+import StatCard, { StatsGrid } from './StatCard';
 import '../AdminWebsiteCSS/GradesRecords.css';
 
 const GradesRecords = () => {
@@ -209,85 +210,19 @@ const GradesRecords = () => {
       {/* Stats Overview */}
       <section className="gr-section">
         {activeTab === 'grades' ? (
-          <div className="gr-stats-grid">
-            <div className="gr-stat-card gr-stat-blue">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Total Students</span>
-                <Users size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{gradeStats.totalStudents}</div>
-              <div className="gr-stat-change">Enrolled this year</div>
-            </div>
-
-            <div className="gr-stat-card gr-stat-green">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Graded Students</span>
-                <CheckCircle size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{gradeStats.gradedStudents}</div>
-              <div className="gr-stat-change positive">
-                {((gradeStats.gradedStudents / gradeStats.totalStudents) * 100).toFixed(1)}% completion
-              </div>
-            </div>
-
-            <div className="gr-stat-card gr-stat-yellow">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Pending Grades</span>
-                <AlertCircle size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{gradeStats.pendingGrades}</div>
-              <div className="gr-stat-change">Need attention</div>
-            </div>
-
-            <div className="gr-stat-card gr-stat-purple">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Average Grade</span>
-                <FileText size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{gradeStats.averageGrade}%</div>
-              <div className="gr-stat-change positive">Above target</div>
-            </div>
-          </div>
+          <StatsGrid>
+            <StatCard label="Total Students" value={gradeStats.totalStudents} subtitle="Enrolled this year" icon={<Users size={22} />} color="blue" />
+            <StatCard label="Graded Students" value={gradeStats.gradedStudents} subtitle={`${((gradeStats.gradedStudents / gradeStats.totalStudents) * 100).toFixed(1)}% completion`} subtitleType="positive" icon={<CheckCircle size={22} />} color="green" />
+            <StatCard label="Pending Grades" value={gradeStats.pendingGrades} subtitle="Need attention" icon={<AlertCircle size={22} />} color="yellow" />
+            <StatCard label="Average Grade" value={`${gradeStats.averageGrade}%`} subtitle="Above target" subtitleType="positive" icon={<FileText size={22} />} color="purple" />
+          </StatsGrid>
         ) : (
-          <div className="gr-stats-grid">
-            <div className="gr-stat-card gr-stat-blue">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Total Students</span>
-                <Users size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{attendanceStats.totalStudents}</div>
-              <div className="gr-stat-change">Today</div>
-            </div>
-
-            <div className="gr-stat-card gr-stat-green">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Present</span>
-                <CheckCircle size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{attendanceStats.present}</div>
-              <div className="gr-stat-change positive">
-                {attendanceStats.attendanceRate}% rate
-              </div>
-            </div>
-
-            <div className="gr-stat-card gr-stat-red">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Absent</span>
-                <XCircle size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{attendanceStats.absent}</div>
-              <div className="gr-stat-change">Requires follow-up</div>
-            </div>
-
-            <div className="gr-stat-card gr-stat-yellow">
-              <div className="gr-stat-header">
-                <span className="gr-stat-label">Late</span>
-                <Clock size={24} className="gr-stat-icon" />
-              </div>
-              <div className="gr-stat-value">{attendanceStats.late}</div>
-              <div className="gr-stat-change">Students</div>
-            </div>
-          </div>
+          <StatsGrid>
+            <StatCard label="Total Students" value={attendanceStats.totalStudents} subtitle="Today" icon={<Users size={22} />} color="blue" />
+            <StatCard label="Present" value={attendanceStats.present} subtitle={`${attendanceStats.attendanceRate}% rate`} subtitleType="positive" icon={<CheckCircle size={22} />} color="green" />
+            <StatCard label="Absent" value={attendanceStats.absent} subtitle="Requires follow-up" icon={<XCircle size={22} />} color="red" />
+            <StatCard label="Late" value={attendanceStats.late} subtitle="Students" icon={<Clock size={22} />} color="yellow" />
+          </StatsGrid>
         )}
       </section>
 

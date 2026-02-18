@@ -23,9 +23,27 @@ class SubjectSerializer(serializers.ModelSerializer):
 
 
 class SectionSerializer(serializers.ModelSerializer):
+    adviser_name = serializers.SerializerMethodField()
+    adviser_id = serializers.SerializerMethodField()
+    student_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Section
-        fields = ["id", "name", "grade_level"]
+        fields = ["id", "name", "grade_level", "adviser", "adviser_name", "adviser_id", "student_count"]
+        extra_kwargs = {"adviser": {"required": False, "allow_null": True}}
+
+    def get_adviser_name(self, obj):
+        if obj.adviser and obj.adviser.user:
+            return obj.adviser.user.username
+        return None
+
+    def get_adviser_id(self, obj):
+        if obj.adviser and obj.adviser.user:
+            return obj.adviser.user.id
+        return None
+
+    def get_student_count(self, obj):
+        return obj.students.count()
 
 
 class UserSerializer(serializers.ModelSerializer):

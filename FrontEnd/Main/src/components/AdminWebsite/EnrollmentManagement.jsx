@@ -9,7 +9,11 @@ import {
   AlertCircle,
   XCircle,
   Eye,
+  Plus,
+  Users,
+  DollarSign,
 } from "lucide-react";
+import StatCard, { StatsGrid } from "./StatCard";
 import "../AdminWebsiteCSS/EnrollmentManagement.css";
 import { getToken } from "../Auth/auth";
 
@@ -56,6 +60,7 @@ const emptyForm = () => ({
   gender: "",
 
   lrn: "",
+  student_number: "",
 
   // academic
   education_level: "",
@@ -332,18 +337,6 @@ export default function EnrollmentManagement() {
       if (code === "COMPLETED") return <CheckCircle size={16} />;
       return <Clock size={16} />;
     };
-  const getCurrentAcademicYear = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth(); // 0 = Jan, 5 = June
-
-  // School year starts June (month 5)
-  if (month >= 5) {
-    return `${year}-${year + 1}`;
-  } else {
-    return `${year - 1}-${year}`;
-  }
-}; 
 
   const getFeeIcon = (fee) => {
     if (fee === "Paid" || fee === "cash") return <CheckCircle size={16} />;
@@ -377,11 +370,12 @@ export default function EnrollmentManagement() {
       gender: e.gender || "",
 
       lrn: e.lrn || "",
+      student_number: e.student_number || "",
 
       education_level: inferredEdu,
       grade_level: e.grade_level || "",
       student_type: e.student_type || "",
-      academic_year: e.academic_year ||  getCurrentAcademicYear(),
+      academic_year: e.academic_year || "2024-2025",
       status: e.status || "PENDING",
       payment_mode: e.payment_mode || "",
 
@@ -518,6 +512,7 @@ export default function EnrollmentManagement() {
       gender: formData.gender,
 
       lrn: formData.lrn,
+      student_number: formData.student_number,
 
       education_level: formData.education_level,
       grade_level: formData.grade_level,
@@ -585,24 +580,13 @@ export default function EnrollmentManagement() {
         </div>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Total Enrollments</h3>
-          <p className="stat-number">{stats.total}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Active Students</h3>
-          <p className="stat-number active">{stats.active}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Pending Enrollment</h3>
-          <p className="stat-number pending">{stats.pending}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Dropped</h3>
-          <p className="stat-number overdue">{stats.dropped}</p>
-        </div>
-      </div>
+      {/* Statistics Cards */}
+      <StatsGrid>
+        <StatCard label="Total Enrollments" value={stats.total} icon={<Users size={22} />} color="blue" />
+        <StatCard label="Active Students" value={stats.active} icon={<CheckCircle size={22} />} color="green" />
+        <StatCard label="Pending Enrollment" value={stats.pending} icon={<Clock size={22} />} color="yellow" />
+        <StatCard label="Fees Collected" value={stats.feePaid} icon={<DollarSign size={22} />} color="purple" />
+      </StatsGrid>
 
       {/* Controls */}
       <div className="enrollment-controls">
@@ -814,7 +798,10 @@ export default function EnrollmentManagement() {
             </div>
 
             <div className="form-row">
-      
+              <div className="form-group">
+                <label>Student Number</label>
+                <input name="student_number" value={formData.student_number} onChange={handleInputChange} disabled={isReadOnly} />
+              </div>
               <div className="form-group">
                 <label>Academic Year *</label>
                 <input name="academic_year" value={formData.academic_year} onChange={handleInputChange} disabled={isReadOnly} />

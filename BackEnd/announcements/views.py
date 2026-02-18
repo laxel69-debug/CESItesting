@@ -2,11 +2,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
-
-from django.db.models import Q
-from django.utils import timezone
 
 from .models import Announcement, AnnouncementMedia
 from .serializers import AnnouncementSerializer
@@ -23,41 +20,16 @@ class AnnouncementListCreate(APIView):
 
     def get_permissions(self):
         if self.request.method == "GET":
-            return [AllowAny()]
+            return []  # public access
         return [IsAuthenticated(), IsTeacherOrAdmin()]
 
-
     def get(self, request):
-        user = request.user if request.user.is_authenticated else None
-
-        # base: only active
-        qs = Announcement.objects.filter(is_active=True).order_by("-publish_date")
-
-        # public (not logged in): only public + already published
-        if not user:
-            qs = qs.filter(target_role="all", publish_date__lte=timezone.now())
-        else:
-            role = str(getattr(user, "role", "")).upper()
-
-            # admin: sees all active (including scheduled)
-            if user.is_staff or user.is_superuser or "ADMIN" in role:
-                pass
-
-            elif "TEACHER" in role:
-                qs = qs.filter(Q(target_role="teachers") | Q(target_role="all"))
-
-            elif "PARENT_STUDENT" in role:
-                qs = qs.filter(Q(target_role="parent_student") | Q(target_role="all"))
-
-            else:
-                qs = qs.filter(target_role="all", publish_date__lte=timezone.now())
-
+        announcements = Announcement.objects.order_by("-publish_date")
         serializer = AnnouncementSerializer(
-            qs,
+            announcements,
             many=True,
-            context={"request": request},
+            context={"request": request},  # ✅ REQUIRED for file_url
         )
-
         return Response(serializer.data)
 
     def post(self, request):

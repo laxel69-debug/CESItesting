@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import AnnouncementCard from "./AnnouncementCard";
 import { useNavigate } from "react-router-dom";
 import "../IndexWebsiteCSS/Notebook.css";
-import "../IndexWebsiteCSS/AnnouncementCard.css";
 
 const API_BASE = "";  // use Vite proxy
 
@@ -21,10 +20,6 @@ const Notebook = ({ onClose, openEnrollment }) => {
       })
       .catch((err) => console.error("Error fetching announcements:", err));
   }, []);
-  function toAbsUrl(path) {
-  if (!path) return null;
-  return path.startsWith("http") ? path : `${API_BASE}${path}`;
-}
 
   // ✅ helper: pick first image from media[]
   function getFirstImagePath(a) {
@@ -33,7 +28,7 @@ const Notebook = ({ onClose, openEnrollment }) => {
     );
     return firstImage?.file || firstImage?.file_url || null;
   }
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+
   const content = {
     announcements: {
       title: "Announcements",
@@ -42,91 +37,19 @@ const Notebook = ({ onClose, openEnrollment }) => {
           {announcements.length === 0 ? (
             <p>No announcements yet.</p>
           ) : (
-            announcements.map((a) => {
-              const img = getFirstImagePath(a);
-              const imgUrl = toAbsUrl(img);
-
-              return (
-                <div
-                  key={a.id}
-                  className={`ann-card ${img ? "ann-card--row" : "ann-card--noimg"}`}
-                  onClick={() => setSelectedAnnouncement(a)}
-                  style={{ cursor: "pointer" }}
-                >
-                  {imgUrl && (
-                    <div className="ann-thumb">
-                      <img src={imgUrl} alt="" />
-                    </div>
-                  )}
-
-                  <div className="ann-right">
-                    <div className="ann-top">
-                      <div className="ann-title">{a.title || "Untitled"}</div>
-
-                      <div className="ann-meta">
-                        <span className="ann-role">{a.target_role || "all"}</span>
-                        <span>
-                          {a.publish_date || a.created_at
-                            ? new Date(a.publish_date || a.created_at).toLocaleString()
-                            : ""}
-                        </span>
-                      </div>
-                    </div>
-
-                    <p className="ann-desc">{a.content || a.description || ""}</p>
-                  </div>
-                </div>
-              );
-            })
+            announcements.map((a) => (
+              <AnnouncementCard
+                key={a.id}
+                title={a.title || "Untitled"}
+                date={a.publish_date || a.created_at}
+                description={a.content || a.description || ""}
+                image={getFirstImagePath(a)}
+              />
+            ))
           )}
-
-          {selectedAnnouncement && (() => {
-            const modalImg = toAbsUrl(getFirstImagePath(selectedAnnouncement));
-
-            return (
-              <div
-                className="ann-modal-overlay"
-                onClick={() => setSelectedAnnouncement(null)}
-              >
-                <div className="ann-modal" onClick={(e) => e.stopPropagation()}>
-                  <span
-                    className="ann-modal-close"
-                    onClick={() => setSelectedAnnouncement(null)}
-                  >
-                    ✕
-                  </span>
-
-                  {modalImg && (
-                    <img src={modalImg} alt="" className="ann-modal-image" />
-                  )}
-
-                  <h2 className="ann-modal-title">
-                    {selectedAnnouncement.title || "Untitled"}
-                  </h2>
-
-                  <div className="ann-modal-meta">
-                    {selectedAnnouncement.target_role || "all"} •{" "}
-                    {selectedAnnouncement.publish_date || selectedAnnouncement.created_at
-                      ? new Date(
-                          selectedAnnouncement.publish_date ||
-                            selectedAnnouncement.created_at
-                        ).toLocaleString()
-                      : ""}
-                  </div>
-
-                  <p className="ann-modal-content">
-                    {selectedAnnouncement.content ||
-                      selectedAnnouncement.description ||
-                      ""}
-                  </p>
-                </div>
-              </div>
-            );
-          })()}
         </div>
       ),
     },
-  
 
     "school-info": {
       title: "School Information",
