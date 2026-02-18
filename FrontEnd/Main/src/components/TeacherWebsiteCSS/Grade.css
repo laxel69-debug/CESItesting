@@ -150,7 +150,6 @@
 .ge__weightChip--quiz { background: #ede9fe; color: var(--purple); }
 .ge__weightChip--exam { background: #fee2e2; color: var(--red); }
 .ge__weightChip--cs   { background: #d1fae5; color: var(--green); }
-.ge__weightChip--att  { background: #fef3c7; color: #d97706; }
 
 /* ═══ Planner — auto-fill columns, never overflows ═══ */
 .ge__planner {

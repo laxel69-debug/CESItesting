@@ -1,58 +1,75 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import "../IndexWebsiteCSS/AnnouncementCard.css";
 
 const API_BASE = "http://127.0.0.1:8000";
 
-function AnnouncementCard({ title, date, image, description }) {
+function toAbsUrl(pathOrUrl) {
+  if (!pathOrUrl) return null;
+  return String(pathOrUrl).startsWith("http") ? pathOrUrl : `${API_BASE}${pathOrUrl}`;
+}
+
+function AnnouncementCard({ title, date, image, description, targetRole }) {
   const [expanded, setExpanded] = useState(false);
   const [zoomed, setZoomed] = useState(false);
 
   const safeDescription = String(description || "");
-  const showToggle = safeDescription.length > 100;
+  const showToggle = safeDescription.length > 160;
 
-  const imageSrc = image
-    ? image.startsWith("http")
-      ? image
-      : `${API_BASE}${image}`
-    : null;
+  const imageSrc = useMemo(() => toAbsUrl(image), [image]);
+
+  const formattedDate = useMemo(() => {
+    if (!date) return "";
+    const d = new Date(date);
+    return Number.isNaN(d.getTime()) ? "" : d.toLocaleString();
+  }, [date]);
 
   return (
     <>
-      <div className="announcement-card">
-        <div className="announcement-body">
-          <h4>{title || "Untitled"}</h4>
-          <small>{date ? new Date(date).toLocaleDateString() : ""}</small>
+      <div className={`ann-card ${imageSrc ? "ann-card--row" : "ann-card--noimg"}`}>
+        {/* LEFT: thumbnail box (always visible) */}
+        {imageSrc && (
+          <div
+            className="ann-thumb"
+            onClick={() => setZoomed(true)}
+            style={{ cursor: "pointer" }}
+          >
+            <img src={imageSrc} alt={title || "Announcement"} />
+          </div>
+        )}
 
-          <p className={expanded ? "expanded" : "collapsed"}>
+        {/* RIGHT: content */}
+        <div className="ann-right">
+          <div className="ann-top">
+            <div className="ann-title">{title || "Untitled"}</div>
+
+            <div className="ann-meta">
+              <span className="ann-role">{targetRole || "all"}</span>
+              <span>{formattedDate}</span>
+            </div>
+          </div>
+
+          <p className={`ann-desc ${expanded ? "expanded" : "collapsed"}`}>
             {safeDescription}
           </p>
 
           {showToggle && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="expand-btn"
+              className="ann-expand-btn"
               type="button"
             >
               {expanded ? "Show Less" : "Read More"}
             </button>
           )}
-
-          {/* ✅ CLICK TO ZOOM */}
-          {imageSrc && (
-            <img
-              src={imageSrc}
-              alt={title}
-              className="announcement-image zoomable"
-              onClick={() => setZoomed(true)}
-            />
-          )}
         </div>
       </div>
 
-      {/* ✅ ZOOM OVERLAY */}
-      {zoomed && (
+      {/* ZOOM OVERLAY */}
+      {zoomed && imageSrc && (
         <div className="image-overlay" onClick={() => setZoomed(false)}>
-          <span className="close-btn">✕</span>
+          <span className="close-btn" onClick={() => setZoomed(false)}>
+            ✕
+          </span>
           <img src={imageSrc} alt="Zoomed" className="zoomed-image" />
         </div>
       )}

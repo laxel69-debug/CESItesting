@@ -6,7 +6,7 @@
   padding: 20px;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
-  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* ========== HEADER SECTION ========== */
@@ -152,9 +152,9 @@
 }
 
 /* ========== STATISTICS GRID ========== */
-.class-management .stats-grid {
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 20px;
   margin-bottom: 25px;
 }
@@ -800,9 +800,8 @@
     width: 100%;
   }
 
-  .class-management .stats-grid {
+  .stats-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
   }
 
   .section-header {
@@ -841,7 +840,7 @@
     padding: 10px 15px;
   }
 
-  .class-management .stats-grid {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 
@@ -889,7 +888,7 @@
 }
 
 .teacher-card-header-large {
-  background: linear-gradient(135deg, #5BA3C7 0%, #4A8FB0 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 20px;
   display: flex;
@@ -942,7 +941,7 @@
 .stat-value {
   font-size: 22px;
   font-weight: 700;
-  color: #5BA3C7;
+  color: #667eea;
 }
 
 /* ========== ASSIGNMENTS SECTION ========== */
@@ -1013,7 +1012,7 @@
 }
 
 .assignment-subject-tag {
-  background: linear-gradient(135deg, #5BA3C7 0%, #4A8FB0 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 4px 10px;
   border-radius: 20px;
@@ -1052,9 +1051,9 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  border: 2px solid #5BA3C7;
+  border: 2px solid #667eea;
   background: transparent;
-  color: #5BA3C7;
+  color: #667eea;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
@@ -1066,10 +1065,10 @@
 }
 
 .btn-primary-outline:hover {
-  background: #5BA3C7;
+  background: #667eea;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(91, 163, 199, 0.4);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* ========== RESPONSIVE TEACHERS ========== */

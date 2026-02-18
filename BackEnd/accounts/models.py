@@ -111,15 +111,15 @@ class Section(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     GRADE_LEVEL_CHOICES = [
-        ("Pre-Kinder", "Pre-Kinder"),
-        ("Kinder", "Kinder"),
-        ("Grade 1", "Grade 1"),
-        ("Grade 2", "Grade 2"),
-        ("Grade 3", "Grade 3"),
-        ("Grade 4", "Grade 4"),
-        ("Grade 5", "Grade 5"),
-        ("Grade 6", "Grade 6"),
-    ]
+            ("prek", "Pre-Kinder"),
+            ("kinder", "Kinder"),
+            ("grade1", "Grade 1"),
+            ("grade2", "Grade 2"),
+            ("grade3", "Grade 3"),
+            ("grade4", "Grade 4"),
+            ("grade5", "Grade 5"),
+            ("grade6", "Grade 6"),
+        ]
     # Student Info
     student_first_name = models.CharField(max_length=50)
     student_middle_name = models.CharField(max_length=50, blank=True, null=True)

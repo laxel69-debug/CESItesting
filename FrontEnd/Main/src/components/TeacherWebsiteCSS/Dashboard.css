@@ -283,16 +283,94 @@
   font-weight: 800;
   border: 1px solid rgba(0,0,0,.08);
 }
+.tann-list { display: grid; gap: 12px; padding: 12px; }
 
-/* Announcements */
-.announce__title{
-  font-weight: 900;
-  margin-bottom: 4px;
+.tann-card{
+  display:flex; gap:14px;
+  padding:12px;
+  border-radius:14px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,0.06);
 }
 
-.announce__title--danger{ color: var(--danger); }
-
-.announce__meta{
-  font-size: 12px;
-  color: var(--muted);
+.tann-thumb img{
+  width:120px; height:84px;
+  object-fit:cover;
+  border-radius:12px;
 }
+
+.tann-right{ flex:1; min-width:0; }
+
+.tann-top{
+  display:flex; justify-content:space-between;
+  gap:10px; align-items:center;
+}
+
+.tann-title{ font-weight:800; }
+.tann-desc{ margin:6px 0 0; color:#555; }
+
+.tann-role{
+  font-size:12px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#ffe7e7;
+  white-space:nowrap;
+}
+
+.tann-meta{ display:flex; gap:10px; align-items:center; font-size:12px; color:#666; }
+
+/* modal */
+.tann-modal-overlay{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.45);
+  display:flex; align-items:center; justify-content:center;
+  padding:16px; z-index:9999;
+}
+
+.tann-modal{
+  width:min(720px, 100%);
+  background:#fff;
+  border-radius:16px;
+  padding:16px;
+  position:relative;
+}
+
+.tann-modal-close{
+  position:absolute; top:10px; right:12px;
+  cursor:pointer; font-size:18px;
+}
+
+.tann-modal-image{
+  width:100%;
+  max-height:360px;
+  object-fit:cover;
+  border-radius:14px;
+  margin-bottom:12px;
+}
+
+.tann-modal-title{ font-weight:900; margin:6px 0; }
+.tann-modal-meta{ font-size:12px; color:#666; margin-bottom:10px; }
+.tann-modal-content{ color:#333; }
+
+/* modal list */
+.tann-modal-list{ display:grid; gap:10px; margin-top:12px; }
+
+.tann-modal-item{
+  width:100%;
+  display:flex; gap:12px;
+  text-align:left;
+  padding:10px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,0.06);
+  background:#fff;
+}
+
+.tann-modal-thumb img{
+  width:72px; height:54px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.tann-modal-right{ flex:1; min-width:0; }
+.tann-modal-itemTitle{ font-weight:800; }
+.tann-modal-itemMeta{ font-size:12px; color:#666; }

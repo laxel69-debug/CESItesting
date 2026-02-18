@@ -13,7 +13,6 @@ import {
   LogOut,
   Menu,
   X,
-  FileBarChart,
 } from "lucide-react";
 import "../AdminWebsiteCSS/Sidebar.css";
 import { useAuth } from "../Auth/useAuth";
@@ -42,63 +41,38 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
   const [expandedMenus, setExpandedMenus] = useState({});
   const sidebarRef = useRef(null);
 
-  const menuSections = useMemo(
+  const menuItems = useMemo(
     () => [
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { id: "users", label: "Student Management", icon: UsersRound },
+      { id: "enrollment", label: "Enrollment Management", icon: UserPlus },
+      { id: "classes", label: "Class Management", icon: BookOpen },
+      { id: "subjects", label: "Subjects", icon: BookOpen },
+      { id: "grades", label: "Grades & Records", icon: GraduationCap },
       {
-        label: "OVERVIEW",
-        items: [
-          { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+        id: "financial",
+        label: "Financial Management",
+        icon: Wallet,
+        subItems: [
+          { id: "tuition_management", label: "Tuition Management" },
+          { id: "transaction-history", label: "Transactions" },
+          { id: "payment-reminders", label: "Payment Reminders" },
         ],
       },
-      {
-        label: "MANAGEMENT",
-        items: [
-          { id: "users", label: "User Management", icon: UsersRound },
-          { id: "enrollment", label: "Enrollment", icon: UserPlus },
-          { id: "classes", label: "Class Management", icon: BookOpen },
-          { id: "grades", label: "Grades & Records", icon: GraduationCap },
-        ],
-      },
-      {
-        label: "FINANCE",
-        items: [
-          {
-            id: "financial",
-            label: "Financial",
-            icon: Wallet,
-            subItems: [
-              { id: "tuition_management", label: "Tuition Management" },
-              { id: "transaction-history", label: "Transactions" },
-              { id: "payment-reminders", label: "Payment Reminders" },
-            ],
-          },
-        ],
-      },
-      {
-        label: "SYSTEM",
-        items: [
-          { id: "cms", label: "CMS Module", icon: Globe },
-          { id: "reports", label: "Reports", icon: FileBarChart },
-        ],
-      },
+      { id: "cms", label: "CMS Module", icon: Globe },
+      { id: "reports", label: "Reports", icon: Globe },
     ],
     []
   );
 
-  // flatten for submenu tracking
-  const allMenuItems = useMemo(
-    () => menuSections.flatMap((s) => s.items),
-    [menuSections]
-  );
-
   // keep submenu open if active sub page
   useEffect(() => {
-    allMenuItems.forEach((item) => {
+    menuItems.forEach((item) => {
       if (!item.subItems) return;
       const isSubActive = item.subItems.some((s) => s.id === activeMenu);
       if (isSubActive) setExpandedMenus((p) => ({ ...p, [item.id]: true }));
     });
-  }, [activeMenu, allMenuItems]);
+  }, [activeMenu, menuItems]);
 
   // resize behavior
   useEffect(() => {
@@ -161,15 +135,16 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
           ...(token ? { Authorization: `Token ${token}` } : {}),
         },
       });
-    } catch {;}
-
+    }  catch (e) {
+    console.warn("Server logout failed:", e);
+  } finally {
     logout();
-    // Force full page reload to ensure clean state
-    window.location.href = "/";
+    navigate("/", { replace: true });
+    window.location.reload();
+  }
   };
 
   const visible = !isMobile || drawerOpen;
-  const showLabels = !isCollapsed || isMobile;
 
   return (
     <>
@@ -184,7 +159,7 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
           >
             {drawerOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          <div className="as-topbar-title">ADMIN PANEL</div>
+          <div className="as-topbar-title">PRESCHOOL ADMIN</div>
           <div className="as-topbar-spacer" />
         </header>
       )}
@@ -201,95 +176,70 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
           isMobile ? "as-mobile" : "as-desktop",
         ].join(" ")}
       >
-        {/* Fixed top section */}
-        <div className="as-top-section">
-          {/* Admin Panel card */}
-          {user && showLabels && (
-            <div className="as-usercard">
-              <div className="as-avatar">{getInitials(user?.full_name || user?.username || user?.email)}</div>
-              <div className="as-usermeta">
-                <div className="as-userrow">
-                  <div className="as-username">Admin Panel</div>
-                </div>
-                <div className="as-usersub">
-                  <div className="as-role">{roleLabel(user?.role)}</div>
-                </div>
+       
+        {/* user card */}
+        {user && (!isCollapsed || isMobile) && (
+          <div className="as-usercard">
+            <div className="as-avatar">{getInitials(user?.full_name || user?.username || user?.email)}</div>
+            <div className="as-usermeta">
+              <div className="as-userrow">
+                <div className="as-username">{user?.full_name || user?.username || "User"}</div>
+                
+              </div>
+              <div className="as-usersub">
+               <div className="as-role">{roleLabel(user?.role)}</div>
               </div>
             </div>
-          )}
-
-          {/* Collapsed user avatar */}
-          {user && isCollapsed && !isMobile && (
-            <div className="as-usercard-collapsed">
-              <div className="as-avatar">{getInitials(user?.full_name || user?.username || user?.email)}</div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* nav */}
         <nav className="as-nav">
-          {menuSections.map((section, sIdx) => (
-            <div key={section.label} className="as-section">
-              {showLabels && (
-                <div className="as-section-label">{section.label}</div>
-              )}
-              {!showLabels && sIdx > 0 && <div className="as-section-dot" />}
+          {menuItems.map((item) => {
+            const active = isMenuItemActive(item);
+            const expanded = !!expandedMenus[item.id];
 
-              {section.items.map((item) => {
-                const active = isMenuItemActive(item);
-                const expanded = !!expandedMenus[item.id];
+            return (
+              <div key={item.id} className="as-navblock">
+                <button
+                  type="button"
+                  className={`as-item ${active ? "active" : ""}`}
+                  onClick={() => handleMenuClick(item.id, !!item.subItems)}
+                  title={isCollapsed && !isMobile ? item.label : undefined}
+                >
+                  <item.icon size={20} className="as-ico" />
+                  {(!isCollapsed || isMobile) && (
+                    <>
+                      <span className="as-label">{item.label}</span>
+                      {item.subItems &&
+                        (expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />)}
+                    </>
+                  )}
+                </button>
 
-                return (
-                  <div key={item.id} className="as-navblock">
-                    <button
-                      type="button"
-                      className={`as-item ${active ? "active" : ""}`}
-                      onClick={() => handleMenuClick(item.id, !!item.subItems)}
-                      title={isCollapsed && !isMobile ? item.label : undefined}
-                    >
-                      <item.icon size={20} className="as-ico" />
-                      {showLabels && (
-                        <>
-                          <span className="as-label">{item.label}</span>
-                          {item.subItems &&
-                            (expanded ? (
-                              <ChevronDown size={16} className="as-chevron" />
-                            ) : (
-                              <ChevronRight size={16} className="as-chevron" />
-                            ))}
-                        </>
-                      )}
-                    </button>
-
-                    {showLabels && item.subItems && expanded && (
-                      <div className="as-subnav">
-                        {item.subItems.map((sub) => (
-                          <button
-                            type="button"
-                            key={sub.id}
-                            className={`as-subitem ${sub.id === activeMenu ? "active" : ""}`}
-                            onClick={() => handleSubMenuClick(sub.id)}
-                          >
-                            <span className="as-subdot" />
-                            {sub.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                {(!isCollapsed || isMobile) && item.subItems && expanded && (
+                  <div className="as-subnav">
+                    {item.subItems.map((sub) => (
+                      <button
+                        type="button"
+                        key={sub.id}
+                        className={`as-subitem ${sub.id === activeMenu ? "active" : ""}`}
+                        onClick={() => handleSubMenuClick(sub.id)}
+                      >
+                        {sub.label}
+                      </button>
+                    ))}
                   </div>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+                )}
+              </div>
+            );
+          })}
 
-        {/* Logout pinned at bottom */}
-        <div className="as-bottom">
           <button type="button" className="as-item as-logout" onClick={handleLogout}>
             <LogOut size={20} className="as-ico" />
-            {showLabels && <span className="as-label">Logout</span>}
+            {(!isCollapsed || isMobile) && <span className="as-label">Logout</span>}
           </button>
-        </div>
+        </nav>
       </aside>
     </>
   );

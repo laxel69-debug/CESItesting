@@ -154,18 +154,28 @@ const EnrollmentForm = ({ onClose }) => {
       alert("Invalid PH mobile number.\nUse 09XXXXXXXXX or +639XXXXXXXXX format.");
       return;
     }
+      const getCurrentAcademicYear = () => {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth(); // 0 = Jan, 5 = June
 
+      // School year starts June (month 5)
+      if (month >= 5) {
+        return `${year}-${year + 1}`;
+      } else {
+        return `${year - 1}-${year}`;
+      }
+    };
     const payload = {
       student_type: studentType,
       education_level: educationLevel,
       grade_level: gradeLevel,
-      academic_year: "2024-2025",
+      academic_year:  getCurrentAcademicYear(),
 
       // ✅ honeypot field (normally empty)
       website: website,
 
       lrn: lrn,
-      student_number: studentNumber,
       last_name: lastName,
       first_name: firstName,
       middle_name: middleName,
@@ -247,14 +257,7 @@ const EnrollmentForm = ({ onClose }) => {
             <input value={lrn} onChange={(e) => setLrn(e.target.value)} />
           </div>
 
-          <div className="form-group">
-            <label>Student Number</label>
-            <input
-              value={studentNumber}
-              onChange={(e) => setStudentNumber(e.target.value)}
-            />
-          </div>
-
+  
           <div className="form-group">
             <label>Student Type</label>
             <select value={studentType} onChange={(e) => setStudentType(e.target.value)}>
