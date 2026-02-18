@@ -213,19 +213,32 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
             # 1) Generate student number if needed
             student_number_generated = False
             if not enrollment.student_number:
-                while True:
+                # Try up to 10 times to generate a unique student number
+                max_attempts = 10
+                for attempt in range(max_attempts):
                     candidate = self.generate_student_number()
                     if not Enrollment.objects.filter(student_number=candidate).exists():
                         enrollment.student_number = candidate
                         student_number_generated = True
                         break
+                
+                if not student_number_generated:
+                    return Response(
+                        {"detail": "Unable to generate unique student number after multiple attempts"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
             
             # 2) Set enrollment ACTIVE
             enrollment.status = "ACTIVE"
             note = "APPROVED BY ADMIN"
-            enrollment.remarks = (enrollment.remarks or "").strip()
-            if note not in enrollment.remarks:
-                enrollment.remarks = f"{enrollment.remarks} | {note}".strip(" |")
+            
+            # Add remark if not already present
+            current_remarks = (enrollment.remarks or "").strip()
+            if note not in current_remarks:
+                if current_remarks:
+                    enrollment.remarks = f"{current_remarks} | {note}"
+                else:
+                    enrollment.remarks = note
             
             # Save with appropriate fields
             update_fields = ["status", "remarks", "updated_at"]
