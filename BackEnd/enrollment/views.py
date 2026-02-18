@@ -7,7 +7,7 @@ from accounts.models import User,UserProfile
 from django.urls import reverse
 from django.utils.text import slugify
 # ============================
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -211,18 +211,35 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
 
         with transaction.atomic():
             # 1) Generate student number if needed
-            student_number_generated = False
             if not enrollment.student_number:
                 # Try up to 10 times to generate a unique student number
+                # Handle race conditions via IntegrityError from unique constraint
                 max_attempts = 10
                 for _ in range(max_attempts):
                     candidate = self.generate_student_number()
-                    if not Enrollment.objects.filter(student_number=candidate).exists():
-                        enrollment.student_number = candidate
-                        student_number_generated = True
-                        break
-                
-                if not student_number_generated:
+                    enrollment.student_number = candidate
+                    
+                    # 2) Set enrollment ACTIVE
+                    enrollment.status = "ACTIVE"
+                    note = "APPROVED BY ADMIN"
+                    
+                    # Add remark if not already present
+                    current_remarks = (enrollment.remarks or "").strip()
+                    if note not in current_remarks:
+                        if current_remarks:
+                            enrollment.remarks = f"{current_remarks} | {note}"
+                        else:
+                            enrollment.remarks = note
+                    
+                    # Try to save - if student_number is duplicate, IntegrityError will be raised
+                    try:
+                        enrollment.save(update_fields=["status", "remarks", "updated_at", "student_number"])
+                        break  # Success!
+                    except IntegrityError:
+                        # Student number collision - try again with a new number
+                        continue
+                else:
+                    # Exhausted all attempts
                     return Response(
                         {
                             "detail": (
@@ -233,24 +250,20 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                         },
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
-            
-            # 2) Set enrollment ACTIVE
-            enrollment.status = "ACTIVE"
-            note = "APPROVED BY ADMIN"
-            
-            # Add remark if not already present
-            current_remarks = (enrollment.remarks or "").strip()
-            if note not in current_remarks:
-                if current_remarks:
-                    enrollment.remarks = f"{current_remarks} | {note}"
-                else:
-                    enrollment.remarks = note
-            
-            # Save with appropriate fields
-            update_fields = ["status", "remarks", "updated_at"]
-            if student_number_generated:
-                update_fields.append("student_number")
-            enrollment.save(update_fields=update_fields)
+            else:
+                # Student number already exists, just update status and remarks
+                enrollment.status = "ACTIVE"
+                note = "APPROVED BY ADMIN"
+                
+                # Add remark if not already present
+                current_remarks = (enrollment.remarks or "").strip()
+                if note not in current_remarks:
+                    if current_remarks:
+                        enrollment.remarks = f"{current_remarks} | {note}"
+                    else:
+                        enrollment.remarks = note
+                
+                enrollment.save(update_fields=["status", "remarks", "updated_at"])
 
             # 3) Create/link parent user and profile if needed
             if parent_email and enrollment.parent_user_id is None:
