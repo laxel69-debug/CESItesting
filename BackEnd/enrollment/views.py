@@ -154,8 +154,8 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     
     def generate_student_number(self):
         """
-        Generate unique student number with format YYYY######.
-        Must be called within a transaction.atomic() block for thread-safety.
+        Generate candidate student number with format YYYY######.
+        Returns a candidate number that should be checked for uniqueness by the caller.
         """
         year = timezone.now().year
         prefix = str(year)
@@ -224,7 +224,13 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                 
                 if not student_number_generated:
                     return Response(
-                        {"detail": "Unable to generate unique student number after multiple attempts"},
+                        {
+                            "detail": (
+                                "Unable to generate unique student number after 10 attempts. "
+                                "This may indicate an issue with the student number generation logic "
+                                "or database constraints. Please contact system administrator."
+                            )
+                        },
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     )
             
