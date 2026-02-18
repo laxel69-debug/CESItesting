@@ -233,12 +233,12 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                 update_fields.append("student_number")
             enrollment.save(update_fields=update_fields)
 
-            # 3) Create/link parent user if needed
+            # 3) Create/link parent user and profile if needed
             if parent_email and enrollment.parent_user_id is None:
                 parent_user = User.objects.filter(email__iexact=parent_email).first()
 
                 if not parent_user:
-                    # username from student name
+                    # Username from student name
                     base_username = f"{(enrollment.first_name or '')}{(enrollment.last_name or '')}".lower()
                     base_username = base_username.replace(" ", "") or "parent"
 
@@ -258,7 +258,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     parent_user.set_unusable_password()
                     parent_user.save()
 
-                # 3a) Create profile if missing
+                # Create profile if missing
                 profile, created = UserProfile.objects.get_or_create(
                     user=parent_user,
                     defaults={
@@ -278,7 +278,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     },
                 )
 
-                # 3b) If profile existed, update missing fields (so old users get filled)
+                # If profile existed, update missing fields (so old users get filled)
                 if not created:
                     profile.student_first_name = profile.student_first_name or (enrollment.first_name or "")
                     profile.student_middle_name = profile.student_middle_name or (enrollment.middle_name or "")
@@ -294,11 +294,11 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     profile.address = enrollment.address or profile.address
                     profile.save()
 
-                # 3c) Link enrollment -> parent_user
+                # Link enrollment -> parent_user
                 enrollment.parent_user = parent_user
                 enrollment.save(update_fields=["parent_user"])
 
-                # 3d) Email set-password link + username
+                # Email set-password link + username
                 uidb64 = urlsafe_base64_encode(force_bytes(parent_user.pk))
                 token = default_token_generator.make_token(parent_user)
 
