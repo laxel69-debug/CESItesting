@@ -27,6 +27,8 @@ staticfiles/
 # SQLite database (include db_backup.json instead)
 db.sqlite3
 db.sqlite3-journal
+db*.sqlite3
+*_backup.json
 
 # Pipenv / pip
 Pipfile.lock

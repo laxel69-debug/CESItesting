@@ -7,7 +7,7 @@ from accounts.models import User,UserProfile
 from django.urls import reverse
 from django.utils.text import slugify
 # ============================
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -32,6 +32,9 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
     Admin can read/update/approve/decline/delete.
     """
     queryset = Enrollment.objects.select_related("student", "section", "parent_info").all()
+    
+    # Maximum number of attempts to generate a unique student number
+    MAX_STUDENT_NUMBER_GENERATION_ATTEMPTS = 10
 
     def get_permissions(self):
         # Public can only submit enrollment
@@ -153,10 +156,14 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def generate_student_number(self):
+        """
+        Generate candidate student number with format YYYY######.
+        Returns a candidate number that should be checked for uniqueness by the caller.
+        """
         year = timezone.now().year
         prefix = str(year)
 
-        # get highest student_number for this year
+        # Get highest student_number for this year
         last = (
             Enrollment.objects
             .filter(student_number__startswith=prefix)
@@ -172,6 +179,18 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
 
         return f"{prefix}{next_seq:06d}"
     
+    def _update_enrollment_status_and_remarks(self, enrollment):
+        """Helper method to update enrollment status and add approval remark."""
+        enrollment.status = "ACTIVE"
+        note = "APPROVED BY ADMIN"
+        
+        # Add remark if not already present
+        current_remarks = (enrollment.remarks or "").strip()
+        if note not in current_remarks:
+            if current_remarks:
+                enrollment.remarks = f"{current_remarks} | {note}"
+            else:
+                enrollment.remarks = note
    
     @action(detail=True, methods=["post"])
     def mark_active(self, request, pk=None):
@@ -206,28 +225,48 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         parent_email = (enrollment.email or "").strip().lower()
 
         with transaction.atomic():
-            # 1) set enrollment ACTIVE
+            # 1) Generate student number if needed
             if not enrollment.student_number:
-                while True:
+                # Try up to MAX_STUDENT_NUMBER_GENERATION_ATTEMPTS times to generate a unique student number
+                # Handle race conditions via IntegrityError from unique constraint
+                max_attempts = self.MAX_STUDENT_NUMBER_GENERATION_ATTEMPTS
+                for _ in range(max_attempts):
                     candidate = self.generate_student_number()
-                    if not Enrollment.objects.filter(student_number=candidate).exists():
-                        enrollment.student_number = candidate
-                        break
-            
-            
-            enrollment.status = "ACTIVE"
-            note = "APPROVED BY ADMIN"
-            enrollment.remarks = (enrollment.remarks or "").strip()
-            if note not in enrollment.remarks:
-                enrollment.remarks = f"{enrollment.remarks} | {note}".strip(" |")
-                enrollment.save(update_fields=["status", "remarks", "updated_at", "student_number"])
+                    enrollment.student_number = candidate
+                    
+                    # Update status and remarks
+                    self._update_enrollment_status_and_remarks(enrollment)
+                    
+                    # Try to save - if student_number is duplicate, IntegrityError will be raised
+                    try:
+                        enrollment.save(update_fields=["status", "remarks", "updated_at", "student_number"])
+                        break  # Success!
+                    except IntegrityError:
+                        # Student number collision - try again with a new number
+                        continue
+                else:
+                    # Exhausted all attempts
+                    return Response(
+                        {
+                            "detail": (
+                                f"Unable to generate unique student number after {max_attempts} attempts. "
+                                "This may indicate an issue with the student number generation logic "
+                                "or database constraints. Please contact system administrator."
+                            )
+                        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
+            else:
+                # Student number already exists, just update status and remarks
+                self._update_enrollment_status_and_remarks(enrollment)
+                enrollment.save(update_fields=["status", "remarks", "updated_at"])
 
-            # 2) create/link parent user if needed
+            # 2) Create/link parent user and profile if needed
             if parent_email and enrollment.parent_user_id is None:
                 parent_user = User.objects.filter(email__iexact=parent_email).first()
 
                 if not parent_user:
-                    # username from student name
+                    # Username from student name
                     base_username = f"{(enrollment.first_name or '')}{(enrollment.last_name or '')}".lower()
                     base_username = base_username.replace(" ", "") or "parent"
 
@@ -247,7 +286,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     parent_user.set_unusable_password()
                     parent_user.save()
 
-                # 3) create profile if missing
+                # Create profile if missing
                 profile, created = UserProfile.objects.get_or_create(
                     user=parent_user,
                     defaults={
@@ -267,7 +306,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     },
                 )
 
-                # 3b) if profile existed, update missing fields (so old users get filled)
+                # If profile existed, update missing fields (so old users get filled)
                 if not created:
                     profile.student_first_name = profile.student_first_name or (enrollment.first_name or "")
                     profile.student_middle_name = profile.student_middle_name or (enrollment.middle_name or "")
@@ -283,11 +322,11 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                     profile.address = enrollment.address or profile.address
                     profile.save()
 
-                # 4) link enrollment -> parent_user
+                # Link enrollment -> parent_user
                 enrollment.parent_user = parent_user
                 enrollment.save(update_fields=["parent_user"])
 
-                # 5) email set-password link + username
+                # Email set-password link + username
                 uidb64 = urlsafe_base64_encode(force_bytes(parent_user.pk))
                 token = default_token_generator.make_token(parent_user)
 
