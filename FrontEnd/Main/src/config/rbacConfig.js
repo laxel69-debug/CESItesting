@@ -173,6 +173,177 @@ const PERMISSIONS = {
 
 export default PERMISSIONS;
 
+// ═══════════════════════════════════════════════════════════════
+//  DASHBOARD SECTION-LEVEL RBAC
+// ═══════════════════════════════════════════════════════════════
+//  Controls which *sections* inside the Dashboard page each
+//  admin sub-role can see.  Keys used by <Dashboard /> to
+//  conditionally render cards, charts, tables, and alert panels.
+//
+//  Access levels follow the same convention:
+//    "full"   → section fully visible & interactive
+//    "view"   → section visible but read-only / reduced detail
+//    "hidden" → section not rendered at all
+// ═══════════════════════════════════════════════════════════════
+
+export const DASHBOARD_SECTION_KEYS = {
+  KPI_STUDENTS:          "kpi_students",
+  KPI_ATTENDANCE:        "kpi_attendance",
+  KPI_STAFF:             "kpi_staff",
+  KPI_FEES:              "kpi_fees",
+  STUDENTS:              "students",
+  STUDENTS_GRADES:       "students_grades",       // grade chart inside Students
+  STUDENTS_ATTENDANCE:   "students_attendance",    // attendance trend inside Students
+  STUDENTS_AT_RISK:      "students_at_risk",       // at-risk table inside Students
+  STAFF:                 "staff",
+  FINANCES:              "finances",
+  ALERTS_ATTENDANCE:     "alerts_attendance",
+  ALERTS_FEES:           "alerts_fees",
+  ALERTS_ANNOUNCEMENTS:  "alerts_announcements",
+  OPERATIONS:            "operations",
+};
+
+const DS = DASHBOARD_SECTION_KEYS;
+
+export const DASHBOARD_PERMISSIONS = {
+  // ── Full Admin (Principal) — sees everything ─────────
+  admin: {
+    [DS.KPI_STUDENTS]:         "full",
+    [DS.KPI_ATTENDANCE]:       "full",
+    [DS.KPI_STAFF]:            "full",
+    [DS.KPI_FEES]:             "full",
+    [DS.STUDENTS]:             "full",
+    [DS.STUDENTS_GRADES]:      "full",
+    [DS.STUDENTS_ATTENDANCE]:  "full",
+    [DS.STUDENTS_AT_RISK]:     "full",
+    [DS.STAFF]:                "full",
+    [DS.FINANCES]:             "full",
+    [DS.ALERTS_ATTENDANCE]:    "full",
+    [DS.ALERTS_FEES]:          "full",
+    [DS.ALERTS_ANNOUNCEMENTS]: "full",
+    [DS.OPERATIONS]:           "full",
+  },
+
+  // ── Registrar — academic focus, no finances ──────────
+  registrar: {
+    [DS.KPI_STUDENTS]:         "full",
+    [DS.KPI_ATTENDANCE]:       "full",
+    [DS.KPI_STAFF]:            "full",
+    [DS.KPI_FEES]:             "hidden",
+    [DS.STUDENTS]:             "full",
+    [DS.STUDENTS_GRADES]:      "full",
+    [DS.STUDENTS_ATTENDANCE]:  "full",
+    [DS.STUDENTS_AT_RISK]:     "full",
+    [DS.STAFF]:                "full",
+    [DS.FINANCES]:             "hidden",
+    [DS.ALERTS_ATTENDANCE]:    "full",
+    [DS.ALERTS_FEES]:          "hidden",
+    [DS.ALERTS_ANNOUNCEMENTS]: "full",
+    [DS.OPERATIONS]:           "hidden",
+  },
+
+  // ── Treasurer — financial focus, read-only academic ──
+  treasurer: {
+    [DS.KPI_STUDENTS]:         "hidden",
+    [DS.KPI_ATTENDANCE]:       "hidden",
+    [DS.KPI_STAFF]:            "hidden",
+    [DS.KPI_FEES]:             "full",
+    [DS.STUDENTS]:             "view",
+    [DS.STUDENTS_GRADES]:      "hidden",     // no grades access
+    [DS.STUDENTS_ATTENDANCE]:  "hidden",
+    [DS.STUDENTS_AT_RISK]:     "hidden",
+    [DS.STAFF]:                "hidden",
+    [DS.FINANCES]:             "full",
+    [DS.ALERTS_ATTENDANCE]:    "hidden",
+    [DS.ALERTS_FEES]:          "full",
+    [DS.ALERTS_ANNOUNCEMENTS]: "full",
+    [DS.OPERATIONS]:           "hidden",
+  },
+
+  // ── Secretary — limited academic read-only ───────────
+  secretary: {
+    [DS.KPI_STUDENTS]:         "view",
+    [DS.KPI_ATTENDANCE]:       "view",
+    [DS.KPI_STAFF]:            "hidden",
+    [DS.KPI_FEES]:             "hidden",
+    [DS.STUDENTS]:             "view",
+    [DS.STUDENTS_GRADES]:      "hidden",
+    [DS.STUDENTS_ATTENDANCE]:  "view",
+    [DS.STUDENTS_AT_RISK]:     "view",
+    [DS.STAFF]:                "hidden",
+    [DS.FINANCES]:             "hidden",
+    [DS.ALERTS_ATTENDANCE]:    "view",
+    [DS.ALERTS_FEES]:          "hidden",
+    [DS.ALERTS_ANNOUNCEMENTS]: "full",
+    [DS.OPERATIONS]:           "hidden",
+  },
+
+  // ── Auditor — everything read-only, no grades ───────
+  auditor: {
+    [DS.KPI_STUDENTS]:         "view",
+    [DS.KPI_ATTENDANCE]:       "view",
+    [DS.KPI_STAFF]:            "view",
+    [DS.KPI_FEES]:             "view",
+    [DS.STUDENTS]:             "view",
+    [DS.STUDENTS_GRADES]:      "hidden",     // no grades
+    [DS.STUDENTS_ATTENDANCE]:  "view",
+    [DS.STUDENTS_AT_RISK]:     "view",
+    [DS.STAFF]:                "view",
+    [DS.FINANCES]:             "view",
+    [DS.ALERTS_ATTENDANCE]:    "view",
+    [DS.ALERTS_FEES]:          "view",
+    [DS.ALERTS_ANNOUNCEMENTS]: "view",
+    [DS.OPERATIONS]:           "hidden",
+  },
+
+  // ── Chairperson — read-only overview ─────────────────
+  chairperson: {
+    [DS.KPI_STUDENTS]:         "view",
+    [DS.KPI_ATTENDANCE]:       "view",
+    [DS.KPI_STAFF]:            "view",
+    [DS.KPI_FEES]:             "view",
+    [DS.STUDENTS]:             "view",
+    [DS.STUDENTS_GRADES]:      "view",
+    [DS.STUDENTS_ATTENDANCE]:  "view",
+    [DS.STUDENTS_AT_RISK]:     "view",
+    [DS.STAFF]:                "view",
+    [DS.FINANCES]:             "view",
+    [DS.ALERTS_ATTENDANCE]:    "view",
+    [DS.ALERTS_FEES]:          "view",
+    [DS.ALERTS_ANNOUNCEMENTS]: "view",
+    [DS.OPERATIONS]:           "hidden",
+  },
+
+  // ── Custodian — operations only, minimal dashboard ───
+  custodian: {
+    [DS.KPI_STUDENTS]:         "hidden",
+    [DS.KPI_ATTENDANCE]:       "hidden",
+    [DS.KPI_STAFF]:            "hidden",
+    [DS.KPI_FEES]:             "hidden",
+    [DS.STUDENTS]:             "hidden",
+    [DS.STUDENTS_GRADES]:      "hidden",
+    [DS.STUDENTS_ATTENDANCE]:  "hidden",
+    [DS.STUDENTS_AT_RISK]:     "hidden",
+    [DS.STAFF]:                "hidden",
+    [DS.FINANCES]:             "hidden",
+    [DS.ALERTS_ATTENDANCE]:    "hidden",
+    [DS.ALERTS_FEES]:          "hidden",
+    [DS.ALERTS_ANNOUNCEMENTS]: "view",
+    [DS.OPERATIONS]:           "full",
+  },
+};
+
+// ─── Helper: get dashboard section access ──────────────
+export function getDashboardSectionAccess(subRole, sectionKey) {
+  const rolePerms = DASHBOARD_PERMISSIONS[subRole];
+  if (!rolePerms) return "hidden";
+  return rolePerms[sectionKey] || "hidden";
+}
+
+export function canViewDashboardSection(subRole, sectionKey) {
+  return getDashboardSectionAccess(subRole, sectionKey) !== "hidden";
+}
+
 // ─── Helper: resolve the effective admin sub-role ──────
 export function resolveAdminSubRole(user) {
   if (!user || user.role !== "ADMIN") return null;

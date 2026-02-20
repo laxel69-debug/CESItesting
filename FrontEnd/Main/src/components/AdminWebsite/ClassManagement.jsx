@@ -124,15 +124,15 @@ const ClassManagement = () => {
     <div className="admin-class-management">
       <div className="admin-class-header"><h1>Class Management</h1></div>
 
-      {/* Tabs */}
+      {/* Tabs — rbac-exempt so read-only roles can still switch tabs */}
       <div className="admin-tabs-container">
-        <button className={`admin-tab-btn ${activeTab === 'classes' ? 'active' : ''}`} onClick={() => setActiveTab('classes')}>
+        <button className={`admin-tab-btn rbac-exempt ${activeTab === 'classes' ? 'active' : ''}`} onClick={() => setActiveTab('classes')}>
           <BookOpen size={18} /> Classes ({sections.length})
         </button>
-        <button className={`admin-tab-btn ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => setActiveTab('schedule')}>
+        <button className={`admin-tab-btn rbac-exempt ${activeTab === 'schedule' ? 'active' : ''}`} onClick={() => setActiveTab('schedule')}>
           <Calendar size={18} /> Schedules ({schedules.length})
         </button>
-        <button className={`admin-tab-btn ${activeTab === 'subjects' ? 'active' : ''}`} onClick={() => setActiveTab('subjects')}>
+        <button className={`admin-tab-btn rbac-exempt ${activeTab === 'subjects' ? 'active' : ''}`} onClick={() => setActiveTab('subjects')}>
           <BookOpen size={18} /> Subjects ({subjects.length})
         </button>
       </div>

@@ -127,8 +127,8 @@
   gap: 8px;
   padding: 6px 14px;
   border-radius: 8px;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .rbac-role-dot {
@@ -147,10 +147,11 @@
 .rbac-role-dot.role-custodian   { background: #94a3b8; }
 
 .rbac-role-name {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #4338ca;
-  letter-spacing: 0.03em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
 }
 
 @keyframes rbac-pulse {
@@ -189,13 +190,7 @@
   max-width: 400px;
 }
 
-/* ─── Sidebar role-specific accent ──────────────────────── */
-.as-sidebar[data-role="registrar"]   { border-left: 3px solid #3b82f6; }
-.as-sidebar[data-role="treasurer"]   { border-left: 3px solid #f59e0b; }
-.as-sidebar[data-role="secretary"]   { border-left: 3px solid #8b5cf6; }
-.as-sidebar[data-role="auditor"]     { border-left: 3px solid #6b7280; }
-.as-sidebar[data-role="chairperson"] { border-left: 3px solid #ec4899; }
-.as-sidebar[data-role="custodian"]   { border-left: 3px solid #94a3b8; }
+/* ─── Sidebar role-specific accent (removed — avatar color is enough) ── */
 
 /* ─── Transition for smooth show/hide ───────────────────── */
 .rbac-fade-enter {

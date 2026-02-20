@@ -1,0 +1,31 @@
+====================================
+  RBAC TEST ACCOUNTS
+====================================
+
+All accounts have role: ADMIN
+All passwords: 12345
+
+Username        Sub-Role        Access Summary
+-----------     -----------     -------------------------------------------
+registrar       Registrar       Academic full, Financial view-only
+treasurer       Treasurer       Financial full, Academic view-only
+secretary       Secretary       Edit contacts, send notifs & payment reminders
+auditor         Auditor         Read-only everything
+chairperson     Chairperson     Read-only dashboards & reports
+custodian       Custodian       Dashboard only, everything else hidden
+
+====================================
+  EXISTING ACCOUNTS
+====================================
+
+Username        Role            Email
+-----------     -----------     -------------------------------------------
+ace             ADMIN           acy995kim@gmail.com
+ZeckAkali       ADMIN           ral531715@gmail.com
+parent1         PARENT_STUDENT  parent1@mail.com
+Vincy Gam       PARENT_STUDENT  VincyGam@gmail.com
+parent_jane     PARENT_STUDENT  jane.parent@example.com
+daphylozana     PARENT_STUDENT  ral53115@gmail.com
+maryantonnet    PARENT_STUDENT  ral222314@gmail.com
+teacher_smith   TEACHER         smith@example.com
+public_user     PUBLIC          public@school.com
