@@ -35,6 +35,9 @@ class AdminProfileInline(admin.StackedInline):
     model = AdminProfile
     extra = 0
     can_delete = False
+    fields = ("permissions_level",)
+    verbose_name = "Admin RBAC Settings"
+    verbose_name_plural = "Admin RBAC Settings"
 
 
 # ---------- Custom User Admin ----------

@@ -13,44 +13,78 @@ import FloatingMessages from "./FloatingMessages";
 import CMSModule from "./CMSModule";
 import TuitionManagement from "./TuitionManagement";
 import "../AdminWebsiteCSS/AdminDashboard.css";
+import "../AdminWebsiteCSS/RBAC.css";
+import { RBACProvider, useRBAC } from "../Auth/RBACContext";
+import { ReadOnlyWrap, RBACBadge } from "./AccessControl";
 
-function AdminDashboard() {
+function AdminDashboardInner() {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { canView, isReadOnly, getAccess, subRole, subRoleLabel } = useRBAC();
 
-  const handleMenuClick = (menuId) => setActiveMenu(menuId);
+  const handleMenuClick = (menuId) => {
+    // Only navigate if the user has access
+    if (canView(menuId)) {
+      setActiveMenu(menuId);
+    }
+  };
 
   const handleToggleSidebar = () => setSidebarCollapsed((v) => !v);
 
   const renderContent = () => {
-    switch (activeMenu) {
-      case "dashboard":
-        return <Dashboard />;
-      case "enrollment":
-        return <EnrollmentManagement />;
-      case "transaction-history":
-        return <TransactionHistory />;
-      case "payment-reminders":
-        return <PaymentReminders />;
-      case "generate-reports":
-        return <Reports />;
-      case "users":
-        return <UserManagement />;
-      case "classes":
-      case "subjects":
-      case "assign-teachers":
-        return <ClassManagement />;
-      case "grades":
-        return <GradesRecords />;
-      case "cms":
-        return <CMSModule />;
-      case "reports":
-        return <Reports />;
-      case "tuition_management":
-        return <TuitionManagement />;
-      default:
-        return <Dashboard />;
+    const moduleKey = activeMenu;
+
+    // If module is hidden for this role, show no-access placeholder
+    if (!canView(moduleKey)) {
+      return (
+        <div className="rbac-no-access">
+          <div className="rbac-no-access-icon">🔒</div>
+          <h3>Access Restricted</h3>
+          <p>
+            Your role ({subRoleLabel}) does not have access to this module.
+            Please contact an administrator if you need access.
+          </p>
+        </div>
+      );
     }
+
+    // Wrap content in ReadOnlyWrap — it auto-detects view-only
+    const content = (() => {
+      switch (activeMenu) {
+        case "dashboard":
+          return <Dashboard />;
+        case "enrollment":
+          return <EnrollmentManagement />;
+        case "transaction-history":
+          return <TransactionHistory />;
+        case "payment-reminders":
+          return <PaymentReminders />;
+        case "generate-reports":
+          return <Reports />;
+        case "users":
+          return <UserManagement />;
+        case "classes":
+        case "subjects":
+        case "assign-teachers":
+          return <ClassManagement />;
+        case "grades":
+          return <GradesRecords />;
+        case "cms":
+          return <CMSModule />;
+        case "reports":
+          return <Reports />;
+        case "tuition_management":
+          return <TuitionManagement />;
+        default:
+          return <Dashboard />;
+      }
+    })();
+
+    return (
+      <ReadOnlyWrap module={moduleKey}>
+        {content}
+      </ReadOnlyWrap>
+    );
   };
 
   const pageMeta = {
@@ -80,13 +114,14 @@ function AdminDashboard() {
         onToggleCollapse={handleToggleSidebar}
       />
 
-      {/* ✅ This is the important change: admin-main drives layout with the sidebar CSS */}
       <main className={`admin-main ${sidebarCollapsed ? "collapsed" : ""}`}>
         <Header
           title={currentPage.title}
           subtitle={currentPage.subtitle}
           onToggleCollapse={handleToggleSidebar}
           sidebarCollapsed={sidebarCollapsed}
+          accessBadge={<RBACBadge module={activeMenu} />}
+          roleLabel={subRoleLabel}
         />
 
         {renderContent()}
@@ -94,6 +129,14 @@ function AdminDashboard() {
 
       <FloatingMessages />
     </div>
+  );
+}
+
+function AdminDashboard() {
+  return (
+    <RBACProvider>
+      <AdminDashboardInner />
+    </RBACProvider>
   );
 }
 
