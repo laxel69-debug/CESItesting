@@ -143,33 +143,6 @@ class UserProfile(models.Model):
 
 
 # =========================
-# Admin Profile
-# =========================
-class AdminProfile(models.Model):
-    PERMISSION_LEVEL_CHOICES = (
-        ("", "Full Admin"),               # default — full access to everything
-        ("registrar", "Registrar"),        # academic full, financial view-only
-        ("treasurer", "Treasurer"),        # financial full, academic view-only
-        ("secretary", "Secretary"),        # edit contacts, send notifications
-        ("auditor", "Auditor"),            # read-only everything
-        ("chairperson", "Chairperson"),    # read-only aggregated views
-        ("custodian", "Custodian"),        # no academic/financial access
-    )
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="admin_profile")
-    permissions_level = models.CharField(
-        max_length=50,
-        blank=True,
-        default="",
-        choices=PERMISSION_LEVEL_CHOICES,
-        help_text="Admin sub-role for RBAC. Leave blank for full admin access.",
-    )
-
-    def __str__(self):
-        return f"AdminProfile({self.user.username})"
-
-
-# =========================
 # Teacher Profile
 # =========================
 class TeacherProfile(models.Model):

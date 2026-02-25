@@ -24,7 +24,7 @@ from .serializers import (
     UserDetailSerializer,
     TeacherAssignmentSerializer,
 )
-from .models import User, Subject, Section, TeacherProfile, AdminProfile
+from .models import User, Subject, Section, TeacherProfile
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -105,18 +105,11 @@ class LoginView(APIView):
         # ✅ Token for SPA
         token, _ = Token.objects.get_or_create(user=user)
 
-        # ✅ Include permissions_level for ADMIN users (RBAC sub-role)
         user_data = {
             "id": user.id,
             "username": user.username,
             "role": user.role,
         }
-        if user.role == "ADMIN":
-            try:
-                admin_profile = AdminProfile.objects.get(user=user)
-                user_data["permissions_level"] = admin_profile.permissions_level or ""
-            except AdminProfile.DoesNotExist:
-                user_data["permissions_level"] = ""
 
         return Response({
             "success": True,
@@ -131,13 +124,6 @@ class LoginView(APIView):
 def me(request):
     u = request.user
     data = {"id": u.id, "username": u.username, "role": u.role}
-    # Include permissions_level for ADMIN users (RBAC sub-role)
-    if u.role == "ADMIN":
-        try:
-            admin_profile = AdminProfile.objects.get(user=u)
-            data["permissions_level"] = admin_profile.permissions_level or ""
-        except AdminProfile.DoesNotExist:
-            data["permissions_level"] = ""
     return Response(data)
 
 
