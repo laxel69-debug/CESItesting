@@ -36,7 +36,7 @@ export default function Profmain() {
     }
   }, [page]);
 
-  const sidebarWidth = isMobile ? 0 : (isCollapsed ? 80 : 240);
+  const sidebarWidth = isMobile ? 0 : (isCollapsed ? 76 : 270);
 
   return (
     <div>
