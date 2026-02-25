@@ -1,0 +1,17 @@
+
+
+====================================
+  EXISTING ACCOUNTS
+====================================
+
+Username        Role            Email
+-----------     -----------     -------------------------------------------
+ace             ADMIN           acy995kim@gmail.com
+ZeckAkali       ADMIN           ral531715@gmail.com
+parent1         PARENT_STUDENT  parent1@mail.com
+Vincy Gam       PARENT_STUDENT  VincyGam@gmail.com
+parent_jane     PARENT_STUDENT  jane.parent@example.com
+daphylozana     PARENT_STUDENT  ral53115@gmail.com
+maryantonnet    PARENT_STUDENT  ral222314@gmail.com
+teacher_smith   TEACHER         smith@example.com
+public_user     PUBLIC          public@school.com

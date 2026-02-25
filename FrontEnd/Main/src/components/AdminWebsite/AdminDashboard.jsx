@@ -14,11 +14,13 @@ import CMSModule from "./CMSModule";
 import TuitionManagement from "./TuitionManagement";
 import "../AdminWebsiteCSS/AdminDashboard.css";
 
-function AdminDashboard() {
+function AdminDashboardInner() {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const handleMenuClick = (menuId) => setActiveMenu(menuId);
+  const handleMenuClick = (menuId) => {
+    setActiveMenu(menuId);
+  };
 
   const handleToggleSidebar = () => setSidebarCollapsed((v) => !v);
 
@@ -80,7 +82,6 @@ function AdminDashboard() {
         onToggleCollapse={handleToggleSidebar}
       />
 
-      {/* ✅ This is the important change: admin-main drives layout with the sidebar CSS */}
       <main className={`admin-main ${sidebarCollapsed ? "collapsed" : ""}`}>
         <Header
           title={currentPage.title}
@@ -95,6 +96,10 @@ function AdminDashboard() {
       <FloatingMessages />
     </div>
   );
+}
+
+function AdminDashboard() {
+  return <AdminDashboardInner />;
 }
 
 export default AdminDashboard;

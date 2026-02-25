@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, UserProfile, TeacherProfile, AdminProfile, Section, Subject
+from .models import User, UserProfile, TeacherProfile, Section, Subject
 
 
 # ── Read-only serializers ──────────────────────────────

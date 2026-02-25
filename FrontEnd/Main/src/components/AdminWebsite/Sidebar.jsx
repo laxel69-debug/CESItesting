@@ -42,6 +42,7 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
   const [expandedMenus, setExpandedMenus] = useState({});
   const sidebarRef = useRef(null);
 
+  // Full menu definition
   const menuSections = useMemo(
     () => [
       {

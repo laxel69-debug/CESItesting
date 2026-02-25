@@ -105,14 +105,16 @@ class LoginView(APIView):
         # ✅ Token for SPA
         token, _ = Token.objects.get_or_create(user=user)
 
+        user_data = {
+            "id": user.id,
+            "username": user.username,
+            "role": user.role,
+        }
+
         return Response({
             "success": True,
             "token": token.key,
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "role": user.role,
-            }
+            "user": user_data,
         })
 
 
@@ -121,7 +123,8 @@ class LoginView(APIView):
 @permission_classes([IsAuthenticated])
 def me(request):
     u = request.user
-    return Response({"id": u.id, "username": u.username, "role": u.role})
+    data = {"id": u.id, "username": u.username, "role": u.role}
+    return Response(data)
 
 
 # ✅ LOGOUT (CSRF exempt — cross-origin call)

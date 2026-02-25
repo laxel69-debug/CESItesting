@@ -143,17 +143,6 @@ class UserProfile(models.Model):
 
 
 # =========================
-# Admin Profile
-# =========================
-class AdminProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="admin_profile")
-    permissions_level = models.CharField(max_length=50, blank=True, default="")
-
-    def __str__(self):
-        return f"AdminProfile({self.user.username})"
-
-
-# =========================
 # Teacher Profile
 # =========================
 class TeacherProfile(models.Model):

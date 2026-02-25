@@ -6,7 +6,6 @@ from .models import (
     User,
     UserProfile,
     TeacherProfile,
-    AdminProfile,
     Section,
     Subject,
 )
@@ -27,12 +26,6 @@ class UserProfileInline(admin.StackedInline):
 
 class TeacherProfileInline(admin.StackedInline):
     model = TeacherProfile
-    extra = 0
-    can_delete = False
-
-
-class AdminProfileInline(admin.StackedInline):
-    model = AdminProfile
     extra = 0
     can_delete = False
 
@@ -92,8 +85,6 @@ class UserAdmin(BaseUserAdmin):
             return [UserProfileInline]
         if obj.role == "TEACHER":
             return [TeacherProfileInline]
-        if obj.role == "ADMIN":
-            return [AdminProfileInline]
         return []
 
     def has_profile(self, obj):
@@ -102,8 +93,6 @@ class UserAdmin(BaseUserAdmin):
             return hasattr(obj, "profile")
         if obj.role == "TEACHER":
             return hasattr(obj, "teacher_profile")
-        if obj.role == "ADMIN":
-            return hasattr(obj, "admin_profile")
         return False
     has_profile.boolean = True
     has_profile.short_description = "Profile?"
