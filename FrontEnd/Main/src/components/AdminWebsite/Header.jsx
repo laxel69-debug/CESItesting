@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Menu } from 'lucide-react';
 import '../AdminWebsiteCSS/Header.css';
-import '../AdminWebsiteCSS/RBAC.css';
 
-const Header = ({ title, subtitle, onToggleCollapse, sidebarCollapsed, accessBadge, roleLabel }) => {
+const Header = ({ title, subtitle, onToggleCollapse, sidebarCollapsed }) => {
   const [hoveredCollapseBtn, setHoveredCollapseBtn] = useState(false);
 
   return (
@@ -20,10 +19,7 @@ const Header = ({ title, subtitle, onToggleCollapse, sidebarCollapsed, accessBad
         </button>
         
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h1 className="header-title">{title}</h1>
-            {accessBadge}
-          </div>
+          <h1 className="header-title">{title}</h1>
           {subtitle && <p className="header-subtitle">{subtitle}</p>}
         </div>
       </div>

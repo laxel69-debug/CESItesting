@@ -16,11 +16,8 @@ import {
   FileBarChart,
 } from "lucide-react";
 import "../AdminWebsiteCSS/Sidebar.css";
-import "../AdminWebsiteCSS/RBAC.css";
 import { useAuth } from "../Auth/useAuth";
 import { getToken } from "../Auth/auth";
-import { useRBAC } from "../Auth/RBACContext";
-import { RBACBadge } from "./AccessControl";
 
 function getInitials(name = "User") {
   const parts = String(name).trim().split(/\s+/);
@@ -29,8 +26,7 @@ function getInitials(name = "User") {
   return (first + last).toUpperCase();
 }
 
-function roleLabel(role, subRoleLabel) {
-  if (subRoleLabel) return subRoleLabel;
+function roleLabel(role) {
   if (!role) return "User";
   const r = String(role).toLowerCase();
   if (r.includes("admin")) return "Administrator";
@@ -40,15 +36,14 @@ function roleLabel(role, subRoleLabel) {
 export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggleCollapse }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { subRole, subRoleLabel, canView } = useRBAC();
 
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({});
   const sidebarRef = useRef(null);
 
-  // Full menu definition (unfiltered)
-  const rawMenuSections = useMemo(
+  // Full menu definition
+  const menuSections = useMemo(
     () => [
       {
         label: "OVERVIEW",
@@ -90,29 +85,6 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
     ],
     []
   );
-
-  // ─── RBAC-filtered menu sections ─────────────────────
-  const menuSections = useMemo(() => {
-    return rawMenuSections
-      .map((section) => {
-        const filteredItems = section.items
-          .map((item) => {
-            // For items with subItems, filter the subItems too
-            if (item.subItems) {
-              const visibleSubs = item.subItems.filter((sub) => canView(sub.id));
-              if (visibleSubs.length === 0) return null; // hide parent if no child visible
-              return { ...item, subItems: visibleSubs };
-            }
-            // Single items: check if module is visible
-            return canView(item.id) ? item : null;
-          })
-          .filter(Boolean);
-
-        if (filteredItems.length === 0) return null; // hide entire section
-        return { ...section, items: filteredItems };
-      })
-      .filter(Boolean);
-  }, [rawMenuSections, canView]);
 
   // flatten for submenu tracking
   const allMenuItems = useMemo(
@@ -223,7 +195,6 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
 
       <aside
         ref={sidebarRef}
-        data-role={subRole || "admin"}
         className={[
           "as-sidebar",
           visible ? "as-visible" : "as-hidden",
@@ -242,14 +213,8 @@ export default function Sidebar({ activeMenu, onMenuClick, isCollapsed, onToggle
                   <div className="as-username">Admin Panel</div>
                 </div>
                 <div className="as-usersub">
-                  <div className="as-role">{roleLabel(user?.role, subRoleLabel)}</div>
+                  <div className="as-role">{roleLabel(user?.role)}</div>
                 </div>
-                {subRole && subRole !== "admin" && (
-                  <div className="rbac-role-indicator" style={{ marginTop: 6 }}>
-                    <span className={`rbac-role-dot role-${subRole}`} />
-                    <span className="rbac-role-name">{subRoleLabel}</span>
-                  </div>
-                )}
               </div>
             </div>
           )}

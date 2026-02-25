@@ -8,12 +8,6 @@ import {
   AlertTriangle, Bell, Briefcase, BookOpen, Wrench,
 } from 'lucide-react';
 import { apiFetch } from '../api/apiFetch';
-import { useRBAC } from '../Auth/RBACContext';
-import {
-  DASHBOARD_SECTION_KEYS as DS,
-  canViewDashboardSection,
-  getDashboardSectionAccess,
-} from '../../config/rbacConfig';
 import '../AdminWebsiteCSS/Dashboard.css';
 
 /* ──────────────────────────────────────────────
@@ -32,15 +26,6 @@ const pct = (n) => `${(n ?? 0).toFixed(1)}%`;
    Dashboard Component
    ────────────────────────────────────────────── */
 const Dashboard = () => {
-  /* ---------- RBAC ---------- */
-  const { subRole } = useRBAC();
-  const role = subRole || 'admin';
-
-  /** Shorthand: is this dashboard section visible? */
-  const canSee = (key) => canViewDashboardSection(role, key);
-  /** Shorthand: access level for a section */
-  const access = (key) => getDashboardSectionAccess(role, key);
-
   /* ---------- state ---------- */
   const [users, setUsers] = useState([]);
   const [attendance, setAttendance] = useState([]);
@@ -230,11 +215,9 @@ const Dashboard = () => {
     <main className="dashboard-main">
 
       {/* ═══════════ 1. TOP KPI CARDS ═══════════ */}
-      {(canSee(DS.KPI_STUDENTS) || canSee(DS.KPI_ATTENDANCE) || canSee(DS.KPI_STAFF) || canSee(DS.KPI_FEES)) && (
       <section className="dashboard-section">
         <h2 className="section-title">Overview</h2>
         <div className="stats-grid stats-grid-4">
-          {canSee(DS.KPI_STUDENTS) && (
           <div className="stat-card stat-card-blue">
             <div className="stat-header">
               <span className="stat-label">Total Students</span>
@@ -242,9 +225,7 @@ const Dashboard = () => {
             </div>
             <div className="stat-value">{fmt(students.length)}</div>
           </div>
-          )}
 
-          {canSee(DS.KPI_ATTENDANCE) && (
           <div className="stat-card stat-card-purple">
             <div className="stat-header">
               <span className="stat-label">Avg Attendance</span>
@@ -252,9 +233,7 @@ const Dashboard = () => {
             </div>
             <div className="stat-value">{pct(avgAttendance)}</div>
           </div>
-          )}
 
-          {canSee(DS.KPI_STAFF) && (
           <div className="stat-card stat-card-green">
             <div className="stat-header">
               <span className="stat-label">Teachers / Staff</span>
@@ -262,9 +241,7 @@ const Dashboard = () => {
             </div>
             <div className="stat-value">{fmt(teachers.length)}</div>
           </div>
-          )}
 
-          {canSee(DS.KPI_FEES) && (
           <div className="stat-card stat-card-yellow">
             <div className="stat-header">
               <span className="stat-label">Fee Collection</span>
@@ -272,24 +249,17 @@ const Dashboard = () => {
             </div>
             <div className="stat-value">{pct(feeCollectionPct)}</div>
           </div>
-          )}
         </div>
       </section>
-      )}
 
       {/* ═══════════ 2. STUDENTS ═══════════ */}
-      {canSee(DS.STUDENTS) && (
       <section className="dashboard-section">
         <h2 className="section-title">
           <GraduationCap size={22} className="title-icon" /> Students
-          {access(DS.STUDENTS) === 'view' && (
-            <span className="rbac-badge rbac-badge-view" style={{ marginLeft: 10, fontSize: 12 }}>Read-Only</span>
-          )}
         </h2>
 
         <div className="charts-grid">
-          {/* Average Grades per Class — hidden for treasurer/auditor */}
-          {canSee(DS.STUDENTS_GRADES) && (
+          {/* Average Grades per Class */}
           <div className="chart-card">
             <h3 className="chart-title">Average Grades per Class</h3>
             <ResponsiveContainer width="100%" height={280}>
@@ -302,10 +272,8 @@ const Dashboard = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          )}
 
           {/* Attendance Trend */}
-          {canSee(DS.STUDENTS_ATTENDANCE) && (
           <div className="chart-card">
             <h3 className="chart-title">Attendance Trend (Last 7 Days)</h3>
             <ResponsiveContainer width="100%" height={280}>
@@ -325,11 +293,9 @@ const Dashboard = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          )}
         </div>
 
         {/* At-Risk Students Table */}
-        {canSee(DS.STUDENTS_AT_RISK) && (
         <div className="chart-card dash-table-card">
           <h3 className="chart-title">
             <AlertTriangle size={16} style={{ color: '#ef4444', marginRight: 6 }} />
@@ -364,18 +330,12 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-        )}
       </section>
-      )}
 
       {/* ═══════════ 3. STAFF ═══════════ */}
-      {canSee(DS.STAFF) && (
       <section className="dashboard-section">
         <h2 className="section-title">
           <Briefcase size={22} className="title-icon" /> Staff
-          {access(DS.STAFF) === 'view' && (
-            <span className="rbac-badge rbac-badge-view" style={{ marginLeft: 10, fontSize: 12 }}>Read-Only</span>
-          )}
         </h2>
         <div className="chart-card dash-table-card">
           <h3 className="chart-title">Teacher Overview</h3>
@@ -407,16 +367,11 @@ const Dashboard = () => {
           )}
         </div>
       </section>
-      )}
 
       {/* ═══════════ 4. FINANCES ═══════════ */}
-      {canSee(DS.FINANCES) && (
       <section className="dashboard-section">
         <h2 className="section-title">
           <DollarSign size={22} className="title-icon" /> Finances
-          {access(DS.FINANCES) === 'view' && (
-            <span className="rbac-badge rbac-badge-view" style={{ marginLeft: 10, fontSize: 12 }}>Read-Only</span>
-          )}
         </h2>
         <div className="charts-grid">
           {/* Fees Pie */}
@@ -466,17 +421,14 @@ const Dashboard = () => {
           </div>
         </div>
       </section>
-      )}
 
       {/* ═══════════ 5. ALERTS / NOTIFICATIONS ═══════════ */}
-      {(canSee(DS.ALERTS_ATTENDANCE) || canSee(DS.ALERTS_FEES) || canSee(DS.ALERTS_ANNOUNCEMENTS)) && (
       <section className="dashboard-section">
         <h2 className="section-title">
           <Bell size={22} className="title-icon" /> Alerts &amp; Notifications
         </h2>
         <div className="alerts-grid">
-          {/* Low Attendance — hidden for treasurer */}
-          {canSee(DS.ALERTS_ATTENDANCE) && (
+          {/* Low Attendance */}
           <div className="alert-card alert-card-red">
             <h4 className="alert-card-title">
               <AlertTriangle size={16} /> Low Attendance Students
@@ -494,10 +446,8 @@ const Dashboard = () => {
               </ul>
             )}
           </div>
-          )}
 
-          {/* Fee Defaulters — hidden for registrar / secretary */}
-          {canSee(DS.ALERTS_FEES) && (
+          {/* Fee Defaulters */}
           <div className="alert-card alert-card-yellow">
             <h4 className="alert-card-title">
               <DollarSign size={16} /> Fee Defaulters
@@ -515,10 +465,8 @@ const Dashboard = () => {
               </ul>
             )}
           </div>
-          )}
 
-          {/* Upcoming Announcements — visible for all who can see alerts */}
-          {canSee(DS.ALERTS_ANNOUNCEMENTS) && (
+          {/* Recent Announcements */}
           <div className="alert-card alert-card-blue">
             <h4 className="alert-card-title">
               <BookOpen size={16} /> Recent Announcements
@@ -536,19 +484,13 @@ const Dashboard = () => {
               </ul>
             )}
           </div>
-          )}
         </div>
       </section>
-      )}
 
       {/* ═══════════ 6. OPERATIONS / RESOURCES ═══════════ */}
-      {canSee(DS.OPERATIONS) && (
       <section className="dashboard-section">
         <h2 className="section-title">
           <Wrench size={22} className="title-icon" /> Operations &amp; Resources
-          {access(DS.OPERATIONS) === 'view' && (
-            <span className="rbac-badge rbac-badge-view" style={{ marginLeft: 10, fontSize: 12 }}>Read-Only</span>
-          )}
         </h2>
         <div className="chart-card dash-table-card">
           <p className="dash-empty" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
@@ -556,7 +498,6 @@ const Dashboard = () => {
           </p>
         </div>
       </section>
-      )}
 
     </main>
   );
